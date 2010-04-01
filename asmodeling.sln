@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "asmodeling", "asmodeling\asmodeling.vcproj", "{05A3231B-4EA4-4C6A-932B-0E1DE4162C0A}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Utils", "Utils\Utils.vcproj", "{75BAE538-D358-40E8-A1F7-60D486E2CC5D}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "L-BFGS-B", "L-BFGS-B\L-BFGS-B.vcproj", "{F9832283-68E4-4064-A8E9-876CF9DCF2C8}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{05A3231B-4EA4-4C6A-932B-0E1DE4162C0A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{05A3231B-4EA4-4C6A-932B-0E1DE4162C0A}.Debug|Win32.Build.0 = Debug|Win32
+		{05A3231B-4EA4-4C6A-932B-0E1DE4162C0A}.Release|Win32.ActiveCfg = Release|Win32
+		{05A3231B-4EA4-4C6A-932B-0E1DE4162C0A}.Release|Win32.Build.0 = Release|Win32
+		{75BAE538-D358-40E8-A1F7-60D486E2CC5D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{75BAE538-D358-40E8-A1F7-60D486E2CC5D}.Debug|Win32.Build.0 = Debug|Win32
+		{75BAE538-D358-40E8-A1F7-60D486E2CC5D}.Release|Win32.ActiveCfg = Release|Win32
+		{75BAE538-D358-40E8-A1F7-60D486E2CC5D}.Release|Win32.Build.0 = Release|Win32
+		{F9832283-68E4-4064-A8E9-876CF9DCF2C8}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F9832283-68E4-4064-A8E9-876CF9DCF2C8}.Debug|Win32.Build.0 = Debug|Win32
+		{F9832283-68E4-4064-A8E9-876CF9DCF2C8}.Release|Win32.ActiveCfg = Release|Win32
+		{F9832283-68E4-4064-A8E9-876CF9DCF2C8}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
