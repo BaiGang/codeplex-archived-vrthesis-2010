@@ -40,6 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
+				AdditionalIncludeDirectories="$(SolutionDir)\Inc"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -110,6 +111,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
+				AdditionalIncludeDirectories="$(SolutionDir)\Inc"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				WarningLevel="3"
@@ -177,6 +179,14 @@
 				RelativePath=".\ASModeling.h"
 				>
 			</File>
+			<File
+				RelativePath=".\OptimizeFirstFrame.cu"
+				>
+			</File>
+			<File
+				RelativePath=".\OptimizeSuccFrame.cu"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="ASRendering"
@@ -190,6 +200,14 @@
 				>
 			</File>
 		</Filter>
+		<File
+			RelativePath=".\stdafx.cc"
+			>
+		</File>
+		<File
+			RelativePath=".\stdafx.h"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>
