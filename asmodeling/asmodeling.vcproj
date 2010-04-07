@@ -172,6 +172,14 @@
 			Name="ASModeling"
 			>
 			<File
+				RelativePath=".\ASMloadCameraFile.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\ASMloadConfigFile.cc"
+				>
+			</File>
+			<File
 				RelativePath=".\ASModeling.cc"
 				>
 			</File>
@@ -180,11 +188,35 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ASMsetIndicator.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\cuda_gradcompute_kernel.cu"
+				>
+			</File>
+			<File
+				RelativePath=".\OptimizeFirstFrame.cc"
+				>
+			</File>
+			<File
 				RelativePath=".\OptimizeFirstFrame.cu"
 				>
 			</File>
 			<File
-				RelativePath=".\OptimizeSuccFrame.cu"
+				RelativePath=".\OptimizeSuccFrames.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\OptimizeSuccFrames.cu"
+				>
+			</File>
+			<File
+				RelativePath=".\StoreVolumeData.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\StoreVolumeData.cu"
 				>
 			</File>
 		</Filter>
@@ -199,6 +231,10 @@
 				RelativePath=".\main.cc"
 				>
 			</File>
+		</Filter>
+		<Filter
+			Name="CudaUtils"
+			>
 		</Filter>
 		<File
 			RelativePath=".\stdafx.cc"

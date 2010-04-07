@@ -1,8 +1,13 @@
+#ifndef _AS_MODELING_H_
+#define _AS_MODELING_H_
 
+#include "stdafx.h"
 #include <string>
 
 #include <scoped_ptr.h>
 #include <CImg.h>
+
+#include "../Utils/math/geomath.h"
 
 namespace as_modeling
 {
@@ -64,38 +69,56 @@ namespace as_modeling
     //    todo : using perfect spatial hashing
     bool StoreVolumeData(int i_frame);
 
+
     ASModeling() {};
     ~ASModeling(){};
 
   private:
 
+    ///////////////////////////////////////////////////
     // consts
+    ///////////////////////////////////////////////////
     static const int MAX_NUM_CAMERAS = 1024; // relatively very large, we typically use 5 ~ 8 cameras
     static const int INITIAL_VOL_SIZE = 32;
     static const int MAX_VOL_SIZE = 256;
     static const int INITIAL_VOL_LEVEL = 5;
     static const int MAX_VOL_LEVEL = 8;
 
-    // helper routines
-    bool load_camera_file(const char * filename);     // called once
-    bool load_configure_file(const char * filename);  // called once
+    ////////////////////////////////////////////////////
+    //               helper routines
+    ////////////////////////////////////////////////////
+    bool load_camera_file(const char * filename);
+    bool load_configure_file(const char * filename);
 
-    bool load_captured_images(int iframe);            // called for each frame
+    bool load_captured_images(int iframe);
 
     // set indicator for density existence at each voxel
     bool set_density_indicator(int level, uchar * ind_volume);  // only used for the first frame
 
+    // convert (x,y,z) to index
+    inline int index3(int x, int y, int z, int length)
+    {
+      return x + length * (y + length * z);
+    }
+
+    // convert 
+    inline int index2(int x, int y, int length)
+    {
+      return x + length * y;
+    }
+
     // data
 
-    // captured images
-    scoped_array< scoped_ptr<Image> > ground_truth_images_;
+    // captured images  
+    cimg_library::CImgList<float> ground_truth_images_;
     scoped_array< scoped_ptr<float> > ground_truth_pixels_;
 
     // temporary results
     scoped_array< scoped_ptr<float> > progressive_results_;
 
     // full detailed result
-    scoped_array< float > frame_result_;
+    scoped_array< float > frame_volume_result_;
+    scoped_array< float > frame_compressed_result_;
 
     ////////////////////////////////////////////
     //
@@ -183,3 +206,5 @@ namespace as_modeling
 
   };
 } // as_modeling
+
+#endif //_AS_MODELING_H_
