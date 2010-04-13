@@ -93,7 +93,7 @@ namespace as_modeling
     bool load_captured_images(int iframe);
 
     // set indicator for density existence at each voxel
-    bool set_density_indicator(int level, uchar * ind_volume);  // only used for the first frame
+    bool set_density_indicator(int level, float * density_volume, uchar * ind_volume);  // only used for the first frame
 
     // convert (x,y,z) to index
     inline int index3(int x, int y, int z, int length)

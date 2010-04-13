@@ -27,7 +27,6 @@ namespace as_modeling
     // init image list
     ground_truth_images_.assign(num_cameras_);
 
-    load_captured_images(0);
 
     return true;
   }
