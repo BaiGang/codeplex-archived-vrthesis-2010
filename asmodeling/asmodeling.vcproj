@@ -208,13 +208,21 @@
 						Name="VCCLCompilerTool"
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\OptimizeFirstFrame.cc"
+				RelativePath=".\OptimizeSingleFrame.cc"
 				>
 			</File>
 			<File
-				RelativePath=".\OptimizeFirstFrame.cu"
+				RelativePath=".\OptimizeSingleFrame.cu"
 				>
 			</File>
 			<File

@@ -19,7 +19,7 @@ namespace as_modeling
   //    Initialize() loads in configure files and 
   //
   //    Fully optimize the first frame
-  //      -- as the single image
+  //      -- as a single image
   //      -- progressively 
   //    
   //     while not_finished
@@ -55,9 +55,9 @@ namespace as_modeling
     // Functions below are called by OptimizeProcess
 
 
-    // Optimize the first frame
+    // Optimize a single frame
     // results will be stored at result_volume_
-    bool OptimizeFirstFrame();
+    bool OptimizeSingleFrame(int i_frame);
 
     // Optimize successors frames
     // results of each frame are temporaraly 
@@ -93,7 +93,7 @@ namespace as_modeling
     bool load_captured_images(int iframe);
 
     // set indicator for density existence at each voxel
-    bool set_density_indicator(int level, float * density_volume, uchar * ind_volume);  // only used for the first frame
+    bool set_density_indicator(int level, float * density_volume, uchar * ind_volume);
 
     // convert (x,y,z) to index
     inline int index3(int x, int y, int z, int length)
@@ -114,7 +114,8 @@ namespace as_modeling
     scoped_array< scoped_ptr<float> > ground_truth_pixels_;
 
     // temporary results
-    scoped_array< scoped_ptr<float> > progressive_results_;
+    scoped_array< scoped_array<float> > progressive_results_;
+    scoped_array< scoped_array<uchar> > progressive_indicators_;
 
     // full detailed result
     scoped_array< float > frame_volume_result_;

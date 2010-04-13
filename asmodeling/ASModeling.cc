@@ -27,15 +27,30 @@ namespace as_modeling
     // init image list
     ground_truth_images_.assign(num_cameras_);
 
+    // init intermediate data
+    // allocate space for progressive density/indicator volume
+    scoped_array<float> * tmparrarr = new scoped_array<float> [num_levels];
+    scoped_array<uchar> * tmpuchararr = new scoped_array<uchar> [num_levels];
+    progressive_results_.reset(tmparrarr);
+    progressive_indicators_.reset(tmpuchararr);
+    for (int i_level = INITIAL_VOL_LEVEL; i_level <= MAX_VOL_LEVEL; ++i_level)
+    {
+      float * tmparr = new float [(1<<i_level)];
+      uchar * tuchararr = new uchar [(1<<i_level)];
+      progressive_results_[i_level].reset(tmparr);
+      progressive_indicators_[i_level].reset(tuchararr);
+    }
 
     return true;
   }
+
+
   /////////////////////////////////////////////////
   //      full modeling process
   /////////////////////////////////////////////////
   bool ASModeling::OptimizeProcess(int num_of_frames)
   {
-    if (!OptimizeFirstFrame())
+    if (!OptimizeSingleFrame(0))
     {
       fprintf(stderr, "<<!-- Optimize First Frame Failed.\n");
       return false;
