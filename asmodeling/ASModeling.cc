@@ -24,6 +24,10 @@ namespace as_modeling
 
     int num_levels = MAX_VOL_LEVEL - INITIAL_VOL_LEVEL + 1;
     
+    // init image list
+    ground_truth_images_.assign(num_cameras_);
+
+    load_captured_images(0);
 
     return true;
   }
