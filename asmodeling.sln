@@ -7,6 +7,14 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Utils", "Utils\Utils.vcproj
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "L-BFGS-B", "L-BFGS-B\L-BFGS-B.vcproj", "{F9832283-68E4-4064-A8E9-876CF9DCF2C8}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "TinyXML", "TinyXML\TinyXML.vcproj", "{2608F40E-1FE3-4D31-9DAD-F78FB6362A42}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F138B981-E905-497C-AD24-68A5E115B542}"
+	ProjectSection(SolutionItems) = preProject
+		Data\camera.txt = Data\camera.txt
+		Data\configure.xml = Data\configure.xml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -25,6 +33,10 @@ Global
 		{F9832283-68E4-4064-A8E9-876CF9DCF2C8}.Debug|Win32.Build.0 = Debug|Win32
 		{F9832283-68E4-4064-A8E9-876CF9DCF2C8}.Release|Win32.ActiveCfg = Release|Win32
 		{F9832283-68E4-4064-A8E9-876CF9DCF2C8}.Release|Win32.Build.0 = Release|Win32
+		{2608F40E-1FE3-4D31-9DAD-F78FB6362A42}.Debug|Win32.ActiveCfg = Debug|Win32
+		{2608F40E-1FE3-4D31-9DAD-F78FB6362A42}.Debug|Win32.Build.0 = Debug|Win32
+		{2608F40E-1FE3-4D31-9DAD-F78FB6362A42}.Release|Win32.ActiveCfg = Release|Win32
+		{2608F40E-1FE3-4D31-9DAD-F78FB6362A42}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

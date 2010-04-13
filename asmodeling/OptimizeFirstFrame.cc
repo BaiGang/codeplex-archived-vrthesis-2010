@@ -2,6 +2,10 @@
 
 #include "ASModeling.h"
 
+extern "C"
+{
+}
+
 namespace as_modeling
 {
   bool ASModeling::OptimizeFirstFrame()

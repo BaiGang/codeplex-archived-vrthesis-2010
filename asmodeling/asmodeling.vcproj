@@ -40,7 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="$(SolutionDir)\Inc"
+				AdditionalIncludeDirectories="&quot;../L-BFGS-B&quot;;../TinyXML;&quot;$(SolutionDir)\Inc&quot;"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="3"
@@ -58,6 +58,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="TinyXML.lib L-BFGS-B.lib Utils.lib"
 				AdditionalLibraryDirectories="$(SolutionDir)\Lib"
 				GenerateDebugInformation="true"
 				TargetMachine="1"
@@ -111,7 +112,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="$(SolutionDir)\Inc"
+				AdditionalIncludeDirectories="&quot;../L-BFGS-B&quot;;../TinyXML;&quot;$(SolutionDir)\Inc&quot;"
 				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				WarningLevel="3"
@@ -128,6 +129,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
+				AdditionalDependencies="TinyXML.lib L-BFGS-B.lib Utils.lib"
 				AdditionalLibraryDirectories="$(SolutionDir)\Lib"
 				GenerateDebugInformation="true"
 				OptimizeReferences="2"
@@ -180,6 +182,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ASMloadImages.cc"
+				>
+			</File>
+			<File
 				RelativePath=".\ASModeling.cc"
 				>
 			</File>
@@ -194,6 +200,14 @@
 			<File
 				RelativePath=".\cuda_gradcompute_kernel.cu"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					ExcludedFromBuild="true"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\OptimizeFirstFrame.cc"
@@ -223,6 +237,10 @@
 		<Filter
 			Name="ASRendering"
 			>
+			<File
+				RelativePath=".\cuda_raymarching.cu"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="App"

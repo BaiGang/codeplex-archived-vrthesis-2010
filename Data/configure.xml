@@ -1,0 +1,62 @@
+<?xml version="1.0" ?>
+<Parameters>
+	<PMedia>
+		<extinction value="0.1" />
+		<scattering value="0.05" />
+		<alpha value="0.00001" />
+	</PMedia>
+	<Render>
+		<CurrentView value="0" />
+		<width value="696" />
+		<height value="520" />
+		<CameraWidth value="696" />
+		<CameraHeight value="520" />
+		<RenderInterval value="2" />
+		<RotAngle value="-15" />
+	</Render>
+	<Light>
+		<LightType value="1" />
+		<LightIntensityR value="5000000.0" />
+		<LightX value="41.8558" />
+		<LightY value="-107.286" />
+		<LightZ value="84.9029" />
+	</Light>
+	<Volume>
+		<BoxSize value="8.0" />
+		<VolWidth value="256" />
+		<VolHeight value="256" />
+		<VolDepth value="256" />
+		<TransX value="6.0" />
+		<TransY value="-12.0" />
+		<TransZ value="2.0" />
+		<VolInterval value="4" />
+	</Volume>
+	<LBFGSB>
+	<!-- #    ConstrainType   If ConstrainType is equal to:                   -->
+	<!-- #                    * 0, X(i) has no constraints,                   -->
+	<!-- #                    * 1, X(i) has only lower boundary,              -->
+	<!-- #                    * 2, X(i) has both lower and upper boundaries,  -->
+	<!-- #                    * 3, X(i) has only upper boundary,              -->
+	<!-- #    lowerBoundary       -   lower boundaries of X(i) variables.     -->
+	<!-- #    upperBoundary       -   upper boundaries of X(i) variables.     -->
+		<disturb value="0.00001" />
+		<EpsG value="0.0001" />
+		<EpsF value="0.0001" />
+		<EpsX value="0.0001" />
+		<MaxIts value="50" />
+		<m value="7" />
+		<ConstrainType value="1" />
+		<LowerBound value="0.0" />
+		<UpperBound value ="10.0" />
+	<!-- # return code:                                                                   -->
+	<!-- #                    * -2 unknown internal error,                                -->
+	<!-- #                    * -1 wrong parameters were specified,                       -->
+	<!-- #                    * 0 interrupted by user,                                    -->
+	<!-- #                    * 1 relative function decreasing is less or equal to EpsF,  -->
+	<!-- #                    * 2 step is less or equal to EpsX,                          -->
+	<!-- #                    * 4 gradient norm is less or equal to EpsG,                 -->
+	<!-- #                    * 5 number of iterations exceeds MaxIts.                    -->
+	</LBFGSB>
+	<CUDA>
+	</CUDA>
+</Parameters>

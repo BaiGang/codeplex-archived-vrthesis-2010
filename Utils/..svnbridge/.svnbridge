@@ -3,4 +3,10 @@
 Debug
 New folder
 Release
+</Value></Property><Property><Name>svn:ignore</Name><Value>*
+*.user
+Debug
+New folder
+Release
+image
 </Value></Property></Properties></ItemProperties>

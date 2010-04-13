@@ -3,7 +3,7 @@
 
 #include <cuda.h>
 
-
+// Kernel function to calculate the sum-of-square-error
 __global__ void calc_f(float * ground_truth, float * render_result, int n, float * f_pixels)
 {
   //  calc index of the thread
@@ -28,9 +28,18 @@ __global__ void calc_f(float * ground_truth, float * render_result, int n, float
   }
 }
 
+// Kernel function to calculate the gradient
 __global__ void calc_g(float * ground_truth,
                        float * render_res_imperturbed,
                        float * render_res_perturbed,
+                       int *   index_pixels2arrayg,
+                       float * o_g,
+                       int n,
+                       int n_pixels)
+{
+
+}
+
 
 
 #endif //__CUDA_GRAD_COMPUTE_KERNEL_CU__
