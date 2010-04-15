@@ -1,6 +1,8 @@
 #include <cstdio>
 
 #include "ASModeling.h"
+#include "../L-BFGS-B/ap.h"
+#include "../L-BFGS-B/lbfgsb.h"
 
 ////////////////////////////////////////////////////////////
 //
@@ -11,9 +13,25 @@
 //
 ////////////////////////////////////////////////////////////
 
-extern "C"
-{
-}
+namespace {
+  extern "C"
+  {
+    // CUDA C functions here
+
+    // grad computing function for lbfgsb routine
+    void grad_compute(ap::real_1d_array &x, double &f, ap::real_1d_array &g);
+
+    // set initial density, indicator and position mapping
+    // uchar ind[length^3], 
+    void set_vol_indicator_cuda(uchar * ind_volume);
+
+    // subdivide volume
+    void subdivide_volume_cuda(int prev_level, int next_level);
+
+  }
+} // unnamed namespace
+
+
 
 namespace as_modeling
 {
