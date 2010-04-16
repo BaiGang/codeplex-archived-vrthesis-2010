@@ -1,31 +1,35 @@
-#ifndef __CUDA_GRAD_COMPUTE_KERNEL_CU__
-#define __CUDA_GRAD_COMPUTE_KERNEL_CU__
-
 #include <cuda.h>
+#include <cuda_runtime.h>
+
+
+extern "C" // functions of cuda-raymarching
+{
+
+}
 
 // Kernel function to calculate the sum-of-square-error
 __global__ void calc_f(float * ground_truth, float * render_result, int n, float * f_pixels)
 {
-  //  calc index of the thread
-  int thread_ind = threadIdx.y * blockDim.x + threadIdx.x;
+  ////  calc index of the thread
+  //int thread_ind = threadIdx.y * blockDim.x + threadIdx.x;
 
-  //  calc f for each pixel
-  f_pixels[ thread_ind ] += (ground_truth[thread_ind] - render_result[thread_ind])
-    * (ground_truth[thread_ind] - render_result[thread_ind]);
+  ////  calc f for each pixel
+  //f_pixels[ thread_ind ] += (ground_truth[thread_ind] - render_result[thread_ind])
+  //  * (ground_truth[thread_ind] - render_result[thread_ind]);
 
-  __syncthreads();
+  //__syncthreads();
 
-  // reduce and sum
-  //  the final result will be stored in f_pixels[0]
-  for (int i = n; i > 0; i /= 2)
-  {
-    if (thread_ind < i)
-    {
-      f_pixels[thread_ind] = f_pixels[thread_ind] + f_pixels[thread_ind +i];
-    }
+  //// reduce and sum
+  ////  the final result will be stored in f_pixels[0]
+  //for (int i = n; i > 0; i /= 2)
+  //{
+  //  if (thread_ind < i)
+  //  {
+  //    f_pixels[thread_ind] = f_pixels[thread_ind] + f_pixels[thread_ind +i];
+  //  }
 
-    __syncthreads();
-  }
+  //  __syncthreads();
+  //}
 }
 
 // Kernel function to calculate the gradient
@@ -36,6 +40,12 @@ __global__ void calc_g(float * ground_truth,
                        float * o_g,
                        int n,
                        int n_pixels)
+{
+
+}
+
+// perturb voxels
+__global__ void perturb_voxels()
 {
 
 }
@@ -72,5 +82,8 @@ __global__ void calc_g(float * ground_truth,
 //
 //    }
 
-
-#endif //__CUDA_GRAD_COMPUTE_KERNEL_CU__
+extern "C"
+float cuda_grad_compute(float * p_host_x, float * p_host_g, int n)
+{
+  return 0.0f;
+}

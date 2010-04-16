@@ -55,7 +55,6 @@ namespace as_modeling
 
     // Functions below are called by OptimizeProcess
 
-
     // Optimize a single frame
     // results will be stored at result_volume_
     bool OptimizeSingleFrame(int i_frame);
@@ -79,7 +78,7 @@ namespace as_modeling
     ///////////////////////////////////////////////////
     // consts
     ///////////////////////////////////////////////////
-    static const int MAX_NUM_CAMERAS = 1024; // relatively very large, we typically use 5 ~ 8 cameras
+    static const int MAX_NUM_CAMERAS = 1024; // relatively very large, we typically use 8 cameras
     static const int INITIAL_VOL_SIZE = 32;
     static const int MAX_VOL_SIZE = 256;
     static const int INITIAL_VOL_LEVEL = 5;
@@ -94,10 +93,9 @@ namespace as_modeling
     bool load_captured_images(int iframe);
 
     // set indicator for density existence at each voxel
-    bool set_density_indicator(int level, int * ind_volume);
+    bool set_density_indicator(int level, int * ind_volume,
+      std::list<float> & density_vectorized, bool is_init_vol);
 
-    // init the coarse volume using image or empirical data
-    bool init_density_volume(int level, std::list<float> & density_vectorized);
 
     // convert (x,y,z) to index
     inline int index3(int x, int y, int z, int length)
@@ -115,13 +113,13 @@ namespace as_modeling
 
     // captured images  
     cimg_library::CImgList<float> ground_truth_images_;
-    scoped_array< scoped_ptr<float> > ground_truth_pixels_;
 
-    // temporary results
+    // temporary indicators
     scoped_array< scoped_array<int> > progressive_indicators_;
 
     // full detailed result
     scoped_array< float > frame_volume_result_;
+
     scoped_array< float > frame_compressed_result_;
 
     ////////////////////////////////////////////

@@ -122,7 +122,7 @@
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
 				AdditionalIncludeDirectories="&quot;../L-BFGS-B&quot;;../TinyXML;&quot;$(SolutionDir)\Inc&quot;"
-				RuntimeLibrary="2"
+				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				WarningLevel="3"
 				DebugInformationFormat="3"
@@ -182,82 +182,96 @@
 		<Filter
 			Name="ASModeling"
 			>
-			<File
-				RelativePath=".\ASMloadCameraFile.cc"
+			<Filter
+				Name="Headers"
 				>
-			</File>
-			<File
-				RelativePath=".\ASMloadConfigFile.cc"
-				>
-			</File>
-			<File
-				RelativePath=".\ASMloadImages.cc"
-				>
-			</File>
-			<File
-				RelativePath=".\ASModeling.cc"
-				>
-			</File>
-			<File
-				RelativePath=".\ASModeling.h"
-				>
-			</File>
-			<File
-				RelativePath=".\ASMsetIndicator.cc"
-				>
-			</File>
-			<File
-				RelativePath=".\cuda_gradcompute_kernel.cu"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					ExcludedFromBuild="true"
+				<File
+					RelativePath=".\ASModeling.h"
 					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					ExcludedFromBuild="true"
+				</File>
+			</Filter>
+			<Filter
+				Name="Cpp files"
+				>
+				<File
+					RelativePath=".\ASMloadCameraFile.cc"
 					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\OptimizeSingleFrame.cc"
+				</File>
+				<File
+					RelativePath=".\ASMloadConfigFile.cc"
+					>
+				</File>
+				<File
+					RelativePath=".\ASMloadImages.cc"
+					>
+				</File>
+				<File
+					RelativePath=".\ASModeling.cc"
+					>
+				</File>
+				<File
+					RelativePath=".\ASMsetIndicator.cc"
+					>
+				</File>
+				<File
+					RelativePath=".\OptimizeSingleFrame.cc"
+					>
+				</File>
+				<File
+					RelativePath=".\OptimizeSuccFrames.cc"
+					>
+				</File>
+				<File
+					RelativePath=".\StoreVolumeData.cc"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="CUDA files"
 				>
-			</File>
-			<File
-				RelativePath=".\OptimizeSingleFrame.cu"
-				>
-			</File>
-			<File
-				RelativePath=".\OptimizeSuccFrames.cc"
-				>
-			</File>
-			<File
-				RelativePath=".\OptimizeSuccFrames.cu"
-				>
-			</File>
-			<File
-				RelativePath=".\StoreVolumeData.cc"
-				>
-			</File>
-			<File
-				RelativePath=".\StoreVolumeData.cu"
-				>
-			</File>
+				<File
+					RelativePath=".\cuda_gradcompute.cu"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\cuda_raymarching.cu"
+					>
+				</File>
+				<File
+					RelativePath=".\OptimizeSingleFrame.cu"
+					>
+				</File>
+				<File
+					RelativePath=".\OptimizeSuccFrames.cu"
+					>
+				</File>
+				<File
+					RelativePath=".\StoreVolumeData.cu"
+					>
+				</File>
+				<File
+					RelativePath=".\Volume_Vto3D.cu"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="ASRendering"
 			>
-			<File
-				RelativePath=".\cuda_raymarching_kernel.cu"
-				>
-			</File>
 		</Filter>
 		<Filter
 			Name="App"
@@ -277,10 +291,6 @@
 		</File>
 		<File
 			RelativePath=".\stdafx.h"
-			>
-		</File>
-		<File
-			RelativePath=".\Volume_Vto3D.cu"
 			>
 		</File>
 	</Files>
