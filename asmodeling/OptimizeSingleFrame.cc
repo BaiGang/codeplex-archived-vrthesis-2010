@@ -29,6 +29,10 @@ namespace {
     void subdivide_volume_cuda(int prev_level, int next_level);
 
   }
+
+  // init volume
+  // This piece of code looks quite like that in set_density_indicator()
+
 } // unnamed namespace
 
 
@@ -46,7 +50,7 @@ namespace as_modeling
 
     int i_level = INITIAL_VOL_LEVEL;
 
-    set_density_indicator(i_level, progressive_results_[0].get(), progressive_indicators_[0].get());
+    set_density_indicator(i_level, progressive_indicators_[0].get());
 
     // optimize the most coarse volume
 

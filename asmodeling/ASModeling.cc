@@ -29,15 +29,11 @@ namespace as_modeling
 
     // init intermediate data
     // allocate space for progressive density/indicator volume
-    scoped_array<float> * tmparrarr = new scoped_array<float> [num_levels];
-    scoped_array<uchar> * tmpuchararr = new scoped_array<uchar> [num_levels];
-    progressive_results_.reset(tmparrarr);
-    progressive_indicators_.reset(tmpuchararr);
+    scoped_array<int> * tmp_p_int = new scoped_array<int> [num_levels];
+    progressive_indicators_.reset(tmp_p_int);
     for (int i_level = INITIAL_VOL_LEVEL; i_level <= MAX_VOL_LEVEL; ++i_level)
     {
-      float * tmparr = new float [(1<<i_level)];
-      uchar * tuchararr = new uchar [(1<<i_level)];
-      progressive_results_[i_level].reset(tmparr);
+      int * tuchararr = new int [(1<<i_level)];
       progressive_indicators_[i_level].reset(tuchararr);
     }
 

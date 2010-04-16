@@ -41,5 +41,36 @@ __global__ void calc_g(float * ground_truth,
 }
 
 
+////////////////////////////////////////////////////////////////
+//
+//   Perturb the voxels to calc gradient
+//   The serial edition of the algorithm
+//
+//First, calc the most close axis to the view direction. This axis
+//is the principal axis.
+//
+//N = the resolution of the slice
+//M = number of sub slices
+//
+//For each slice along the principal axis
+//  for group_v = 0 to N/M-1
+//    for group_u = 0 to N/M-1  // for each concurrently perturbed group
+//    {
+//      // firstly, perturb
+//
+//      for sub_v = 0 to M
+//        for sub_u = 0 to M    // for each sub slice
+//        {
+//          if this voxel contains density
+//            perturb it
+//        }
+//
+//      // then, render
+//      Render 
+//
+//      // Sum the gradient
+//
+//    }
+
 
 #endif //__CUDA_GRAD_COMPUTE_KERNEL_CU__

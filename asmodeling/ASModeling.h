@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include <string>
+#include <list>
 
 #include <scoped_ptr.h>
 #include <CImg.h>
@@ -93,7 +94,10 @@ namespace as_modeling
     bool load_captured_images(int iframe);
 
     // set indicator for density existence at each voxel
-    bool set_density_indicator(int level, float * density_volume, uchar * ind_volume);
+    bool set_density_indicator(int level, int * ind_volume);
+
+    // init the coarse volume using image or empirical data
+    bool init_density_volume(int level, std::list<float> & density_vectorized);
 
     // convert (x,y,z) to index
     inline int index3(int x, int y, int z, int length)
@@ -114,8 +118,7 @@ namespace as_modeling
     scoped_array< scoped_ptr<float> > ground_truth_pixels_;
 
     // temporary results
-    scoped_array< scoped_array<float> > progressive_results_;
-    scoped_array< scoped_array<uchar> > progressive_indicators_;
+    scoped_array< scoped_array<int> > progressive_indicators_;
 
     // full detailed result
     scoped_array< float > frame_volume_result_;

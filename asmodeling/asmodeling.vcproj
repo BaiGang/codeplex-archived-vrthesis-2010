@@ -279,6 +279,10 @@
 			RelativePath=".\stdafx.h"
 			>
 		</File>
+		<File
+			RelativePath=".\Volume_Vto3D.cu"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>
