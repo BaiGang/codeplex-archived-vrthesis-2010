@@ -1,7 +1,6 @@
 #include <cstdio>
 
 #include "ASModeling.h"
-#include "../L-BFGS-B/ap.h"
 #include "../L-BFGS-B/lbfgsb.h"
 
 ////////////////////////////////////////////////////////////
@@ -21,14 +20,17 @@ extern "C"
   float cuda_grad_compute(float * p_host_x, float * p_host_g, int n);
 
   // set initial density, indicator and position mapping
-  // uchar ind[length^3], 
-  void set_vol_indicator_cuda(uchar * ind_volume);
+  // int ind[length^3], 
+  void set_density_indicator(int level, int * indicator);
 
   // subdivide volume
   void subdivide_volume_cuda(int prev_level, int next_level);
 
-}
+} // extern "C"
+
+
 namespace {
+
   // grad computing function for lbfgsb routine
   //  this is actually a bridge between ASModeling and cuda routines
   void grad_compute(ap::real_1d_array x, double &f, ap::real_1d_array &g)
@@ -69,34 +71,40 @@ namespace as_modeling
     //  set parameters for lbfgsb minimize routine
     //
     ///////////////////////////////////////////////////////////////////////
-    int info_code;
 
-    ap::real_1d_array x;
-    ap::integer_1d_array nbd;
-    ap::real_1d_array l;
-    ap::real_1d_array u;
 
-    x.setbounds(1, host_x.size());
-    nbd.setbounds(1, host_x.size());
-    l.setbounds(1, host_x.size());
-    u.setbounds(1, host_x.size());
+    lbfgsb_x_.setbounds(1, host_x.size());
+    lbfgsb_nbd_.setbounds(1, host_x.size());
+    lbfgsb_l_.setbounds(1, host_x.size());
+    lbfgsb_u_.setbounds(1, host_x.size());
 
     int index_x = 1;
     for (std::list<float>::const_iterator it = host_x.begin();
       it != host_x.end();
       ++ it)
     {
-      x(index_x) = *it;
+      lbfgsb_x_(index_x) = *it;
 
-      nbd(index_x) = constrain_type_;
-      l(index_x) = lower_boundary_;
-      u(index_x) = upper_boundary_;
+      lbfgsb_nbd_(index_x) = constrain_type_;
+      lbfgsb_l_(index_x) = lower_boundary_;
+      lbfgsb_u_(index_x) = upper_boundary_;
 
       ++ index_x;
     }
 
     // optimize the most coarse volume
-    lbfgsbminimize(host_x.size(), lbfgs_m_, x, eps_g_, eps_f_, eps_x_, max_iter_, nbd, l, u, info_code, grad_compute);
+    lbfgsbminimize(host_x.size(),
+      lbfgs_m_, 
+      lbfgsb_x_,
+      eps_g_, 
+      eps_f_, 
+      eps_x_,
+      max_iter_,
+      lbfgsb_nbd_,
+      lbfgsb_l_,
+      lbfgsb_u_,
+      lbfgsb_info_code_,
+      grad_compute);
 
     // progressively optimize finer volumes
     while (i_level <= MAX_VOL_LEVEL)

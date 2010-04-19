@@ -1,11 +1,24 @@
 #include <cuda.h>
 #include <cuda_runtime.h>
 
-
-extern "C" // functions of cuda-raymarching
+// functions of cuda-raymarching
+extern "C" 
 {
 
 }
+
+// global variables
+int n_views;                // num of views
+int current_level;          // current level of volume
+float ** intr_camera_para;  // camera parameters
+float ** extr_camera_para;  // ...
+
+
+/////////////////////////////////////////////////////////////
+//
+//       DEVICE CODE
+//
+/////////////////////////////////////////////////////////////
 
 // Kernel function to calculate the sum-of-square-error
 __global__ void calc_f(float * ground_truth, float * render_result, int n, float * f_pixels)
@@ -41,13 +54,13 @@ __global__ void calc_g(float * ground_truth,
                        int n,
                        int n_pixels)
 {
-
+  //
 }
 
 // perturb voxels
 __global__ void perturb_voxels()
 {
-
+  //
 }
 
 
@@ -82,8 +95,39 @@ __global__ void perturb_voxels()
 //
 //    }
 
+/////////////////////////////////////////////////////////////
+//
+//       HOST CODE
+//
+/////////////////////////////////////////////////////////////
+
+// set the level and the volume indicator
+// so that we can construct the density volume
+// on the GPU side
+extern "C"
+void set_density_indicator(int level, int * indicator)
+{
+
+}
+
+extern "C"
+void construct_volume(float * p_x)
+
+// the main routine for grad computation
 extern "C"
 float cuda_grad_compute(float * p_host_x, float * p_host_g, int n)
 {
+  float * p_device_x;
+  float * p_device_g;
+
+  // construct volume
+
+
   return 0.0f;
+}
+
+extern "C"
+void subdivide_volume_cuda(int prev_level, int next_level)
+{
+
 }

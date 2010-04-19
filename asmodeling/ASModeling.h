@@ -8,6 +8,8 @@
 #include <scoped_ptr.h>
 #include <CImg.h>
 
+#include "../L-BFGS-B/ap.h"
+
 #include "../Utils/math/geomath.h"
 
 namespace as_modeling
@@ -78,23 +80,24 @@ namespace as_modeling
     ///////////////////////////////////////////////////
     // consts
     ///////////////////////////////////////////////////
-    static const int MAX_NUM_CAMERAS = 1024; // relatively very large, we typically use 8 cameras
-    static const int INITIAL_VOL_SIZE = 32;
-    static const int MAX_VOL_SIZE = 256;
-    static const int INITIAL_VOL_LEVEL = 5;
-    static const int MAX_VOL_LEVEL = 8;
+    static const int MAX_NUM_CAMERAS     = 1024; // relatively very large, we typically use 8 cameras
+    static const int INITIAL_VOL_SIZE    = 32;
+    static const int MAX_VOL_SIZE        = 256;
+    static const int INITIAL_VOL_LEVEL   = 5;
+    static const int MAX_VOL_LEVEL       = 8;
 
     ////////////////////////////////////////////////////
     //               helper routines
     ////////////////////////////////////////////////////
     bool load_camera_file(const char * filename);
     bool load_configure_file(const char * filename);
-
     bool load_captured_images(int iframe);
 
     // set indicator for density existence at each voxel
-    bool set_density_indicator(int level, int * ind_volume,
-      std::list<float> & density_vectorized, bool is_init_vol);
+    bool set_density_indicator(int level,
+      int * ind_volume,
+      std::list<float> & density_vectorized,
+      bool is_init_vol);
 
 
     // convert (x,y,z) to index
@@ -205,6 +208,18 @@ namespace as_modeling
 
     // number of cameras for capturation
     int num_cameras_;
+
+    ////////////////////////////////////////////
+    //
+    //  Parameters for lbfgsbminimize routine
+    //
+    ////////////////////////////////////////////
+    int lbfgsb_info_code_;
+
+    ap::real_1d_array    lbfgsb_x_;
+    ap::integer_1d_array lbfgsb_nbd_;
+    ap::real_1d_array    lbfgsb_l_;
+    ap::real_1d_array    lbfgsb_u_;
 
   };
 } // as_modeling
