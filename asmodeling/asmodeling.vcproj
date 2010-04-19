@@ -14,7 +14,7 @@
 	</Platforms>
 	<ToolFiles>
 		<ToolFile
-			RelativePath="U:\ProgramData\NVIDIA Corporation\NVIDIA GPU Computing SDK\C\common\Cuda.rules"
+			RelativePath="..\Cuda.rules"
 		/>
 	</ToolFiles>
 	<Configurations>
