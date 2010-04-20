@@ -93,6 +93,8 @@ namespace as_modeling
     bool load_configure_file(const char * filename);
     bool load_captured_images(int iframe);
 
+    bool init_hardware();
+
     // set indicator for density existence at each voxel
     bool set_density_indicator(int level,
       int * ind_volume,

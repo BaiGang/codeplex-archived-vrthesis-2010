@@ -13,7 +13,7 @@
 //  param- ind_volume:  the incidator volume
 //  param- density_vectorized :
 //     vectorized effective voxels
-//  param- is init_vol:
+//  param- is_init_vol:
 //     if false, just set the indicator volume, without init density.
 //     else set indicator and init density by sum of pixels...
 //
@@ -39,7 +39,10 @@ namespace as_modeling
 
 
     if (is_init_vol)
+    {
       density_vectorized.clear();
+      density_vectorized.push_back(0.0f); // zero density value
+    }
 
     memset(ind_volume, 0, sizeof(int)*length*length*length);
 

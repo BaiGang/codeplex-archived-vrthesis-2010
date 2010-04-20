@@ -2,6 +2,12 @@
 
 #include "ASModeling.h"
 
+extern "C"
+{
+  // cuda_gradcompute.cu
+  bool set_cameras(int n_camera, float * intr_para, float * extr_para);
+}
+
 namespace as_modeling
 {
 
@@ -26,6 +32,13 @@ namespace as_modeling
     
     // init image list
     ground_truth_images_.assign(num_cameras_);
+
+    ////////////////////////////////////////////////////////
+    //
+    //  Sets camera parameters to Device, also inits cuda
+    //
+    ////////////////////////////////////////////////////////
+    init_hardware();
 
     // init intermediate data
     // allocate space for progressive density/indicator volume
@@ -70,7 +83,32 @@ namespace as_modeling
   /////////////////////////////////////////////////
   //      helper functions
   /////////////////////////////////////////////////
+  bool ASModeling::init_hardware()
+  {
+    // here we init cuda and set camera parameters
+    float * intr_para = new float[16 * num_cameras_];
+    float * extr_para = new float[16 * num_cameras_];
+    scoped_array<float> sa_intr, sa_extr;
+    sa_intr.reset(intr_para);
+    sa_extr.reset(extr_para);
 
+    for (int i_camera = 0; i_camera < num_cameras_; ++i_camera)
+    {
+      int base = i_camera * 16;
+      for (int p = 0; p < 16; ++p)
+      {
+        intr_para[base+p] = camera_intr_paras_[i_camera](p/4, p%4);
+        extr_para[base+p] = camera_extr_paras_[i_camera](p/4, p%4);
+      }
+    }
+
+    if (!set_cameras(num_cameras_, intr_para, extr_para))
+    {
+      return false;
+    }
+
+    return true;
+  }
 
 
 } // namespace as_modeling

@@ -22,6 +22,7 @@ extern "C"
   // set initial density, indicator and position mapping
   // int ind[length^3], 
   void set_density_indicator(int level, int * indicator);
+  void delete_density_indicator();
 
   // subdivide volume
   void subdivide_volume_cuda(int prev_level, int next_level);
@@ -36,14 +37,23 @@ namespace {
   void grad_compute(ap::real_1d_array x, double &f, ap::real_1d_array &g)
   {
     int n = x.gethighbound() - x.getlowbound() + 1;
-    float * p_host_x = new float [n];
+    float * p_host_x = new float [n+1];
     float * p_host_g = new float [n];
 
-    f = cuda_grad_compute(p_host_x, p_host_g, n);
-  }
+    p_host_x[0] = 0.0f;  // all empty cells point to this item
+    for (int i = 1; i <= n; ++i)
+    {
+      p_host_x[i] = x(x.getlowbound()+i-1);
+    }
 
-  // init volume
-  // This piece of code looks quite like that in set_density_indicator()
+    f = cuda_grad_compute(p_host_x, p_host_g, n);
+
+    for (int i = 0; i < n; ++i)
+    {
+      g(g.getlowbound()+i) = p_host_g[i];
+    }
+  } // grad_compute(ap...
+
 
 } // unnamed namespace
 
@@ -71,8 +81,6 @@ namespace as_modeling
     //  set parameters for lbfgsb minimize routine
     //
     ///////////////////////////////////////////////////////////////////////
-
-
     lbfgsb_x_.setbounds(1, host_x.size());
     lbfgsb_nbd_.setbounds(1, host_x.size());
     lbfgsb_l_.setbounds(1, host_x.size());
@@ -106,13 +114,24 @@ namespace as_modeling
       lbfgsb_info_code_,
       grad_compute);
 
+    // finish this optimize call
+    delete_density_indicator();
+
     // progressively optimize finer volumes
     while (i_level <= MAX_VOL_LEVEL)
     {
+      // TODO:
+      // subdivide volume and the previous array x
+
+      // TODO:
+      // optimize routine
+
       ++ i_level;
     }
 
-
+    // TODO:
+    // store the resulted volume...
+    // maybe use some kind of compression...
 
     return true;
   }
