@@ -80,7 +80,7 @@ namespace as_modeling
     ///////////////////////////////////////////////////
     // consts
     ///////////////////////////////////////////////////
-    static const int MAX_NUM_CAMERAS     = 1024; // relatively very large, we typically use 8 cameras
+    static const int MAX_NUM_CAMERAS     = 64; // relatively very large, we typically use 8 cameras
     static const int INITIAL_VOL_SIZE    = 32;
     static const int MAX_VOL_SIZE        = 256;
     static const int INITIAL_VOL_LEVEL   = 5;
@@ -93,10 +93,14 @@ namespace as_modeling
     bool load_configure_file(const char * filename);
     bool load_captured_images(int iframe);
 
-    bool init_hardware();
+    bool set_cameras();
+
+    // set ground truth image
+    bool set_groundtruth_image();
 
     // set indicator for density existence at each voxel
-    bool set_density_indicator(int level,
+    bool set_density_indicator(
+      int level,
       int * ind_volume,
       std::list<float> & density_vectorized,
       bool is_init_vol);

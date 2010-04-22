@@ -182,6 +182,26 @@
 				>
 			</File>
 		</Filter>
+		<Filter
+			Name="shader"
+			>
+			<File
+				RelativePath=".\shader\nvShaderUtils.h"
+				>
+			</File>
+			<File
+				RelativePath=".\shader\rendercheckGL.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\shader\rendercheckGL.h"
+				>
+			</File>
+			<File
+				RelativePath=".\shader\shrUtils.h"
+				>
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>

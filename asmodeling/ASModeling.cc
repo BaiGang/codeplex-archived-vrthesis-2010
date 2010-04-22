@@ -5,7 +5,7 @@
 extern "C"
 {
   // cuda_gradcompute.cu
-  bool set_cameras(int n_camera, float * intr_para, float * extr_para);
+  bool set_camera_parameters_cuda(int n_camera, float * intr_para, float * extr_para);
 }
 
 namespace as_modeling
@@ -34,11 +34,9 @@ namespace as_modeling
     ground_truth_images_.assign(num_cameras_);
 
     ////////////////////////////////////////////////////////
-    //
     //  Sets camera parameters to Device, also inits cuda
-    //
     ////////////////////////////////////////////////////////
-    init_hardware();
+    set_cameras();
 
     // init intermediate data
     // allocate space for progressive density/indicator volume
@@ -54,9 +52,11 @@ namespace as_modeling
   }
 
 
-  /////////////////////////////////////////////////
+  /////////////////////////////////////////////////////////////////////////////
+  //
   //      full modeling process
-  /////////////////////////////////////////////////
+  //
+  /////////////////////////////////////////////////////////////////////////////
   bool ASModeling::OptimizeProcess(int num_of_frames)
   {
     if (!OptimizeSingleFrame(0))
@@ -80,10 +80,23 @@ namespace as_modeling
     return true;
   }
 
-  /////////////////////////////////////////////////
+  ////////////////////////////////////////////////////////////////////////////////
+  //
   //      helper functions
-  /////////////////////////////////////////////////
-  bool ASModeling::init_hardware()
+  //
+  ////////////////////////////////////////////////////////////////////////////////
+  bool ASModeling::set_groundtruth_image( )
+  {
+    // NOTE: the array in CImag is CImage::data
+    float* images[MAX_NUM_CAMERAS];
+
+
+    return true;
+  } // set_groundtruth_image
+
+  // set camera parameters to cuda
+  // note, this function is called only once, at the begining of the optimization process
+  bool ASModeling::set_cameras()
   {
     // here we init cuda and set camera parameters
     float * intr_para = new float[16 * num_cameras_];
@@ -102,7 +115,7 @@ namespace as_modeling
       }
     }
 
-    if (!set_cameras(num_cameras_, intr_para, extr_para))
+    if (!set_camera_parameters_cuda(num_cameras_, intr_para, extr_para))
     {
       return false;
     }

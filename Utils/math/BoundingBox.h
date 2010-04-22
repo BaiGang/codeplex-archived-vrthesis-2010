@@ -1,3 +1,7 @@
+//Copyright (c) 2005 HU Yong (huyong@vrlab.buaa.edu.cn)
+//  All rights reserved.
+
+
 /********************************************************************
 	created:	2005/09/05
 	created:	5:9:2005   14:29

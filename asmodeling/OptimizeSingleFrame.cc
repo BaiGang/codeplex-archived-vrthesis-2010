@@ -52,8 +52,7 @@ namespace {
     {
       g(g.getlowbound()+i) = p_host_g[i];
     }
-  } // grad_compute(ap...
-
+  } // grad_compute(ap::
 
 } // unnamed namespace
 
@@ -70,11 +69,16 @@ namespace as_modeling
       return false;
     }
 
+    // set groundtruth image to CUDA
+    set_groundtruth_image();
+
     int i_level = INITIAL_VOL_LEVEL;
     std::list<float> host_x;
 
     set_density_indicator(i_level, progressive_indicators_[0].get(),
       host_x, true);
+
+    
 
     ///////////////////////////////////////////////////////////////////////
     //

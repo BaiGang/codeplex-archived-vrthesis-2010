@@ -27,8 +27,6 @@ texture<int, 3, cudaReadModeElementType> indicator_tex;
 
 cudaPitchedPtr density_volume_pptr;
 
-
-
 /////////////////////////////////////////////////////////////
 //
 //       DEVICE CODE
@@ -62,26 +60,7 @@ __global__ void construct_denvol_kernel(cudaPitchedPtr vol_pptr, float * device_
 // Kernel function to calculate the sum-of-square-error
 __global__ void calc_f(float * ground_truth, float * render_result, int n, float * f_pixels)
 {
-  ////  calc index of the thread
-  //int thread_ind = threadIdx.y * blockDim.x + threadIdx.x;
 
-  ////  calc f for each pixel
-  //f_pixels[ thread_ind ] += (ground_truth[thread_ind] - render_result[thread_ind])
-  //  * (ground_truth[thread_ind] - render_result[thread_ind]);
-
-  //__syncthreads();
-
-  //// reduce and sum
-  ////  the final result will be stored in f_pixels[0]
-  //for (int i = n; i > 0; i /= 2)
-  //{
-  //  if (thread_ind < i)
-  //  {
-  //    f_pixels[thread_ind] = f_pixels[thread_ind] + f_pixels[thread_ind +i];
-  //  }
-
-  //  __syncthreads();
-  //}
 }
 
 // Kernel function to calculate the gradient
@@ -93,13 +72,13 @@ __global__ void calc_g(float * ground_truth,
                        int n,
                        int n_pixels)
 {
-  //
+
 }
 
 // perturb voxels
 __global__ void perturb_voxels()
 {
-  //
+
 }
 
 
@@ -142,7 +121,7 @@ __global__ void perturb_voxels()
 //
 /////////////////////////////////////////////////////////////
 extern "C"
-bool set_cameras(int n_camera, float * intr_para, float * extr_para)
+bool set_camera_parameters_cuda(int n_camera, float * intr_para, float * extr_para)
 {
   int tmp_n_camera[1] = {n_camera};
 
@@ -252,6 +231,7 @@ float cuda_grad_compute(float * p_host_x, float * p_host_g, int n)
   construct_volume_cuda( p_device_x );
 
   // render to image 1
+
 
   // calc f
 

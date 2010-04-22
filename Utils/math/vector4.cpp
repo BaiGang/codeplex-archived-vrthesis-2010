@@ -1,3 +1,7 @@
+//Copyright (c) 2005 HU Yong (huyong@vrlab.buaa.edu.cn)
+//  All rights reserved.
+
+
 #include "geomath.h"
 using namespace std;
 

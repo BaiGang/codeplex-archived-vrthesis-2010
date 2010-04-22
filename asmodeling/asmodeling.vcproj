@@ -64,7 +64,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="TinyXML.lib L-BFGS-B.lib Utils.lib cudart.lib"
+				AdditionalDependencies="TinyXML.lib L-BFGS-B.lib Utils.lib cudart.lib glew32.lib"
 				AdditionalLibraryDirectories="$(SolutionDir)\Lib"
 				GenerateDebugInformation="true"
 				TargetMachine="1"
@@ -138,7 +138,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="TinyXML.lib L-BFGS-B.lib Utils.lib cudart.lib"
+				AdditionalDependencies="TinyXML.lib L-BFGS-B.lib Utils.lib cudart.lib glew32.lib"
 				AdditionalLibraryDirectories="$(SolutionDir)\Lib"
 				GenerateDebugInformation="true"
 				OptimizeReferences="2"
@@ -236,26 +236,6 @@
 				<File
 					RelativePath=".\cuda_gradcompute.cu"
 					>
-				</File>
-				<File
-					RelativePath=".\cuda_gradcompute_kernel.cu"
-					>
-					<FileConfiguration
-						Name="Debug|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="CUDA Build Rule"
-						/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Release|Win32"
-						ExcludedFromBuild="true"
-						>
-						<Tool
-							Name="CUDA Build Rule"
-						/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\cuda_raymarching.cu"
