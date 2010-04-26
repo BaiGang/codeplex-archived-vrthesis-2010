@@ -43,7 +43,7 @@
 				AdditionalIncludeDirectories="$(SolutionDir)\Inc"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
+				RuntimeLibrary="1"
 				WarningLevel="3"
 				DebugInformationFormat="4"
 			/>
@@ -104,7 +104,7 @@
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
 				AdditionalIncludeDirectories="$(SolutionDir)\Inc"
-				RuntimeLibrary="3"
+				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				WarningLevel="3"
 				DebugInformationFormat="3"
@@ -179,26 +179,6 @@
 			</File>
 			<File
 				RelativePath=".\math\vector4.h"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="shader"
-			>
-			<File
-				RelativePath=".\shader\nvShaderUtils.h"
-				>
-			</File>
-			<File
-				RelativePath=".\shader\rendercheckGL.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\shader\rendercheckGL.h"
-				>
-			</File>
-			<File
-				RelativePath=".\shader\shrUtils.h"
 				>
 			</File>
 		</Filter>

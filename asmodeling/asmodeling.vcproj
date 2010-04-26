@@ -47,9 +47,10 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories="&quot;../L-BFGS-B&quot;;../TinyXML;&quot;$(SolutionDir)\Inc&quot;"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
+				RuntimeLibrary="1"
 				WarningLevel="3"
 				DebugInformationFormat="4"
 			/>
@@ -64,9 +65,13 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="TinyXML.lib L-BFGS-B.lib Utils.lib cudart.lib glew32.lib"
+				AdditionalDependencies="TinyXML.lib L-BFGS-B.lib Utils.lib cudart.lib glew32.lib glut32.lib"
+				ShowProgress="2"
+				LinkIncremental="2"
 				AdditionalLibraryDirectories="$(SolutionDir)\Lib"
+				DelayLoadDLLs=""
 				GenerateDebugInformation="true"
+				SubSystem="1"
 				TargetMachine="1"
 			/>
 			<Tool
@@ -122,7 +127,8 @@
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
 				AdditionalIncludeDirectories="&quot;../L-BFGS-B&quot;;../TinyXML;&quot;$(SolutionDir)\Inc&quot;"
-				RuntimeLibrary="2"
+				PreprocessorDefinitions="WIN32;_CONSOLE"
+				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				WarningLevel="3"
 				DebugInformationFormat="3"
@@ -138,9 +144,11 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="TinyXML.lib L-BFGS-B.lib Utils.lib cudart.lib glew32.lib"
+				AdditionalDependencies="TinyXML.lib L-BFGS-B.lib Utils.lib cudart.lib glew32.lib glut32.lib"
+				LinkIncremental="2"
 				AdditionalLibraryDirectories="$(SolutionDir)\Lib"
 				GenerateDebugInformation="true"
+				SubSystem="1"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
 				TargetMachine="1"
@@ -198,23 +206,19 @@
 				Name="Cpp files"
 				>
 				<File
-					RelativePath=".\ASMloadCameraFile.cc"
+					RelativePath=".\ASMLoadCameraFile.cc"
 					>
 				</File>
 				<File
-					RelativePath=".\ASMloadConfigFile.cc"
+					RelativePath=".\ASMLoadConfigFile.cc"
 					>
 				</File>
 				<File
-					RelativePath=".\ASMloadImages.cc"
+					RelativePath=".\ASMLoadImages.cc"
 					>
 				</File>
 				<File
 					RelativePath=".\ASModeling.cc"
-					>
-				</File>
-				<File
-					RelativePath=".\ASMsetIndicator.cc"
 					>
 				</File>
 				<File
@@ -225,35 +229,7 @@
 					RelativePath=".\OptimizeSuccFrames.cc"
 					>
 				</File>
-				<File
-					RelativePath=".\StoreVolumeData.cc"
-					>
-				</File>
 			</Filter>
-			<Filter
-				Name="CUDA files"
-				>
-				<File
-					RelativePath=".\cuda_gradcompute.cu"
-					>
-				</File>
-				<File
-					RelativePath=".\cuda_raymarching.cu"
-					>
-				</File>
-				<File
-					RelativePath=".\cuda_util.cuh"
-					>
-				</File>
-				<File
-					RelativePath=".\StoreVolumeData.cu"
-					>
-				</File>
-			</Filter>
-		</Filter>
-		<Filter
-			Name="ASRendering"
-			>
 		</Filter>
 		<Filter
 			Name="App"
@@ -264,8 +240,92 @@
 			</File>
 		</Filter>
 		<Filter
-			Name="CudaUtils"
+			Name="GradCompute"
 			>
+			<File
+				RelativePath=".\GradCompute.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\GradCompute.h"
+				>
+			</File>
+			<Filter
+				Name="CUDA files"
+				>
+				<File
+					RelativePath=".\ASMGradCompute_kernel.cu"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="CUDA Build Rule"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="CUDA Build Rule"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
+					RelativePath=".\cuda_gradcompute.cu"
+					>
+				</File>
+				<File
+					RelativePath=".\cuda_util.cuh"
+					>
+				</File>
+				<File
+					RelativePath=".\grad_compute_cuda.cu"
+					>
+				</File>
+				<File
+					RelativePath=".\StoreVolumeData.cu"
+					>
+				</File>
+			</Filter>
+		</Filter>
+		<Filter
+			Name="StoreVolumeData"
+			>
+			<File
+				RelativePath=".\StoreVolumeData.cc"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="RenderGL"
+			>
+			<File
+				RelativePath=".\GLFBO.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\GLFBO.h"
+				>
+			</File>
+			<File
+				RelativePath=".\GLSLShader.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\GLSLShader.h"
+				>
+			</File>
+			<File
+				RelativePath=".\RenderGL.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\RenderGL.h"
+				>
+			</File>
 		</Filter>
 		<File
 			RelativePath=".\stdafx.cc"

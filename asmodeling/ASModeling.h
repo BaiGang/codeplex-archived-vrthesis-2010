@@ -9,8 +9,8 @@
 #include <CImg.h>
 
 #include "../L-BFGS-B/ap.h"
-
 #include "../Utils/math/geomath.h"
+
 
 namespace as_modeling
 {
@@ -55,7 +55,9 @@ namespace as_modeling
     bool OptimizeProcess(int num_of_frames);
 
 
+    //
     // Functions below are called by OptimizeProcess
+    //
 
     // Optimize a single frame
     // results will be stored at result_volume_
@@ -71,6 +73,10 @@ namespace as_modeling
     //    todo : using perfect spatial hashing
     bool StoreVolumeData(int i_frame);
 
+    // for rendering the scene of smoke
+    friend class RenderGL;
+    // for gradient computation on the CUDA
+    friend class ASMGradCompute;
 
     ASModeling() {};
     ~ASModeling(){};
@@ -93,57 +99,41 @@ namespace as_modeling
     bool load_configure_file(const char * filename);
     bool load_captured_images(int iframe);
 
-    bool set_cameras();
-
-    // set ground truth image
-    bool set_groundtruth_image();
-
-    // set indicator for density existence at each voxel
-    bool set_density_indicator(
-      int level,
-      int * ind_volume,
-      std::list<float> & density_vectorized,
-      bool is_init_vol);
-
 
     // convert (x,y,z) to index
     inline int index3(int x, int y, int z, int length)
-    {
-      return x + length * (y + length * z);
-    }
+    {return x + length * (y + length * z);}
 
     // convert 
     inline int index2(int x, int y, int length)
-    {
-      return x + length * y;
-    }
+    {return x + length * y;}
 
-    // data
+    ////////////////////////////////////////////
+    // data (very minor on CPU side)
+    ////////////////////////////////////////////
 
     // captured images  
     cimg_library::CImgList<float> ground_truth_images_;
 
-    // temporary indicators
-    scoped_array< scoped_array<int> > progressive_indicators_;
 
-    // full detailed result
+    // density field result
     scoped_array< float > frame_volume_result_;
-
     scoped_array< float > frame_compressed_result_;
 
+    //////////////////////////////////////////////
+    // ALL CONFIGURE PARAMETERS
+    // LOAD FROM CONFIGURE.XML
+    //////////////////////////////////////////////
+
     ////////////////////////////////////////////
-    //
     //  participating media parameters
-    //
     ////////////////////////////////////////////
     float extinction_;
     float scattering_;
     float alpha_;
 
     ////////////////////////////////////////////
-    //
     //  render parameters
-    //
     ////////////////////////////////////////////
     int current_view_;   // deprecated
     int width_;
@@ -154,9 +144,7 @@ namespace as_modeling
     int rot_angles_;
 
     ////////////////////////////////////////////
-    //
     //  light parameters
-    //
     ////////////////////////////////////////////
     int light_type_;
     float light_intensity_;
@@ -165,9 +153,7 @@ namespace as_modeling
     float light_z_;
 
     ////////////////////////////////////////////
-    //
     //  volume parameters
-    //
     ////////////////////////////////////////////
     float box_size_;
     int box_width_;
@@ -179,17 +165,13 @@ namespace as_modeling
     int volume_interval_;
 
     ////////////////////////////////////////////
-    //
-    //  octree parameters
-    //
+    //  octree parameters  -- deprecated
     ////////////////////////////////////////////
     int octree_level_;
     int node_to_divide_;
 
     ////////////////////////////////////////////
-    //
     //  L-BFGS_B parameters
-    //
     ////////////////////////////////////////////
     float disturb_;
     float eps_g_;
@@ -202,9 +184,7 @@ namespace as_modeling
     float upper_boundary_;
 
     ////////////////////////////////////////////
-    //
     //  Camera parameters
-    //
     ////////////////////////////////////////////
     scoped_array<Matrix4> camera_intr_paras_;
     scoped_array<Matrix4> camera_extr_paras_;
@@ -226,6 +206,15 @@ namespace as_modeling
     ap::integer_1d_array lbfgsb_nbd_;
     ap::real_1d_array    lbfgsb_l_;
     ap::real_1d_array    lbfgsb_u_;
+
+    /////////////////////////////////////////////////
+    //
+    //  Helper classes for rendering and g computing
+    //
+    /////////////////////////////////////////////////
+    RenderGL * renderer_;
+    ASMGradCompute * grad_computer_;
+    unsigned int volume_texture_id_;
 
   };
 } // as_modeling
