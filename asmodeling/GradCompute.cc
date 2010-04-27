@@ -64,7 +64,8 @@ namespace as_modeling
     delete [] p_host_x;
   } // 
 
-  void ASMGradCompute::init( )
+  
+  void ASMGradCompute::init(int level, std::list<float>& guess_x, int * projection_center, int * tag_volume)
   {
     // init gl texture for volume data storage
     glGenTextures(1, &(p_asmodeling_->volume_texture_id_));
@@ -86,9 +87,15 @@ namespace as_modeling
       GL_TEXTURE_3D,
       cudaGraphicsMapFlagsWriteDiscard);
 
-    //cudaMalloc3D(
-
   }
+  
+  //void ASMGradCompute::init( )
+  //{
+
+
+  //  //cudaMalloc3D(
+
+  //}
 
   
   void ASMGradCompute::init_current_level(int level)

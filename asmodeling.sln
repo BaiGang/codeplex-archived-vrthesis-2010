@@ -12,10 +12,15 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F138B981-E905-497C-AD24-68A5E115B542}"
 	ProjectSection(SolutionItems) = preProject
 		Data\camera.txt = Data\camera.txt
+		Inc\CImg.h = Inc\CImg.h
 		Data\configure.xml = Data\configure.xml
 		Inc\GL\glew.h = Inc\GL\glew.h
 		Data\GLSLShaders\RayMarchingBlend.frag = Data\GLSLShaders\RayMarchingBlend.frag
 		Data\GLSLShaders\RayMarchingBlend.vert = Data\GLSLShaders\RayMarchingBlend.vert
+		Data\GLSLShaders\RayMarchingBlendX.frag = Data\GLSLShaders\RayMarchingBlendX.frag
+		Data\GLSLShaders\RayMarchingBlendY.frag = Data\GLSLShaders\RayMarchingBlendY.frag
+		Data\GLSLShaders\RayMarchingBlendZ.frag = Data\GLSLShaders\RayMarchingBlendZ.frag
+		Inc\scoped_ptr.h = Inc\scoped_ptr.h
 	EndProjectSection
 EndProject
 Global

@@ -17,10 +17,14 @@ namespace as_modeling
 
     bool init();
 
-    void render(int i_view);
+    void render(int i); // dummy
+    void render_unperturbed(int i_view);
+    void render_perturbed(int i_view);
 
     inline const GLuint& get_render_result_tex()
-    {return fbo_->GetColorTex();}
+    {return rr_fbo_->GetColorTex();}
+    inline const GLuint& get_perturb_result_tex()
+    {return pr_fbo_->GetColorTex();}
 
     explicit RenderGL(ASModeling *p)
       :asml_(p) {};
@@ -34,8 +38,11 @@ namespace as_modeling
     ASModeling * asml_;
 
     // render paras
-    scoped_ptr<GLSLShader> shader_;
-    scoped_ptr<CGLFBO> fbo_;
+    scoped_ptr<GLSLShader> shader_x_; // along x axis
+    scoped_ptr<GLSLShader> shader_y_; // along y axis
+    scoped_ptr<GLSLShader> shader_z_; // along z axis
+    scoped_ptr<CGLFBO> rr_fbo_;     // render result fbo, for calc f
+    scoped_ptr<CGLFBO> pr_fbo_;     // perturbed result fbo, for calc g
 
     // image parameters
     int width_;

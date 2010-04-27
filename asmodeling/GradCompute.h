@@ -21,9 +21,15 @@ namespace as_modeling{
 
     // init 3D volume texture
     // init CUDA
-    void init( );
-    void release();
+    // set the initial guess for x
+    // construct the volume tags
+    // set the projection center for each item
+    void init(int level, std::list<float>& guess_x, int * projection_center, int * tag_volume);
 
+    // release resources
+    void release( );
+
+    // set the volume tag and projection center for current level
     void init_current_level(int level);
     
     // set indicators for the current level

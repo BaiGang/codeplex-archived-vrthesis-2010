@@ -30,7 +30,7 @@ namespace as_modeling
     int i_level = INITIAL_VOL_LEVEL;
     std::list<float> host_x;
 
-    
+    grad_computer_->init_current_level(i_level);
 
     ///////////////////////////////////////////////////////////////////////
     //

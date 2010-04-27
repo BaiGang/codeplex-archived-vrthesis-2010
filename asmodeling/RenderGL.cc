@@ -27,16 +27,34 @@ namespace as_modeling
     height_ = asml_->height_;
 
     GLSLShader * tmpshader = new GLSLShader();
-    shader_.reset(tmpshader);
-    shader_->InitShaders(
+    shader_x_.reset(tmpshader);
+    tmpshader = new GLSLShader();
+    shader_y_.reset(tmpshader);
+    tmpshader = new GLSLShader();
+    shader_z_.reset(tmpshader);
+
+    shader_x_->InitShaders(
       "../Data/GLSLShaders/RayMarchingBlend.vert",
-      "../Data/GLSLShaders/RayMarchingBlend.frag"
+      "../Data/GLSLShaders/RayMarchingBlendX.frag"
+      );
+    shader_x_->InitShaders(
+      "../Data/GLSLShaders/RayMarchingBlend.vert",
+      "../Data/GLSLShaders/RayMarchingBlendY.frag"
+      );
+    shader_x_->InitShaders(
+      "../Data/GLSLShaders/RayMarchingBlend.vert",
+      "../Data/GLSLShaders/RayMarchingBlendZ.frag"
       );
 
     CGLFBO * tmpfbo = new CGLFBO();
-    fbo_.reset(tmpfbo);
-    fbo_->Init(width_, height_);
-    fbo_->CheckFBOErr();
+    rr_fbo_.reset(tmpfbo);
+    rr_fbo_->Init(width_, height_);
+    rr_fbo_->CheckFBOErr();
+
+    tmpfbo = new CGLFBO();
+    pr_fbo_.reset(tmpfbo);
+    pr_fbo_->Init(width_, height_);
+    pr_fbo_->CheckFBOErr();
 
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glDisable(GL_DEPTH_TEST);
@@ -79,52 +97,52 @@ namespace as_modeling
     tmp_camera.GetData(inv_camera);
 
 
-    // bind fbo
-    fbo_->BeginDraw2FBO();
-    {
+    //// bind fbo
+    //fbo_->BeginDraw2FBO();
+    //{
 
-      // render smoke
-      shader_->Begin();
-      {
-        if (asml_->light_type_ == 1)
-        {
-          // point light
-          shader_->SetUniform3f("lightPosWorld", asml_->light_x_, asml_->light_y_, asml_->light_z_);
-        }
-        else
-        {
-          // directional light
-          Vector4 dir;
-          dir.x = asml_->light_x_ - asml_->trans_x_;
-          dir.y = asml_->light_y_ - asml_->trans_y_;
-          dir.z = asml_->light_z_ - asml_->trans_z_;
-          dir.w = 1.0;
-          dir.normaVec();
-          shader_->SetUniform3f("lightDirWorld", dir[0], dir[1], dir[2]);
-        }
-        shader_->SetUniform3f("lightIntensity", asml_->light_intensity_, asml_->light_intensity_, asml_->light_intensity_);
-        
-        // camera position
-        shader_->SetUniform3f("cameraPos",
-          asml_->camera_positions_[i_view].x,
-          asml_->camera_positions_[i_view].y,
-          asml_->camera_positions_[i_view].z);
+    //  // render smoke
+    //  shader_->Begin();
+    //  {
+    //    if (asml_->light_type_ == 1)
+    //    {
+    //      // point light
+    //      shader_->SetUniform3f("lightPosWorld", asml_->light_x_, asml_->light_y_, asml_->light_z_);
+    //    }
+    //    else
+    //    {
+    //      // directional light
+    //      Vector4 dir;
+    //      dir.x = asml_->light_x_ - asml_->trans_x_;
+    //      dir.y = asml_->light_y_ - asml_->trans_y_;
+    //      dir.z = asml_->light_z_ - asml_->trans_z_;
+    //      dir.w = 1.0;
+    //      dir.normaVec();
+    //      shader_->SetUniform3f("lightDirWorld", dir[0], dir[1], dir[2]);
+    //    }
+    //    shader_->SetUniform3f("lightIntensity", asml_->light_intensity_, asml_->light_intensity_, asml_->light_intensity_);
+    //    
+    //    // camera position
+    //    shader_->SetUniform3f("cameraPos",
+    //      asml_->camera_positions_[i_view].x,
+    //      asml_->camera_positions_[i_view].y,
+    //      asml_->camera_positions_[i_view].z);
 
-        shader_->SetUniform1f("absorptionCoefficient", asml_->extinction_);
-        shader_->SetUniform1f("scatteringCoefficient", asml_->scattering_);
+    //    shader_->SetUniform1f("absorptionCoefficient", asml_->extinction_);
+    //    shader_->SetUniform1f("scatteringCoefficient", asml_->scattering_);
 
-        shader_->SetUniformMatrix4fv("cameraInv", 1, GL_FALSE, inv_camera);
+    //    shader_->SetUniformMatrix4fv("cameraInv", 1, GL_FALSE, inv_camera);
 
-        // set to shaders.....
+    //    // set to shaders.....
 
 
 
-      }
-      shader_->End();
+    //  }
+    //  shader_->End();
 
-    }
-    // unbind fbo
-    fbo_->EndDraw2FBO();
+    //}
+    //// unbind fbo
+    //fbo_->EndDraw2FBO();
 
   }
 
