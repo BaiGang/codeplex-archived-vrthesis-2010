@@ -27,23 +27,42 @@ namespace as_modeling
     height_ = asml_->height_;
 
     GLSLShader * tmpshader = new GLSLShader();
-    shader_x_.reset(tmpshader);
+    shader_x_render_.reset(tmpshader);
     tmpshader = new GLSLShader();
-    shader_y_.reset(tmpshader);
+    shader_y_render_.reset(tmpshader);
     tmpshader = new GLSLShader();
-    shader_z_.reset(tmpshader);
+    shader_z_render_.reset(tmpshader);
+    tmpshader = new GLSLShader();
+    shader_x_pertuerbed_.reset(tmpshader);
+    tmpshader = new GLSLShader();
+    shader_y_pertuerbed_.reset(tmpshader);
+    tmpshader = new GLSLShader();
+    shader_z_pertuerbed_.reset(tmpshader);
 
-    shader_x_->InitShaders(
+    shader_x_render_->InitShaders(
       "../Data/GLSLShaders/RayMarchingBlend.vert",
       "../Data/GLSLShaders/RayMarchingBlendX.frag"
       );
-    shader_x_->InitShaders(
+    shader_y_render_->InitShaders(
       "../Data/GLSLShaders/RayMarchingBlend.vert",
       "../Data/GLSLShaders/RayMarchingBlendY.frag"
       );
-    shader_x_->InitShaders(
+    shader_z_render_->InitShaders(
       "../Data/GLSLShaders/RayMarchingBlend.vert",
       "../Data/GLSLShaders/RayMarchingBlendZ.frag"
+      );
+
+    shader_x_pertuerbed_->InitShaders(
+      "../Data/GLSLShaders/RayMarchingBlend.vert",
+      "../Data/GLSLShaders/RayMarchingBlendXPurt.frag"
+      );
+    shader_y_pertuerbed_->InitShaders(
+      "../Data/GLSLShaders/RayMarchingBlend.vert",
+      "../Data/GLSLShaders/RayMarchingBlendYPurt.frag"
+      );
+    shader_z_pertuerbed_->InitShaders(
+      "../Data/GLSLShaders/RayMarchingBlend.vert",
+      "../Data/GLSLShaders/RayMarchingBlendZPurt.frag"
       );
 
     CGLFBO * tmpfbo = new CGLFBO();

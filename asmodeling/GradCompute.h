@@ -6,6 +6,7 @@
 #include <list>
 #include <cuda_runtime.h>
 #include <cuda_gl_interop.h>
+#include <>
 #include "../L-BFGS-B/ap.h"
 
 namespace as_modeling{
@@ -24,7 +25,7 @@ namespace as_modeling{
     // set the initial guess for x
     // construct the volume tags
     // set the projection center for each item
-    void init(int level, std::list<float>& guess_x, int * projection_center, int * tag_volume);
+    void init(int level, std::list<float>& guess_x, std::list<int>& projection_center, int * tag_volume);
 
     // release resources
     void release( );
@@ -41,22 +42,26 @@ namespace as_modeling{
     void set_density_tags(int level, int * tag_volume, std::list<float>& density, bool is_init_density);
 
     // Set the density volume
-    // using d_x and pre-
+    // using d_x and pre-generated tag_volume
     void set_volume(int level, float * d_x);
 
     // must feed with a ASModeling 
     explicit ASMGradCompute(ASModeling *p)
-      :p_asmodeling_(p){};
+      :p_asmodeling_(p), vol_data(0), tag_volume(0){};
 
   private:
     // no default constructor
     ASMGradCompute(){};
+
+    // pointer to the caller ASModeling object
     ASModeling * p_asmodeling_;
 
     // CUDA resources
     cudaGraphicsResource * resource_vol_;
 
     float * vol_data;
+
+    int * tag_volume;
 
   };
 

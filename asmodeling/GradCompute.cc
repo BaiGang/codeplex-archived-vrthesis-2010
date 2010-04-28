@@ -65,7 +65,10 @@ namespace as_modeling
   } // 
 
   
-  void ASMGradCompute::init(int level, std::list<float>& guess_x, int * projection_center, int * tag_volume)
+  void ASMGradCompute::init(int level, 
+                            std::list<float>& guess_x,
+                            std::list<int>& projection_center,
+                            int * tag_vol)
   {
     // init gl texture for volume data storage
     glGenTextures(1, &(p_asmodeling_->volume_texture_id_));
@@ -87,15 +90,39 @@ namespace as_modeling
       GL_TEXTURE_3D,
       cudaGraphicsMapFlagsWriteDiscard);
 
+    // calc an ininial guess of x
+    int length = (1<<level);
+
+    float wc_x[8];
+    float wc_y[8];
+    float wc_z[8];
+
+    PT2DVEC pts;
+    pts.reserve(16);
+
+    guess_x.clear();
+    guess_x.push_back(0.0f); // zero density value
+
+    if (tag_vol)
+    {
+      delete [] tag_vol;
+    }
+    tag_vol = new int [length*length*length];
+    memset(tag_vol, 0, sizeof(int)*length*length*length);
+
+    // for each cell (i, j, k)
+    for (int k = 0; k < length; ++k)
+    {
+      for (int j = 0; j < length; ++j)
+      {
+        for (int i = 0; i < length; ++i)
+        {
+          int wc_index = 0;
+        } // for i
+      } // for j
+    } // for k
   }
   
-  //void ASMGradCompute::init( )
-  //{
-
-
-  //  //cudaMalloc3D(
-
-  //}
 
   
   void ASMGradCompute::init_current_level(int level)
@@ -111,23 +138,6 @@ namespace as_modeling
 
   void ASMGradCompute::set_density_tags(int level, int *tag_volume, std::list<float> &density, bool is_init_density)
   {
-    int length = (1<<level);
-
-    float wc_x[8];
-    float wc_y[8];
-    float wc_z[8];
-
-    PT2DVEC pts;
-    pts.reserve(16);
-
-
-    if (is_init_density)
-    {
-      density.clear();
-      density.push_back(0.0f); // zero density value
-    }
-
-    memset(tag_volume, 0, sizeof(int)*length*length*length);
 
     // for each cell (i,j,k) 
     for (int k = 0; k < length; ++k)

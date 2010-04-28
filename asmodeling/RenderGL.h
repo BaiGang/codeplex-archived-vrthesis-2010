@@ -38,9 +38,12 @@ namespace as_modeling
     ASModeling * asml_;
 
     // render paras
-    scoped_ptr<GLSLShader> shader_x_; // along x axis
-    scoped_ptr<GLSLShader> shader_y_; // along y axis
-    scoped_ptr<GLSLShader> shader_z_; // along z axis
+    scoped_ptr<GLSLShader> shader_x_render_; // along x axis, unperturbed
+    scoped_ptr<GLSLShader> shader_y_render_; // along y axis, ..
+    scoped_ptr<GLSLShader> shader_z_render_; // along z axis, ..
+    scoped_ptr<GLSLShader> shader_x_pertuerbed_; // along x axis, perturbed
+    scoped_ptr<GLSLShader> shader_y_pertuerbed_; // along y axis, ..
+    scoped_ptr<GLSLShader> shader_z_pertuerbed_; // along z axis, ..
     scoped_ptr<CGLFBO> rr_fbo_;     // render result fbo, for calc f
     scoped_ptr<CGLFBO> pr_fbo_;     // perturbed result fbo, for calc g
 
