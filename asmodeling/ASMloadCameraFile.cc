@@ -35,6 +35,8 @@ namespace as_modeling
     tmpptr1 = new Matrix4[num_cameras_];
     camera_gl_extr_paras_.reset(tmpptr1);
     tmpptr1 = new Matrix4[num_cameras_];
+    camera_inv_gl_extr_paras_.reset(tmpptr1);
+    tmpptr1 = new Matrix4[num_cameras_];
     gl_projection_mats_.reset(tmpptr1);
     Vector4 * tmpptr2 = new Vector4[num_cameras_];
     camera_positions_.reset(tmpptr2);
@@ -91,6 +93,10 @@ namespace as_modeling
       trans(1,1) = -1;
       trans(2,2) = -1;
       camera_gl_extr_paras_[i] = trans * camera_extr_paras_[i];
+
+      // set the inverse matrix of gl_extr_para
+      camera_inv_gl_extr_paras_[i] = camera_gl_extr_paras_[i];
+      camera_inv_gl_extr_paras_[i].Inverse();
 
       // calc glProjection mat from intr paras
       float proj[16];

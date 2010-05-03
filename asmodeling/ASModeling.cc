@@ -1,8 +1,7 @@
 #include <cstdio>
 
 #include "ASModeling.h"
-#include "RenderGL.h"
-#include "GradCompute.h"
+
 
 namespace as_modeling
 {
@@ -30,15 +29,16 @@ namespace as_modeling
     ground_truth_images_.assign(num_cameras_);
 
     // init renderer
-    renderer_ = new RenderGL(this);
+    RenderGL * tmprgl = new RenderGL(this);
+    renderer_.reset(tmprgl);
     if (!renderer_->init())
     {
-      delete renderer_;
       return false;
     }
 
     // init gradient computer
-    grad_computer_ = new ASMGradCompute(this);
+    ASMGradCompute * tmpgc = new ASMGradCompute(this);
+    grad_computer_.reset(tmpgc);
 
     // the volume texture should be inited in grad_computer
 

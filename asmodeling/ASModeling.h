@@ -11,6 +11,9 @@
 #include "../L-BFGS-B/ap.h"
 #include "../Utils/math/geomath.h"
 
+#include "RenderGL.h"
+#include "GradCompute.h"
+
 
 namespace as_modeling
 {
@@ -189,6 +192,7 @@ namespace as_modeling
     scoped_array<Matrix4> camera_intr_paras_;
     scoped_array<Matrix4> camera_extr_paras_;
     scoped_array<Matrix4> camera_gl_extr_paras_;
+    scoped_array<Matrix4> camera_inv_gl_extr_paras_;
     scoped_array<Vector4> camera_positions_;
     scoped_array<Matrix4> gl_projection_mats_;
 
@@ -212,9 +216,10 @@ namespace as_modeling
     //  Helper classes for rendering and g computing
     //
     /////////////////////////////////////////////////
-    RenderGL * renderer_;
-    ASMGradCompute * grad_computer_;
+    scoped_ptr<RenderGL> renderer_;
+    scoped_ptr<ASMGradCompute> grad_computer_;
     unsigned int volume_texture_id_;
+    //unsigned int volume_pbo_id_;
 
   };
 } // as_modeling

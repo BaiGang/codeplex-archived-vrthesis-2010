@@ -30,7 +30,9 @@ namespace as_modeling
     int i_level = INITIAL_VOL_LEVEL;
     std::list<float> host_x;
 
-    grad_computer_->init_current_level(i_level);
+    grad_computer_->frame_init(i_level, host_x);
+
+    //grad_computer_->init_current_level(i_level);
 
     ///////////////////////////////////////////////////////////////////////
     //
@@ -79,6 +81,7 @@ namespace as_modeling
     {
       // TODO:
       // subdivide volume and the previous array x
+      
 
       // TODO:
       // optimize routine
@@ -89,6 +92,7 @@ namespace as_modeling
     // TODO:
     // store the resulted volume...
     // maybe use some kind of compression...
+    //grad_computer_->
 
     return true;
   }

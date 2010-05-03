@@ -6,7 +6,8 @@
 #include <list>
 #include <cuda_runtime.h>
 #include <cuda_gl_interop.h>
-#include <>
+//#include "ASModeling.h"
+#include "RenderGL.h"
 #include "../L-BFGS-B/ap.h"
 
 namespace as_modeling{
@@ -20,34 +21,43 @@ namespace as_modeling{
     // for lbfgsbminimize callback
     static void grad_compute(ap::real_1d_array, double&, ap::real_1d_array&);
 
-    // init 3D volume texture
+    // init buffer texture
     // init CUDA
+    bool init();
+
+    // release resources
+    bool release( );
+
+    // get the volume data
+    bool get_data(int &level, scoped_array<float>& data);
+
     // set the initial guess for x
     // construct the volume tags
     // set the projection center for each item
-    void init(int level, std::list<float>& guess_x, std::list<int>& projection_center, int * tag_volume);
+    bool frame_init(int level, std::list<float>& guess_x);
 
-    // release resources
-    void release( );
+    // use previous level result
+    // init the new x
+    bool level_init(int level);
 
+    // use previous frame result
+    // init the new x
+    bool succframe_init(int level);
+
+  private:
     // set the volume tag and projection center for current level
-    void init_current_level(int level);
-    
     // set indicators for the current level
     //  level : curent level
     //  tag_volume : the tags of density volume, volume cell to array index mapping
     //  density : a list of non-zero density values, z-y-x lay out
     //  is_init_density : if true, the density will be set,
     //                    else, just set the tag_volume
-    void set_density_tags(int level, int * tag_volume, std::list<float>& density, bool is_init_density);
+    void set_density_tags(int level, int *tag_volume, std::list<float> &density, std::list<int> &centers, bool is_init_density);
 
-    // Set the density volume
-    // using d_x and pre-generated tag_volume
-    void set_volume(int level, float * d_x);
 
-    // must feed with a ASModeling 
-    explicit ASMGradCompute(ASModeling *p)
-      :p_asmodeling_(p), vol_data(0), tag_volume(0){};
+  public:
+    // must feed with an ASModeling 
+    explicit ASMGradCompute(ASModeling *p);
 
   private:
     // no default constructor
@@ -58,11 +68,36 @@ namespace as_modeling{
 
     // CUDA resources
     cudaGraphicsResource * resource_vol_;
+    cudaStream_t cuda_stream_;
 
-    float * vol_data;
+    // pbo
+    // for cuda access
+    GLuint pbo_;
 
-    int * tag_volume;
+    // buffer texture id
+    GLuint vol_tex_;
 
+    // CUDA host memory
+    float * h_vol_data;
+    int * h_tag_volume;
+    int * h_projected_centers;
+
+    std::list<int> projected_centers;
+
+    // CUDA device memory
+    float * d_vol_data;
+    int * d_projected_centers;
+
+    cudaArray * tag_volume;
+    cudaChannelFormatDesc tag_channel_desc;
+    cudaExtent  tag_vol_extent;
+
+    // texture ref
+    //texture<int, 3, cudaReadModeElementType> *tag_tax_ref;
+    //textureReference * tag_tax_ref;
+
+    /////////////////////////////
+    int num_views;
   };
 
 } // namespace as_modeling

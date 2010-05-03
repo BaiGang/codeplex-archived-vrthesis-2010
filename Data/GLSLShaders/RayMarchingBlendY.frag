@@ -1,6 +1,15 @@
+//////////////////////////////////////////////////////////////////
+//    Implemented based on HU Yong's shader code.
+//
+//  RayMarchingBlendX.frag
+//  Ray marching for alpha blending along Y axis.
+//
+//
+//////////////////////////////////////////////////////////////////
+
 varying vec4 vertexPosEye;  // 视坐标系下的顶点坐标 
 
-uniform ivec4 disturbPara;//M,KU,KV,slice, M体素间隔，KU，KV扰动序号,slice当前切面是否扰动,
+uniform ivec4 disturbPara;//M,KU,KV，isPert： M体素间隔，KU，KV扰动序号,是否扰动
 uniform float fwidth;  //体素分辨率
 uniform float disturb;  // 扰动差分， delta x
 uniform vec3 lightIntensity; // 光强度
@@ -10,8 +19,7 @@ uniform float scatteringCoefficient;  // 参与介质 属性
 uniform vec4 cameraPos;  // 相机位置 （世界坐标系下）
 uniform float stepSize;  // ray marching 的步长
 uniform sampler3D volumeTex;  // 保存体数据的三维纹理的id
-uniform vec3 principalAxis;   // 主轴
-uniform mat4 cameraInv;  // what the heck?
+uniform mat4 cameraInv;  //
 
 const float LOG2E = 1.442695; //1 / log(2)
 const float PI = 3.1415926;
@@ -24,7 +32,7 @@ void main()
   //计算ray
   vec3 raydir = cameraPos.xyz - VertexPosWorld.xyz;	
   raydir = normalize(raydir);
-  float dotProduct = dot(raydir.xyz, principalAxis.xyz);
+  float dotProduct = dot(raydir.xyz, vec3(0.0, 1.0, 0.0));
   //计算当前像素所在视线被平行多边形分割的间距
   float deltaStep = stepSize / abs(dotProduct);
 
@@ -34,51 +42,15 @@ void main()
   //获取密度
   float density = texture3D(volumeTex, gl_TexCoord[0].stp).r;
 
-  int u=0;
-  int v=0;
-  /*	int w=0;
-  u = int(gl_TexCoord[0].t*fwidth);
-  v = int(gl_TexCoord[0].p*fwidth);	
-  w = int(gl_TexCoord[0].s*fwidth);*/
+  int u = int(gl_TexCoord[0].s*fwidth);
+  int v = int(gl_TexCoord[0].p*fwidth);		
 
-
-  if(disturbPara.w == 1)
-  {		
-    u = int(gl_TexCoord[0].t*fwidth);
-    v = int(gl_TexCoord[0].p*fwidth);	
-    u = int(mod(float(u), float(disturbPara.x)));
-    v = int(mod(float(v), float(disturbPara.x)));
-    //u%M==K && v%M==k
-    if(u== disturbPara.y && v == disturbPara.z)
-    {
-      density += disturb;
-    }
-
-  }
-  if(disturbPara.w == 2)
+  u = int(mod(float(u), float(disturbPara.x)));
+  v = int(mod(float(v), float(disturbPara.x)));
+  //u%M==K && v%M==k
+  if(1 == disturbPara.w && u== disturbPara.y && v == disturbPara.z)
   {
-    u = int(gl_TexCoord[0].s*fwidth);
-    v = int(gl_TexCoord[0].p*fwidth);		
-
-    u = int(mod(float(u), float(disturbPara.x)));
-    v = int(mod(float(v), float(disturbPara.x)));
-    //u%M==K && v%M==k
-    if(u== disturbPara.y && v == disturbPara.z)
-    {
-      density += disturb;
-    }
-  }
-  if(disturbPara.w == 3)
-  {
-    u = int(gl_TexCoord[0].s*fwidth);
-    v = int(gl_TexCoord[0].t*fwidth);		
-    u = int(mod(float(u), float(disturbPara.x)));
-    v = int(mod(float(v), float(disturbPara.x)));
-    //u%M==K && v%M==k
-    if(u== disturbPara.y && v == disturbPara.z)
-    {
-      density += disturb;
-    }
+    density += disturb;
   }
 
   if(density < 0.000001)

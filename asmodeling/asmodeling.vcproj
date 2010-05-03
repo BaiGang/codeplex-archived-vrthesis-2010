@@ -65,7 +65,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="TinyXML.lib L-BFGS-B.lib Utils.lib cudart.lib glew32.lib glut32.lib"
+				AdditionalDependencies="glew32.lib glut32.lib TinyXML.lib L-BFGS-B.lib Utils.lib cUtil32.lib cudart.lib"
 				ShowProgress="2"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="$(SolutionDir)\Lib"
@@ -144,7 +144,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="TinyXML.lib L-BFGS-B.lib Utils.lib cudart.lib glew32.lib glut32.lib"
+				AdditionalDependencies="glew32.lib glut32.lib TinyXML.lib L-BFGS-B.lib Utils.lib cUtil32.lib cudart.lib"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="$(SolutionDir)\Lib"
 				GenerateDebugInformation="true"
@@ -276,18 +276,22 @@
 				<File
 					RelativePath=".\cuda_gradcompute.cu"
 					>
-				</File>
-				<File
-					RelativePath=".\cuda_util.cuh"
-					>
-				</File>
-				<File
-					RelativePath=".\grad_compute_cuda.cu"
-					>
-				</File>
-				<File
-					RelativePath=".\StoreVolumeData.cu"
-					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="CUDA Build Rule"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="CUDA Build Rule"
+						/>
+					</FileConfiguration>
 				</File>
 			</Filter>
 		</Filter>
@@ -324,6 +328,34 @@
 			</File>
 			<File
 				RelativePath=".\RenderGL.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="shaders"
+			>
+			<File
+				RelativePath="..\Data\GLSLShaders\RayMarchingBlendX.frag"
+				>
+			</File>
+			<File
+				RelativePath="..\Data\GLSLShaders\RayMarchingBlendXU.frag"
+				>
+			</File>
+			<File
+				RelativePath="..\Data\GLSLShaders\RayMarchingBlendY.frag"
+				>
+			</File>
+			<File
+				RelativePath="..\Data\GLSLShaders\RayMarchingBlendYU.frag"
+				>
+			</File>
+			<File
+				RelativePath="..\Data\GLSLShaders\RayMarchingBlendZ.frag"
+				>
+			</File>
+			<File
+				RelativePath="..\Data\GLSLShaders\RayMarchingBlendZU.frag"
 				>
 			</File>
 		</Filter>
