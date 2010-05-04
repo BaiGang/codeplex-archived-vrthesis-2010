@@ -41,6 +41,10 @@ namespace as_modeling
     Vector4 * tmpptr2 = new Vector4[num_cameras_];
     camera_positions_.reset(tmpptr2);
 
+    char * tmpcam = new char [num_cameras_];
+    camera_orientations_.reset(tmpcam);
+
+
     // for each camera
     for (int i = 0; i < num_cameras_; ++i)
     {
@@ -111,6 +115,48 @@ namespace as_modeling
       proj[11] = -1.0f;
       proj[14] = -2.0f*(zf*zn)/(zf-zn);
       gl_projection_mats_[i].SetMatrix(proj);
+
+      // camera orientations
+      Vector4 dir(
+        camera_positions_[i].x - trans_x_,
+        camera_positions_[i].y - trans_y_,
+        camera_positions_[i].z - trans_z_,
+        1.0
+        );
+
+      dir.normaVec();
+
+      if (abs(dir.x)>abs(dir.y) && abs(dir.x)>abs(dir.z))
+      {
+        // along x
+        if (dir.x < 0.0)
+          camera_orientations_[i] = 'X';
+        else
+          camera_orientations_[i] = 'x';
+      }
+      else if (abs(dir.y)>abs(dir.x) && abs(dir.y)>abs(dir.z))
+      {
+        // along y
+        if (dir.y < 0.0)
+          camera_orientations_[i] = 'Y';
+        else
+          camera_orientations_[i] = 'y';
+
+      }
+      else if (abs(dir.z)>abs(dir.x) && abs(dir.z)>abs(dir.y))
+      {
+        // along z
+        if (dir.z < 0.0)
+          camera_orientations_[i] = 'Z';
+        else
+          camera_orientations_[i] = 'z';
+
+      }
+      else
+      {
+        // should not have been here
+        fprintf(stderr, " ERROR : axis specifying error!\n\n");
+      }
 
     } // for i
 

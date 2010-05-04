@@ -199,6 +199,10 @@ namespace as_modeling
     // number of cameras for capturation
     int num_cameras_;
 
+    // indicates each camera : along axis, 
+    //   CAPITAL charactor for positive orientation
+    scoped_array<char> camera_orientations_;
+
     ////////////////////////////////////////////
     //
     //  Parameters for lbfgsbminimize routine
@@ -218,8 +222,7 @@ namespace as_modeling
     /////////////////////////////////////////////////
     scoped_ptr<RenderGL> renderer_;
     scoped_ptr<ASMGradCompute> grad_computer_;
-    unsigned int volume_texture_id_;
-    //unsigned int volume_pbo_id_;
+
 
   };
 } // as_modeling

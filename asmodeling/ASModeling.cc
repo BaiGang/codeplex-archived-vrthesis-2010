@@ -25,6 +25,8 @@ namespace as_modeling
 
     int num_levels = MAX_VOL_LEVEL - INITIAL_VOL_LEVEL + 1;
     
+
+
     // init image list
     ground_truth_images_.assign(num_cameras_);
 
@@ -40,7 +42,10 @@ namespace as_modeling
     ASMGradCompute * tmpgc = new ASMGradCompute(this);
     grad_computer_.reset(tmpgc);
 
-    // the volume texture should be inited in grad_computer
+    if (!grad_computer_->init())
+    {
+      return false;
+    }
 
     return true;
   }

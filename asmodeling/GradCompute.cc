@@ -122,7 +122,13 @@ namespace as_modeling
   {
     // ground truth images have already been loaded...
 
+    if (h_tag_volume != NULL)
+      delete [] h_tag_volume;
+
     // set initial guess of x using ground truth image
+    set_density_tags(level, h_tag_volume, guess_x, projected_centers_, true);
+
+    // copy data to CUDA
 
     return true;
   }
@@ -131,6 +137,17 @@ namespace as_modeling
   bool ASMGradCompute::succframe_init(int level)
   {
     // init using previous frame's result
+
+    if (h_tag_volume != NULL)
+    {
+      delete [] h_tag_volume;
+    }
+
+    std::list<float> dummy_list;
+
+    set_density_tags(level, h_tag_volume, dummy_list, projected_centers_, false);
+
+    // copy data to CUDA
 
     return true;
   }

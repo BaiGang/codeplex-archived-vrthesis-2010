@@ -82,7 +82,7 @@ namespace as_modeling{
     int * h_tag_volume;
     int * h_projected_centers;
 
-    std::list<int> projected_centers;
+    std::list<int> projected_centers_;
 
     // CUDA device memory
     float * d_vol_data;
