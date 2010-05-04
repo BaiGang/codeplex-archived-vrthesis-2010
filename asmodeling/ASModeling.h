@@ -1,15 +1,13 @@
 #ifndef _AS_MODELING_H_
 #define _AS_MODELING_H_
 
-#include "stdafx.h"
+#include <stdafx.h>
 #include <string>
 #include <list>
-
 #include <scoped_ptr.h>
 #include <CImg.h>
-
-#include "../L-BFGS-B/ap.h"
-#include "../Utils/math/geomath.h"
+#include <ap.h>
+#include <math/geomath.h>
 
 #include "RenderGL.h"
 #include "GradCompute.h"
@@ -221,7 +219,6 @@ namespace as_modeling
     //
     /////////////////////////////////////////////////
     scoped_ptr<RenderGL> renderer_;
-    scoped_ptr<ASMGradCompute> grad_computer_;
 
 
   };

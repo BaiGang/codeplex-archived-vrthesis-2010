@@ -9,12 +9,25 @@
 
 #include "GradCompute.h"
 #include "ASModeling.h"
-#include "../Utils/math/geomath.h"
-#include "../Utils/math/ConvexHull2D.h"
+#include <math/geomath.h>
+#include <math/ConvexHull2D.h>
+
+namespace 
+{
+  void construct_volume_cuda(
+    int level,
+    float * device_x,
+    float * density_vol,
+    int *   tag_vol
+    );
+} // unnamed namespace
 
 namespace as_modeling
 {
-  void ASMGradCompute::grad_compute(ap::real_1d_array x, double &f, ap::real_1d_array &g)
+
+  ASMGradCompute* ASMGradCompute::instance_ = NULL;
+
+  void ASMGradCompute::grad_compute(ap::real_1d_array& x, double &f, ap::real_1d_array &g)
   {
     float * p_device_x = 0;
     float * p_device_g = 0;
@@ -27,8 +40,8 @@ namespace as_modeling
     // alloc size
     size_t size = n * sizeof(float);
 
-    cudaMalloc<float>(&p_device_g, size);
-    cudaMalloc<float>(&p_device_x, size+1);
+    cutilSafeCall( cudaMalloc<float>(&p_device_g, size) );
+    cutilSafeCall( cudaMalloc<float>(&p_device_x, size+1) );
     p_host_g = new float [n];
     p_host_x = new float [n+1];
 
@@ -39,11 +52,30 @@ namespace as_modeling
       p_host_x[i] = x(x.getlowbound()+i-1);
     }
 
-    cudaMemcpy(p_device_x, p_host_x, size+1, cudaMemcpyHostToDevice);
-    cudaMemset(p_device_g, 0, size);
+    // copy to device x
+    cutilSafeCall( cudaMemcpy(p_device_x, p_host_x, size+1, cudaMemcpyHostToDevice) );
+    cutilSafeCall( cudaMemset(p_device_g, 0, size) );
+
+    // map gl graphics resource
+    cutilSafeCall( cudaGraphicsMapResources(1, &(Instance()->resource_vol_)) );
+    cutilSafeCall(
+      cudaGraphicsResourceGetMappedPointer( (void**)&(Instance()->d_vol_bufferptr),
+      &(Instance()->vol_buffer_num_bytes_), Instance()->resource_vol_)
+      );
 
     // construct volume using x[] and voxel tags
     //construct_volume_cuda(p_device_x);
+    //construct_volume_cuda(current_level_, p_device_x, d_tag_volume
+
+
+    // unmap gl graphics resource after writing-to operation
+    cutilSafeCall( cudaGraphicsUnmapResources(1, &Instance()->resource_vol_) );
+
+    
+
+
+    // copy buffer to texture
+
 
     // render to image 1
 
@@ -72,7 +104,7 @@ namespace as_modeling
   } // 
 
 
-  bool get_data(int & level, scoped_array<float>& data)
+  bool ASMGradCompute::get_data(int & level, scoped_array<float>& data)
   {
     int length = 1<<level;
     int size = length * length * length;
@@ -122,13 +154,29 @@ namespace as_modeling
   {
     // ground truth images have already been loaded...
 
-    if (h_tag_volume != NULL)
-      delete [] h_tag_volume;
+    current_level_ = level;
+
+    int length = 1<<level;
+    int size = length * length *length;
 
     // set initial guess of x using ground truth image
     set_density_tags(level, h_tag_volume, guess_x, projected_centers_, true);
 
     // copy data to CUDA
+    h_projected_centers = new int [projected_centers_.size()];
+    int i = 0;
+    for (std::list<int>::const_iterator it = projected_centers_.begin();
+      it != projected_centers_.end();
+      ++i, ++it)
+    {
+      h_projected_centers[i] = *it;
+    }
+    cutilSafeCall( cudaMalloc<int>(&d_tag_volume, sizeof(int)*size) );
+    cutilSafeCall( cudaMalloc<int>(&d_projected_centers, sizeof(int)*projected_centers_.size()) );
+    cutilSafeCall( cudaMemcpy(d_projected_centers, h_projected_centers, sizeof(int)*projected_centers_.size(), cudaMemcpyHostToDevice));
+    cutilSafeCall( cudaMemcpy(d_tag_volume, h_tag_volume, sizeof(int)*size, cudaMemcpyHostToDevice) );
+    delete [] h_projected_centers;
+    delete [] h_tag_volume;
 
     return true;
   }
@@ -137,11 +185,7 @@ namespace as_modeling
   bool ASMGradCompute::succframe_init(int level)
   {
     // init using previous frame's result
-
-    if (h_tag_volume != NULL)
-    {
-      delete [] h_tag_volume;
-    }
+    current_level_ = level;
 
     std::list<float> dummy_list;
 
@@ -154,13 +198,40 @@ namespace as_modeling
 
   bool ASMGradCompute::level_init(int level)
   {
+    current_level_ = level;
+
+    int length = 1<<level;
+    int size = length * length *length;
+
+    std::list<float> dummy_list;
+
+    set_density_tags(level, h_tag_volume, dummy_list, projected_centers_, FALSE);
+
+    // copy data to CUDA
+    cutilSafeCall( cudaFree(d_tag_volume) );
+    cutilSafeCall( cudaFree(d_projected_centers) );
+
+    h_projected_centers = new int [projected_centers_.size()];
+    int i = 0;
+    for (std::list<int>::const_iterator it = projected_centers_.begin();
+      it != projected_centers_.end();
+      ++i, ++it)
+    {
+      h_projected_centers[i] = *it;
+    }
+    cutilSafeCall( cudaMalloc<int>(&d_tag_volume, sizeof(int)*size) );
+    cutilSafeCall( cudaMalloc<int>(&d_projected_centers, sizeof(int)*projected_centers_.size()) );
+    cutilSafeCall( cudaMemcpy(d_projected_centers, h_projected_centers, sizeof(int)*projected_centers_.size(), cudaMemcpyHostToDevice));
+    cutilSafeCall( cudaMemcpy(d_tag_volume, h_tag_volume, sizeof(int)*size, cudaMemcpyHostToDevice) );
+    delete [] h_projected_centers;
+    delete [] h_tag_volume;
+
     return true;
   }
 
   bool ASMGradCompute::release(void)
   {
-    cudaGraphicsUnregisterResource(resource_vol_);
-
+    cutilSafeCall(cudaGraphicsUnregisterResource(resource_vol_));
     
     return true;
   }
@@ -320,8 +391,11 @@ namespace as_modeling
 
   }
 
+  void ASMGradCompute::set_asmodeling(ASModeling *p)
+  {
+    p_asmodeling_ = p;
+    num_views = p->num_cameras_;
+  }
 
-  ASMGradCompute::ASMGradCompute(as_modeling::ASModeling *p)
-      :p_asmodeling_(p), h_vol_data(0), h_tag_volume(0), num_views(p->num_cameras_){};
 
 } // namespace as_modeling

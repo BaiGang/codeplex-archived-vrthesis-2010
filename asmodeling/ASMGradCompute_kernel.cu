@@ -1,6 +1,0 @@
-#ifndef __ASM_GRAD_COMPUTE_KERNEL_CU_
-#define __ASM_GRAD_COMPUTE_KERNEL_CU_
-
-
-
-#endif //__ASM_GRAD_COMPUTE_KERNEL_CU_

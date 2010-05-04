@@ -2,7 +2,7 @@
 
 #include "ASModeling.h"
 #include "GradCompute.h"
-#include "../L-BFGS-B/lbfgsb.h"
+#include <lbfgsb.h>
 
 ////////////////////////////////////////////////////////////
 //
@@ -30,7 +30,7 @@ namespace as_modeling
     int i_level = INITIAL_VOL_LEVEL;
     std::list<float> host_x;
 
-    grad_computer_->frame_init(i_level, host_x);
+    ASMGradCompute::Instance()->frame_init(i_level, host_x);
 
     //grad_computer_->init_current_level(i_level);
 

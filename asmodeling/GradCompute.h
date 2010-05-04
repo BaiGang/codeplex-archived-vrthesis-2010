@@ -19,7 +19,17 @@ namespace as_modeling{
   public:
 
     // for lbfgsbminimize callback
-    static void grad_compute(ap::real_1d_array, double&, ap::real_1d_array&);
+    static void grad_compute(ap::real_1d_array&, double&, ap::real_1d_array&);
+
+    // Singleton pattern 
+    static inline ASMGradCompute* Instance( )
+    {
+      if (NULL == instance_)
+      {
+        instance_ = new ASMGradCompute();
+      }
+      return instance_;
+    }
 
     // init buffer texture
     // init CUDA
@@ -57,11 +67,15 @@ namespace as_modeling{
 
   public:
     // must feed with an ASModeling 
-    explicit ASMGradCompute(ASModeling *p);
+    void set_asmodeling(ASModeling *p);
+    ~ASMGradCompute(){delete instance_;}
 
   private:
+
     // no default constructor
     ASMGradCompute(){};
+
+    static ASMGradCompute * instance_;
 
     // pointer to the caller ASModeling object
     ASModeling * p_asmodeling_;
@@ -77,6 +91,9 @@ namespace as_modeling{
     // buffer texture id
     GLuint vol_tex_;
 
+    // 
+    int current_level_;
+
     // CUDA host memory
     float * h_vol_data;
     int * h_tag_volume;
@@ -87,10 +104,13 @@ namespace as_modeling{
     // CUDA device memory
     float * d_vol_data;
     int * d_projected_centers;
+    int * d_tag_volume;
+    float * d_vol_bufferptr;
+    size_t vol_buffer_num_bytes_;
 
-    cudaArray * tag_volume;
-    cudaChannelFormatDesc tag_channel_desc;
-    cudaExtent  tag_vol_extent;
+    //cudaArray * tag_volume;
+    //cudaChannelFormatDesc tag_channel_desc;
+    //cudaExtent  tag_vol_extent;
 
     // texture ref
     //texture<int, 3, cudaReadModeElementType> *tag_tax_ref;
@@ -100,6 +120,9 @@ namespace as_modeling{
     int num_views;
   };
 
+  //ASMGradCompute::instance_ = NULL;
+
 } // namespace as_modeling
 
 #endif //_GRAD_COMPUTE_H_
+

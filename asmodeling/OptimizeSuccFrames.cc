@@ -1,6 +1,6 @@
 #include "ASModeling.h"
 #include "GradCompute.h"
-#include "../L-BFGS-B/lbfgsb.h"
+#include <lbfgsb.h>
 
 namespace as_modeling
 {
@@ -17,7 +17,7 @@ namespace as_modeling
     //  x_pre
 
     // init the grad_computer
-    grad_computer_->succframe_init(MAX_VOL_LEVEL);
+    ASMGradCompute::Instance()->succframe_init(MAX_VOL_LEVEL);
 
     // calc x using previous x and volume tag
     // x

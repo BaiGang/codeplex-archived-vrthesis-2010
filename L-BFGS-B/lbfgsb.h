@@ -131,7 +131,7 @@ void lbfgsbminimize(const int& n,
      const ap::real_1d_array& l,
      const ap::real_1d_array& u,
      int& info,
-     void (*funcgrad)(ap::real_1d_array , double& , ap::real_1d_array& ));
+     void (*funcgrad)(ap::real_1d_array& , double& , ap::real_1d_array& ));
 
 
 #endif
