@@ -35,12 +35,6 @@ namespace as_modeling
   //
   //=======================================================
 
-  //
-  //  Note we must make clear which of those member varaibles 
-  //  are constant for all frames and which are distinct
-  //  for each frame.
-  //  Carry on...
-  //
 
   class ASModeling
   {

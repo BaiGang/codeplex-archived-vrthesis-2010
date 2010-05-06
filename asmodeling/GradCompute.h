@@ -48,7 +48,7 @@ namespace as_modeling{
 
     // use previous level result
     // init the new x
-    bool level_init(int level);
+    bool level_init(int level, std::list<float>& guess_x);
 
     // use previous frame result
     // init the new x
@@ -101,12 +101,24 @@ namespace as_modeling{
 
     std::list<int> projected_centers_;
 
+    // for lbfgsb routine
+    float * p_host_x;
+    float * p_host_g;
+
+
     // CUDA device memory
     float * d_vol_data;
     int * d_projected_centers;
     int * d_tag_volume;
+
+    cudaArray * vol_tex_cudaArray;
+
     float * d_vol_bufferptr;
     size_t vol_buffer_num_bytes_;
+
+    // for lbfgsb routine
+    float * p_device_x;
+    float * p_device_g;
 
     //cudaArray * tag_volume;
     //cudaChannelFormatDesc tag_channel_desc;
