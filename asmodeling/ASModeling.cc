@@ -29,13 +29,6 @@ namespace as_modeling
     // init image list
     ground_truth_images_.assign(num_cameras_);
 
-    // init renderer
-    RenderGL * tmprgl = new RenderGL(this);
-    renderer_.reset(tmprgl);
-    if (!renderer_->init())
-    {
-      return false;
-    }
 
     // init gradient computer
     //ASMGradCompute * tmpgc = new ASMGradCompute(this);

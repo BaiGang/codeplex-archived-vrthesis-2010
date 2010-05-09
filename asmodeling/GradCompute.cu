@@ -11,29 +11,41 @@ __device__ int index3(int i, int j, int k, int length)
 //  Reconstruct the volume on the cuda
 //
 /////////////////////////////////////////////////////////////////////////////////////////////////////
-__global__ void construct_volume(float * density_vol, float * device_x, int * tag_vol)
+__global__ void construct_volume(
+                                 cudaPitchedPtr vol_pptr, 
+                                 float * device_x, 
+                                 int * tag_vol
+                                 )
 {
-  unsigned int k = blockIdx.x;
-  unsigned int j = threadIdx.y;
-  unsigned int i = threadIdx.x;
+  // z = blockDim.x
+  // y = threadDim.y
+  // x = threadDim.x
+  // slice_pitch = pitch * height
+  // slice = ptr + z * slice_pitch
+  // row = (type*)(slice + y*pitch)
+  // elem = *(row + x)
 
-  int index = index3(i, j, k, blockDim.x);
-  density_vol[index] = device_x[ tag_vol[index] ];
+  int index = index3(threadIdx.x, threadIdx.y, blockIdx.x, blockDim.x);
+
+  char * slice = (char *)vol_pptr.ptr + blockIdx.x * vol_pptr.pitch * blockDim.x;
+
+  *((float*)(slice+threadIdx.y*vol_pptr.pitch) + threadIdx.x)
+    = device_x[ tag_vol[index] ];
+
 }
 void construct_volume_cuda(
-                           int level,
                            float * device_x,
-                           float * density_vol,
+                           cudaPitchedPtr * density_vol,
+                           cudaExtent extent,
                            int *   tag_vol
                            )
 {
-  int length = 1<<level;
 
-  dim3 grid_dim(length, 1, 1);
-  dim3 block_dim(length, length, 1);
+  dim3 grid_dim(extent.depth, 1, 1);
+  dim3 block_dim(extent.width, extent.height, 1);
 
   construct_volume<<< grid_dim, block_dim >>>(
-    density_vol,
+    *density_vol,
     device_x,
     tag_vol
     );
@@ -45,34 +57,51 @@ void construct_volume_cuda(
 //
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-__global__ void upsample_volume(float * i_lower, float * o_upper, int scale)
+__global__ void upsample_volume(
+                                cudaPitchedPtr pptr_lower,
+                                cudaExtent     extent_lower,
+                                cudaPitchedPtr pptr_higher
+                                )
 {
+  // for higher level volume
   unsigned int k = blockIdx.x;
   unsigned int j = threadIdx.y;
   unsigned int i = threadIdx.x;
 
-  unsigned int index_upper = index3(i, j, k, blockDim.x);
-  unsigned int index_lower = index3( i/scale, j/scale, k/scale, blockDim.x/scale );
+  int scale = blockDim.x / extent_lower.depth;
 
-  o_upper[index_upper] = i_lower[index_lower];
+  char * slice = (char*)pptr_higher.ptr + k*pptr_higher.pitch*blockDim.x;
+  float *p_higher = (float*)(slice + j*pptr_higher.pitch) + i;
+
+
+  k /= scale;
+  j /= scale;
+  k /= scale;
+
+  slice = (char*)pptr_lower.ptr + k*pptr_lower.pitch*extent_lower.depth;
+  float *p_lower  = (float*)(slice + j*pptr_lower.pitch) + i;
+
+  *p_higher = *p_lower;
 }
 void upsample_volume_cuda(
                           int level,
                           int max_level,
-                          float * lower_lev,
-                          float * upper_lev
+                          cudaPitchedPtr * lower_lev,
+                          cudaPitchedPtr * upper_lev
                           )
 {
-  int scale = 1<<(max_level - level);
+  int length = 1 << level;
   int max_length = 1 << max_level;
 
   dim3 grid_dim(max_length, 1, 1);
   dim3 block_dim(max_length, max_length, 1);
 
+  cudaExtent ext_low = make_cudaExtent(length, length, length);
+
   upsample_volume<<< grid_dim, block_dim >>>(
-    lower_lev,
-    upper_lev,
-    scale
+    *lower_lev,
+    ext_low,
+    *upper_lev
     );
 }
 

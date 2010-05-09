@@ -79,7 +79,6 @@ namespace as_modeling
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
 
-    // NOTE : 这里要考虑好。
     glBlendFuncSeparate(GL_DST_ALPHA, GL_ONE, GL_DST_ALPHA, GL_ZERO);
 
     return true;

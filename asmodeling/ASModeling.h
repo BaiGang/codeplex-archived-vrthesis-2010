@@ -9,7 +9,6 @@
 #include <ap.h>
 #include <math/geomath.h>
 
-#include "RenderGL.h"
 #include "GradCompute.h"
 
 
@@ -206,14 +205,6 @@ namespace as_modeling
     ap::integer_1d_array lbfgsb_nbd_;
     ap::real_1d_array    lbfgsb_l_;
     ap::real_1d_array    lbfgsb_u_;
-
-    /////////////////////////////////////////////////
-    //
-    //  Helper classes for rendering and g computing
-    //
-    /////////////////////////////////////////////////
-    scoped_ptr<RenderGL> renderer_;
-
 
   };
 } // as_modeling

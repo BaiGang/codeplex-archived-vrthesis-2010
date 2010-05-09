@@ -4,10 +4,12 @@
 #include <cstdlib>
 #include <cstdio>
 #include <list>
+
+#include "RenderGL.h"
+
 #include <cuda_runtime.h>
 #include <cuda_gl_interop.h>
-//#include "ASModeling.h"
-#include "RenderGL.h"
+
 #include "../L-BFGS-B/ap.h"
 
 namespace as_modeling{
@@ -19,7 +21,7 @@ namespace as_modeling{
   public:
 
     // for lbfgsbminimize callback
-    static void grad_compute(ap::real_1d_array&, double&, ap::real_1d_array&);
+    static void grad_compute(const ap::real_1d_array&, double&, ap::real_1d_array&);
 
     // Singleton pattern 
     static inline ASMGradCompute* Instance( )
@@ -67,8 +69,12 @@ namespace as_modeling{
 
   public:
     // must feed with an ASModeling 
-    void set_asmodeling(ASModeling *p);
-    ~ASMGradCompute(){delete instance_;}
+    bool set_asmodeling(ASModeling *p);
+    ~ASMGradCompute()
+    {
+      delete instance_;
+      delete renderer_;
+    }
 
   private:
 
@@ -80,8 +86,14 @@ namespace as_modeling{
     // pointer to the caller ASModeling object
     ASModeling * p_asmodeling_;
 
+    // Renderer
+    RenderGL * renderer_;
+
     // CUDA resources
     cudaGraphicsResource * resource_vol_;
+    cudaGraphicsResource * resource_rr_;
+    cudaGraphicsResource * resource_pr_;
+
     cudaStream_t cuda_stream_;
 
     // pbo
@@ -105,13 +117,19 @@ namespace as_modeling{
     float * p_host_x;
     float * p_host_g;
 
-
     // CUDA device memory
-    float * d_vol_data;
+
+    cudaPitchedPtr * d_vol_pitchedptr;
+    cudaExtent       vol_extent;
+    cudaPitchedPtr * d_full_vol_pptr;
+    cudaExtent       full_vol_extent;
+
     int * d_projected_centers;
     int * d_tag_volume;
 
     cudaArray * vol_tex_cudaArray;
+    cudaArray * rr_tex_cudaArray;
+    cudaArray * pr_tex_cudaArray;
 
     float * d_vol_bufferptr;
     size_t vol_buffer_num_bytes_;
@@ -119,14 +137,6 @@ namespace as_modeling{
     // for lbfgsb routine
     float * p_device_x;
     float * p_device_g;
-
-    //cudaArray * tag_volume;
-    //cudaChannelFormatDesc tag_channel_desc;
-    //cudaExtent  tag_vol_extent;
-
-    // texture ref
-    //texture<int, 3, cudaReadModeElementType> *tag_tax_ref;
-    //textureReference * tag_tax_ref;
 
     /////////////////////////////
     int num_views;
