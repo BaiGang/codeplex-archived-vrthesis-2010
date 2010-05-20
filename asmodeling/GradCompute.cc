@@ -233,46 +233,22 @@ namespace as_modeling
   }
 
 
-  bool ASMGradCompute::set_ground_truth_images(cimg_library::CImgList<unsigned char>& gt_images)
+  bool ASMGradCompute::set_ground_truth_images(cuda_imageutil::Image_4c8u& gt_images)
   {
-    using namespace cimg_library;
-    typedef CImgList<unsigned char> image_list;
-
-
-    unsigned char * raw_image;   // c3, c-h-w layout
-    cudaPitchedPtr  image_pptr;  // c4, h-w-c layout
-    cudaExtent      image_extent = make_cudaExtent(p_asmodeling_->width_*4*sizeof(unsigned char), p_asmodeling_->height_, num_views);
-    size_t          raw_size = p_asmodeling_->width_ * p_asmodeling_->height_*3*sizeof(unsigned char);
-
-    // alloc for data and plus one for swap space
-    cutilSafeCall( cudaMalloc<unsigned char>(&raw_image, raw_size) );
-    cutilSafeCall( cudaMalloc3D(&image_pptr, image_extent) );
-
-    cutilSafeCall (cudaGetLastError() );
-
-    // UNKNOWN ERROR
-    // 20100520
-
-    int iimg = 0;
-    for (image_list::iterator it = gt_images.begin();
-      it != gt_images.end(); ++it, ++iimg)
-    {
-      cutilSafeCall( cudaMemcpy(raw_image, it->data, raw_size, cudaMemcpyHostToDevice) );
-      change_image_layout_cuda(raw_image, &image_pptr, &image_extent, p_asmodeling_->width_, p_asmodeling_->height_, iimg);
-    }
-
     cudaMemcpy3DParms param = {0};
-    param.srcPtr   = image_pptr;
+    param.srcPtr   = make_cudaPitchedPtr(gt_images.GetPixelAt(0,0), 
+      p_asmodeling_->width_*4*sizeof(unsigned char),
+      p_asmodeling_->width_,
+      num_views * p_asmodeling_->height_ );
+
     param.dstArray = gt_tex_cudaArray;
     param.extent   = gt_cudaArray_extent;
-    param.kind     = cudaMemcpyDeviceToDevice;
+    param.kind     = cudaMemcpyHostToDevice;
 
+    // ERROR -- 20100520 --002
     cutilSafeCall( cudaMemcpy3D(&param) );
 
     bind_gttex_cuda( gt_tex_cudaArray );
-
-    cutilSafeCall( cudaFree(raw_image) );
-    cutilSafeCall( cudaFree(image_pptr.ptr) );
 
     return true;
   }
@@ -582,12 +558,14 @@ namespace as_modeling
           // number of pixels that are not zero valued
           int n_effective_pixels = 0;
           // sum of the values of all non-zero pixels
-          float luminance_sum = 0.0f;
+          unsigned int luminance_sum = 0;
 
           // for each camera
           for (int i_camera = 0; i_camera < p_asmodeling_->num_cameras_; ++i_camera)
           {
             pts.clear();
+
+            int zbase = i_camera*p_asmodeling_->height_;
 
             // calc the projected pixel of the current cell 
             Vector4 cwc;
@@ -647,16 +625,15 @@ namespace as_modeling
             {
               for (int uu = static_cast<int>(x_min); uu < static_cast<int>(x_max+0.5f); ++uu)
               {
-                // IMAGE TYPE NOT SPECIFIED YET
-                float pix = p_asmodeling_->ground_truth_images_(i_camera, uu, vv);
-                if (pix > 0.0f && tmpConvexHull.IfInConvexHull(uu*1.0f, vv*1.0f))  // *1.0f to make the compiler happy
+                // Currently only R channel
+                unsigned char pix = *(p_asmodeling_->ground_truth_image_.GetPixelAt(uu,vv+zbase));
+                if (pix > 0 && tmpConvexHull.IfInConvexHull(uu*1.0f, vv*1.0f))  // *1.0f to make the compiler happy
                 {
                   ++ n_effective_pixels;
                   luminance_sum += pix;
                 }
               }
             }
-
           } // for i_camera
 
           if (n_effective_pixels != 0)
@@ -666,7 +643,7 @@ namespace as_modeling
             tag_volume[vol_index] = tag_index;
 
             if (is_init_density)
-              density.push_back( luminance_sum / static_cast<float>(n_effective_pixels) );
+              density.push_back( static_cast<float>(luminance_sum) / (255.0f*n_effective_pixels) );
           }
         } // for i
       } // for j

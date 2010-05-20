@@ -46,7 +46,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)\Inc&quot;; ../TinyXML; ../Utils;../L-BFGS-B"
+				AdditionalIncludeDirectories="../CudaImageUtil;&quot;$(SolutionDir)\Inc&quot;;../TinyXML;../Utils;&quot;../L-BFGS-B&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -65,7 +65,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="TinyXML.lib L-BFGS-B.lib Utils.lib glut32.lib glew32.lib cudart.lib cUtil32.lib"
+				AdditionalDependencies="TinyXML.lib CudaImageUtil.lib L-BFGS-B.lib Utils.lib glut32.lib glew32.lib cudart.lib cUtil32.lib"
 				ShowProgress="2"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="$(SolutionDir)\Lib"
@@ -126,7 +126,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="2"
 				EnableIntrinsicFunctions="true"
-				AdditionalIncludeDirectories="&quot;$(SolutionDir)\Inc&quot;; ../TinyXML; ../Utils;../L-BFGS-B"
+				AdditionalIncludeDirectories="../CudaImageUtil;&quot;$(SolutionDir)\Inc&quot;;../TinyXML;../Utils;&quot;../L-BFGS-B&quot;"
 				PreprocessorDefinitions="WIN32;_CONSOLE"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
@@ -144,7 +144,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="TinyXML.lib L-BFGS-B.lib Utils.lib glut32.lib glew32.lib cudart.lib cUtil32.lib"
+				AdditionalDependencies="TinyXML.lib CudaImageUtil.lib L-BFGS-B.lib Utils.lib glut32.lib glew32.lib cudart.lib cUtil32.lib"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="$(SolutionDir)\Lib"
 				GenerateDebugInformation="true"

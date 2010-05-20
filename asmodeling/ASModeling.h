@@ -5,9 +5,9 @@
 #include <string>
 #include <list>
 #include <scoped_ptr.h>
-#include <CImg.h>
 #include <ap.h>
 #include <math/geomath.h>
+#include <CudaImgUtilBMP.h>
 
 #include "GradCompute.h"
 
@@ -104,8 +104,7 @@ namespace as_modeling
     ////////////////////////////////////////////
 
     // captured images  
-    cimg_library::CImgList<unsigned char> ground_truth_images_;
-
+    cuda_imageutil::Image_4c8u ground_truth_image_;
 
     // density field result
     scoped_array<float> frame_volume_result_;

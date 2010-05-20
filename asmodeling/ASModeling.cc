@@ -67,14 +67,17 @@ namespace as_modeling
       {
         // should not have been here
         fprintf(stderr, " ERROR : axis specifying error!\n\n");
+        return false;
       }
     }
 
     // init image list
     // num_cameras images
-    // depth dimension   : 1
-    // channels of color : 3
-    ground_truth_images_.assign(num_cameras_,width_,height_,1,3);
+    if (!ground_truth_image_.SetSizes(width_, height_*num_cameras_))
+    {
+      fprintf(stderr, " ERROR : alloc space for ground image error!\n\n");
+      return false;
+    }
 
     // init gradient computer
     ASMGradCompute::Instance()->set_asmodeling(this);

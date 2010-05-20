@@ -5,14 +5,13 @@
 #include <cstdio>
 #include <list>
 
-#include <CImg.h>
-
 #include "RenderGL.h"  // glew.h must be loaded befor gl.h
 
 #include <cuda_runtime.h>
 #include <cuda_gl_interop.h>
 
 #include "../L-BFGS-B/ap.h"
+#include "../CudaImageUtil/CudaImgUtil.h"
 
 namespace as_modeling{
 
@@ -46,8 +45,7 @@ namespace as_modeling{
     bool get_data(int &level, scoped_array<float>& data);
 
     // set the loaded ground truth images
-
-    bool set_ground_truth_images(cimg_library::CImgList<unsigned char> & gt_images);
+    bool set_ground_truth_images(cuda_imageutil::Image_4c8u& gt_images);
 
     // set the initial guess for x
     // construct the volume tags
