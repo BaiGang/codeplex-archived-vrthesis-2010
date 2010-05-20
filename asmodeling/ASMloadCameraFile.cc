@@ -41,10 +41,6 @@ namespace as_modeling
     Vector4 * tmpptr2 = new Vector4[num_cameras_];
     camera_positions_.reset(tmpptr2);
 
-    char * tmpcam = new char [num_cameras_];
-    camera_orientations_.reset(tmpcam);
-
-
     // for each camera
     for (int i = 0; i < num_cameras_; ++i)
     {
@@ -116,51 +112,73 @@ namespace as_modeling
       proj[14] = -2.0f*(zf*zn)/(zf-zn);
       gl_projection_mats_[i].SetMatrix(proj);
 
-      // camera orientations
-      Vector4 dir(
-        camera_positions_[i].x - trans_x_,
-        camera_positions_[i].y - trans_y_,
-        camera_positions_[i].z - trans_z_,
-        1.0
-        );
-
-      dir.normaVec();
-
-      if (abs(dir.x)>abs(dir.y) && abs(dir.x)>abs(dir.z))
-      {
-        // along x
-        if (dir.x < 0.0)
-          camera_orientations_[i] = 'X';
-        else
-          camera_orientations_[i] = 'x';
-      }
-      else if (abs(dir.y)>abs(dir.x) && abs(dir.y)>abs(dir.z))
-      {
-        // along y
-        if (dir.y < 0.0)
-          camera_orientations_[i] = 'Y';
-        else
-          camera_orientations_[i] = 'y';
-
-      }
-      else if (abs(dir.z)>abs(dir.x) && abs(dir.z)>abs(dir.y))
-      {
-        // along z
-        if (dir.z < 0.0)
-          camera_orientations_[i] = 'Z';
-        else
-          camera_orientations_[i] = 'z';
-
-      }
-      else
-      {
-        // should not have been here
-        fprintf(stderr, " ERROR : axis specifying error!\n\n");
-      }
 
     } // for i
 
     fclose(fp);
+
+#if 0
+    // for testing
+    FILE *debug = fopen("../Data/debug_camera.txt", "w");
+    for (int i = 0; i < num_cameras_; ++i)
+    {
+      // intr para
+
+      for(int j=0; j<4;++j)
+      {
+        for (int k=0; k<4;++k)
+        {
+          fprintf(debug, "%f  ", camera_intr_paras_[i](j,k));
+        }
+        fprintf(debug, "\n");
+      }
+      fprintf(debug, "\n");
+
+
+      // extr para
+
+      for(int j=0; j<4;++j)
+      {
+        for (int k=0; k<4;++k)
+        {
+          fprintf(debug, "%f  ", camera_extr_paras_[i](j,k));
+        }
+        fprintf(debug, "\n");
+      }
+      fprintf(debug, "\n");
+
+      // gl extr para
+      for(int j=0; j<4;++j)
+      {
+        for (int k=0; k<4;++k)
+        {
+          fprintf(debug, "%f  ", camera_gl_extr_paras_[i](j,k));
+        }
+        fprintf(debug, "\n");
+      }
+      fprintf(debug, "\n");
+      // camera position
+
+      for(int j=0; j<4; ++j)
+      {
+        fprintf(debug, "%f  ", camera_positions_[i][j]);
+      }
+      fprintf(debug, "\n");
+
+      // inverse gl extr para
+      Matrix4 mulres = camera_gl_extr_paras_[i] * camera_inv_gl_extr_paras_[i];
+      for(int j=0; j<4; ++j)
+      {
+        for(int k=0; k<4;++k)
+        {
+          fprintf(debug, "%f  ", mulres(j,k));
+        }
+        fprintf(debug, "\n");
+      }
+
+    } // for i
+#endif
+
     return true;
   }
 

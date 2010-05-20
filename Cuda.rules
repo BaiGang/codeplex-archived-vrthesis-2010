@@ -109,7 +109,7 @@
 				<EnumProperty
 					Name="Arch1"
 					DisplayName="GPU Architecture (1)"
-					Description="Select GPU architecture (1) to use on the command line (-arch sm_10, sm_11, sm_12, sm_13, sm_20)"
+					Description="Select GPU architecture (1) to use on the command line (-arch sm_10)"
 					DefaultValue="10"
 					>
 					<Values>
@@ -148,7 +148,7 @@
 				<EnumProperty
 					Name="Arch2"
 					DisplayName="GPU Architecture (2)"
-					Description="Select GPU architecture (2) to use on the command line (-arch sm_10, sm_11, sm_12, sm_13, sm_20)"
+					Description="Select GPU architecture (2) to use on the command line (-arch sm_10)"
 					DefaultValue="20"
 					>
 					<Values>
@@ -187,7 +187,7 @@
 				<EnumProperty
 					Name="Arch3"
 					DisplayName="GPU Architecture (3)"
-					Description="Select GPU architecture (3) to use on the command line (-arch sm_10, sm_11, sm_12, sm_13, sm_20)"
+					Description="Select GPU architecture (3) to use on the command line (-arch sm_10)"
 					DefaultValue="0"
 					>
 					<Values>

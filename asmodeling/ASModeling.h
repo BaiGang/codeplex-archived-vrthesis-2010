@@ -34,7 +34,6 @@ namespace as_modeling
   //
   //=======================================================
 
-
   class ASModeling
   {
   public:
@@ -80,11 +79,10 @@ namespace as_modeling
     ///////////////////////////////////////////////////
     // consts
     ///////////////////////////////////////////////////
-    static const int MAX_NUM_CAMERAS     = 64; // relatively very large, we typically use 8 cameras
     static const int INITIAL_VOL_SIZE    = 32;
-    static const int MAX_VOL_SIZE        = 256;
+    static const int MAX_VOL_SIZE        = 128;
     static const int INITIAL_VOL_LEVEL   = 5;
-    static const int MAX_VOL_LEVEL       = 8;
+    static const int MAX_VOL_LEVEL       = 7;
 
     ////////////////////////////////////////////////////
     //               helper routines
@@ -92,7 +90,6 @@ namespace as_modeling
     bool load_camera_file(const char * filename);
     bool load_configure_file(const char * filename);
     bool load_captured_images(int iframe);
-
 
     // convert (x,y,z) to index
     inline int index3(int x, int y, int z, int length)
@@ -107,12 +104,12 @@ namespace as_modeling
     ////////////////////////////////////////////
 
     // captured images  
-    cimg_library::CImgList<float> ground_truth_images_;
+    cimg_library::CImgList<unsigned char> ground_truth_images_;
 
 
     // density field result
-    scoped_array< float > frame_volume_result_;
-    scoped_array< float > frame_compressed_result_;
+    scoped_array<float> frame_volume_result_;
+    scoped_array<float> frame_compressed_result_;
 
     //////////////////////////////////////////////
     // ALL CONFIGURE PARAMETERS

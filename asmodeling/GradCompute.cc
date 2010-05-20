@@ -15,19 +15,38 @@
 /////////////////////////////////////////////
 //   Forward declarations
 /////////////////////////////////////////////
-void construct_volume_cuda(
-                           float * device_x,
+void construct_volume_cuda(float * device_x,
                            cudaPitchedPtr * density_vol,
                            cudaExtent extent,
-                           int *   tag_vol
-                           );
+                           int *   tag_vol );
 
-void upsample_volume_cuda(
-                          int level,
+void upsample_volume_cuda(int level,
                           int max_level,
                           cudaPitchedPtr * lower_lev,
-                          cudaPitchedPtr * upper_lev
-                          );
+                          cudaPitchedPtr * upper_lev );
+
+void bind_rrtex_cuda(cudaArray*);
+void bind_prtex_cuda(cudaArray*);
+void bind_gttex_cuda(cudaArray*);
+
+void change_image_layout_cuda(unsigned char * raw_image,
+                              cudaPitchedPtr * image_pptr,
+                              cudaExtent * extent,
+                              int width,
+                              int height,
+                              int iview );
+
+float calculate_f_cuda(int    level, 
+                       int    i_view, 
+                       int    n_view,
+                       int    n_nonzero_items,
+                       int    interval,
+                       int*   projected_centers, 
+                       int*   vol_tag,
+                       float* f_array,
+                       float* sum_array );
+
+void calculate_g_cuda(int, int*, float*, float*);
 /////////////////////////////////////////////
 
 
@@ -72,50 +91,46 @@ namespace as_modeling
       0,
       0) );
 
-    // construct volume using x[] and voxel tags
-
-    construct_volume_cuda(
-      Instance()->p_device_x,
-      Instance()->d_vol_pitchedptr,
-      Instance()->vol_extent,
-      Instance()->d_tag_volume
-      );
 
     // we need to upsample the low-resolution volume
     // to full resolution for rendering
     if (Instance()->current_level_ != ASModeling::MAX_VOL_LEVEL)
     {
-      // upsampling, then copy
+      // construct volume using x[] and voxel tags
+      construct_volume_cuda(
+        Instance()->p_device_x,
+        &(Instance()->d_vol_pitchedptr),
+        Instance()->vol_extent,
+        Instance()->d_tag_volume
+        );
 
+      // upsampling
       upsample_volume_cuda(
         Instance()->current_level_,
         ASModeling::MAX_VOL_LEVEL,
-        Instance()->d_vol_pitchedptr,
-        Instance()->d_full_vol_pptr
+        &(Instance()->d_vol_pitchedptr),
+        &(Instance()->d_full_vol_pptr)
         );
-
-
-      // copy 
-      cudaMemcpy3DParms param = {0};
-      param.dstArray = Instance()->vol_tex_cudaArray;
-      param.srcPtr   =*Instance()->d_full_vol_pptr;
-      param.extent   = Instance()->full_vol_extent;
-      param.kind     = cudaMemcpyDeviceToDevice;
-      
-      cutilSafeCall( cudaMemcpy3D(&param) );
-
     }
     else
     {
-      // direct copy, without upsampling
-      cudaMemcpy3DParms param = {0};
-      param.dstArray = Instance()->vol_tex_cudaArray;
-      param.srcPtr   =*Instance()->d_vol_pitchedptr;
-      param.extent   = Instance()->full_vol_extent;
-      param.kind     = cudaMemcpyDeviceToDevice;
-
-      cutilSafeCall( cudaMemcpy3D(&param) );
+      // construct volume using x[] and voxel tags
+      construct_volume_cuda(
+        Instance()->p_device_x,
+        &(Instance()->d_full_vol_pptr),
+        Instance()->full_vol_extent,
+        Instance()->d_tag_volume
+        );
     }
+
+    // copy 
+    cudaMemcpy3DParms param = {0};
+    param.dstArray = Instance()->vol_tex_cudaArray;
+    param.srcPtr   = Instance()->d_full_vol_pptr;
+    param.extent   = Instance()->full_vol_extent;
+    param.kind     = cudaMemcpyDeviceToDevice;
+
+    cutilSafeCall( cudaMemcpy3D(&param) );
 
     // unmap gl graphics resource after writing-to operation
     cutilSafeCall( cudaGraphicsUnmapResources(1, &Instance()->resource_vol_) );
@@ -127,15 +142,30 @@ namespace as_modeling
       // render to image 1
       Instance()->renderer_->render_unperturbed(i_view, Instance()->vol_tex_);
 
-      // calc f
       cutilSafeCall( cudaGraphicsMapResources(1, &(Instance()->resource_rr_)) );
 
       // get mapped array
+      cutilSafeCall( cudaGraphicsSubResourceGetMappedArray(
+        &(Instance()->rr_tex_cudaArray),
+        Instance()->resource_rr_,
+        0, 0) );
 
-      // bind 2 cuda tex
+      // bind array to cuda tex
+      bind_rrtex_cuda(Instance()->rr_tex_cudaArray);
 
       // launch kernel
+      f += calculate_f_cuda(
+        Instance()->current_level_,
+        i_view,
+        Instance()->num_views,
+        n,
+        Instance()->p_asmodeling_->render_interval_,
+        Instance()->d_projected_centers,
+        Instance()->d_tag_volume,
+        Instance()->p_device_x,
+        Instance()->d_temp_f);
 
+      // unmap resource
       cutilSafeCall( cudaGraphicsUnmapResources(1, &(Instance()->resource_rr_)) );
 
       for (int pt_slice = 0; pt_slice < ASModeling::MAX_VOL_SIZE; ++pt_slice)
@@ -150,17 +180,31 @@ namespace as_modeling
             cutilSafeCall( cudaGraphicsMapResources(1, &(Instance()->resource_pr_)) );
 
             // get mapped array
+            cutilSafeCall( cudaGraphicsSubResourceGetMappedArray(
+              &(Instance()->pr_tex_cudaArray),
+              Instance()->resource_pr_,
+              0, 0) );
 
             // bind 2 cuda tex
+            bind_prtex_cuda(Instance()->pr_tex_cudaArray);
 
-            // launch kernel
+            //// launch kernel
+            //calculate_g_cuda(Instance()->current_level_,
+            //  Instance()->d_projected_centers,
+            //  Instance()->p_device_x,
+            //  Instance()->p_device_g);
 
+            // unmap resource
             cutilSafeCall( cudaGraphicsUnmapResources(1, &(Instance()->resource_pr_)) );
 
           } // for pu
         } // for pv
       } // for each slice
+
+
     } // for i_view
+
+
 
     // copy g[] from device to host 
     cutilSafeCall( cudaMemcpy(
@@ -188,6 +232,51 @@ namespace as_modeling
     return true;
   }
 
+
+  bool ASMGradCompute::set_ground_truth_images(cimg_library::CImgList<unsigned char>& gt_images)
+  {
+    using namespace cimg_library;
+    typedef CImgList<unsigned char> image_list;
+
+
+    unsigned char * raw_image;   // c3, c-h-w layout
+    cudaPitchedPtr  image_pptr;  // c4, h-w-c layout
+    cudaExtent      image_extent = make_cudaExtent(p_asmodeling_->width_*4*sizeof(unsigned char), p_asmodeling_->height_, num_views);
+    size_t          raw_size = p_asmodeling_->width_ * p_asmodeling_->height_*3*sizeof(unsigned char);
+
+    // alloc for data and plus one for swap space
+    cutilSafeCall( cudaMalloc<unsigned char>(&raw_image, raw_size) );
+    cutilSafeCall( cudaMalloc3D(&image_pptr, image_extent) );
+
+    cutilSafeCall (cudaGetLastError() );
+
+    // UNKNOWN ERROR
+    // 20100520
+
+    int iimg = 0;
+    for (image_list::iterator it = gt_images.begin();
+      it != gt_images.end(); ++it, ++iimg)
+    {
+      cutilSafeCall( cudaMemcpy(raw_image, it->data, raw_size, cudaMemcpyHostToDevice) );
+      change_image_layout_cuda(raw_image, &image_pptr, &image_extent, p_asmodeling_->width_, p_asmodeling_->height_, iimg);
+    }
+
+    cudaMemcpy3DParms param = {0};
+    param.srcPtr   = image_pptr;
+    param.dstArray = gt_tex_cudaArray;
+    param.extent   = gt_cudaArray_extent;
+    param.kind     = cudaMemcpyDeviceToDevice;
+
+    cutilSafeCall( cudaMemcpy3D(&param) );
+
+    bind_gttex_cuda( gt_tex_cudaArray );
+
+    cutilSafeCall( cudaFree(raw_image) );
+    cutilSafeCall( cudaFree(image_pptr.ptr) );
+
+    return true;
+  }
+  
   bool ASMGradCompute::init(void)
   {
     current_level_ = ASModeling::INITIAL_VOL_LEVEL;
@@ -197,7 +286,8 @@ namespace as_modeling
 
     // OpenGL and renderer initiation in RenderGL...
     renderer_ = new RenderGL(p_asmodeling_);
-    renderer_->init();
+    if (!renderer_->init())
+      return false;
 
     ///////////////////////////////////////////////////////
     //           Init CUDA
@@ -205,14 +295,14 @@ namespace as_modeling
     cudaSetDevice( cutGetMaxGflopsDeviceId() );
     cudaGLSetGLDevice( cutGetMaxGflopsDeviceId() );
 
-
     // create gl texture for volume data storage
     glGenTextures(1, &vol_tex_);
     glBindTexture(GL_TEXTURE_3D, vol_tex_);
 
     // set basic texture parameters
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
@@ -246,19 +336,26 @@ namespace as_modeling
     // NOTE: due to pitching issues, 
     //  shall be allocated for distinct levels
     size_t vol_size = 1 << current_level_;
-    vol_extent = make_cudaExtent(vol_size, vol_size, vol_size);
-    cutilSafeCall( cudaMalloc3D(d_vol_pitchedptr, vol_extent) );
+    vol_extent = make_cudaExtent(vol_size*sizeof(float), vol_size, vol_size);
+    cutilSafeCall( cudaMalloc3D(&d_vol_pitchedptr, vol_extent) );
 
     // full resolution can be allocated once,
     // thanks to its fixed size...
-    full_vol_extent = make_cudaExtent(max_length, max_length, max_length);
-    cutilSafeCall( cudaMalloc3D(d_full_vol_pptr, full_vol_extent) );
+    full_vol_extent = make_cudaExtent(max_length*sizeof(float), max_length, max_length);
+    cutilSafeCall( cudaMalloc3D(&d_full_vol_pptr, full_vol_extent) );
 
     cutilSafeCall( cudaMalloc<int>(&d_projected_centers, 2 * p_asmodeling_->num_cameras_ * max_size) );
     cutilSafeCall( cudaMalloc<int>(&d_tag_volume, max_size) );
 
     cutilSafeCall( cudaMalloc<float>(&p_device_x, max_size) );
     cutilSafeCall( cudaMalloc<float>(&p_device_g, max_size) );
+    cutilSafeCall( cudaMalloc<float>(&d_temp_f,   max_size) );
+
+    // alloc array for ground truth image
+    cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc<uchar4>();
+
+    gt_cudaArray_extent = make_cudaExtent(p_asmodeling_->width_, p_asmodeling_->height_, num_views);
+    cutilSafeCall( cudaMalloc3DArray(&gt_tex_cudaArray, &channelDesc, gt_cudaArray_extent) );
 
     //////////////////////////////////////////////////////////
     // alloc memory on HOST
@@ -280,11 +377,16 @@ namespace as_modeling
     cutilSafeCall( cudaFree( d_projected_centers ) );
     cutilSafeCall( cudaFree( d_tag_volume ) );
 
-    cutilSafeCall( cudaFree( d_full_vol_pptr->ptr) );
-    cutilSafeCall( cudaFree( d_vol_pitchedptr->ptr) );
+    cutilSafeCall( cudaFree( d_full_vol_pptr.ptr) );
+    cutilSafeCall( cudaFree( d_vol_pitchedptr.ptr) );
 
     cutilSafeCall( cudaFree( p_device_g ) );
     cutilSafeCall( cudaFree( p_device_x ) );
+    cutilSafeCall( cudaFree( d_temp_f ) );
+
+    cutilSafeCall( cudaFreeArray(gt_tex_cudaArray) );
+
+    cutilSafeCall( cudaThreadExit() );
 
     delete [] h_projected_centers;
     delete [] h_tag_volume;
@@ -322,6 +424,7 @@ namespace as_modeling
       h_projected_centers,
       sizeof(int)*projected_centers_.size(),
       cudaMemcpyHostToDevice));
+
     cutilSafeCall( cudaMemcpy(
       d_tag_volume, 
       h_tag_volume, 
@@ -333,7 +436,7 @@ namespace as_modeling
   }
 
 
-  bool ASMGradCompute::succframe_init(int level)
+  bool ASMGradCompute::succframe_init(int level, std::list<float>& guess_x)
   {
     // init using previous frame's result
     current_level_ = level;
@@ -345,10 +448,10 @@ namespace as_modeling
     set_density_tags(level, h_tag_volume, dummy_list, projected_centers_, false);
 
     // allocate space for volume data on device
-    cutilSafeCall( cudaFree(d_vol_pitchedptr->ptr) );
+    cutilSafeCall( cudaFree(d_vol_pitchedptr.ptr) );
     size_t vol_size = 1 << current_level_;
     vol_extent = make_cudaExtent(vol_size, vol_size, vol_size);
-    cutilSafeCall( cudaMalloc3D(d_vol_pitchedptr, vol_extent) );
+    cutilSafeCall( cudaMalloc3D(&d_vol_pitchedptr, vol_extent) );
 
     // copy data to CUDA
     int i = 0;
@@ -385,10 +488,10 @@ namespace as_modeling
     set_density_tags(level, h_tag_volume, dummy_list, projected_centers_, FALSE);
 
     // allocate space for volume data on device
-    cutilSafeCall( cudaFree(d_vol_pitchedptr->ptr) );
+    cutilSafeCall( cudaFree(d_vol_pitchedptr.ptr) );
     size_t vol_size = 1 << current_level_;
     vol_extent = make_cudaExtent(vol_size, vol_size, vol_size);
-    cutilSafeCall( cudaMalloc3D(d_vol_pitchedptr, vol_extent) );
+    cutilSafeCall( cudaMalloc3D(&d_vol_pitchedptr, vol_extent) );
 
     // copy data to CUDA
     cutilSafeCall( cudaFree(d_tag_volume) );
@@ -436,7 +539,6 @@ namespace as_modeling
     if (is_init_density)
     {
       density.clear();
-      density.push_back(0.0f); // zero density value
     }
     centers.clear();
 
@@ -583,3 +685,4 @@ namespace as_modeling
 
 
 } // namespace as_modeling
+

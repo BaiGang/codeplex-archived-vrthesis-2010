@@ -239,6 +239,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\stdafx.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\Inc\stdafx.h"
 				>
 			</File>
@@ -249,38 +253,10 @@
 			<File
 				RelativePath=".\GradCompute.cc"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\GradCompute.cu"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="CUDA Build Rule"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="CUDA Build Rule"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\GradCompute.h"
@@ -315,20 +291,6 @@
 			<File
 				RelativePath=".\GLFBO.cc"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\GLFBO.h"
@@ -351,20 +313,6 @@
 			<File
 				RelativePath=".\GLSLShader.cc"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\GLSLShader.h"
@@ -387,20 +335,6 @@
 			<File
 				RelativePath=".\RenderGL.cc"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\RenderGL.h"
@@ -449,10 +383,6 @@
 				>
 			</File>
 		</Filter>
-		<File
-			RelativePath=".\stdafx.cc"
-			>
-		</File>
 	</Files>
 	<Globals>
 	</Globals>

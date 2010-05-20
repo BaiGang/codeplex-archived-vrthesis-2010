@@ -27,12 +27,12 @@ namespace as_modeling
     // set groundtruth image to CUDA
     //set_groundtruth_image();
 
+    ASMGradCompute::Instance()->set_ground_truth_images(ground_truth_images_);
+
     int i_level = INITIAL_VOL_LEVEL;
     std::list<float> host_x;
 
     ASMGradCompute::Instance()->frame_init(i_level, host_x);
-
-    //grad_computer_->init_current_level(i_level);
 
     ///////////////////////////////////////////////////////////////////////
     //

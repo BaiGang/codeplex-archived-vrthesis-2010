@@ -22,6 +22,7 @@ namespace as_modeling
     {
       sprintf_s(path_buf, 200, "../Data/Camera%02d/Frame%05d.bmp", i_camera, iframe);
       ground_truth_images_(i_camera).assign(path_buf);
+
     } // for each camera
 
     return true;

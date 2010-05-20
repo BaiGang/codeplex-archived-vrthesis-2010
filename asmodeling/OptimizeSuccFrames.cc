@@ -16,12 +16,16 @@ namespace as_modeling
     // get result from previous frame
     //  x_pre
 
+    std::list<float> guess_x;
+
     // init the grad_computer
-    ASMGradCompute::Instance()->succframe_init(MAX_VOL_LEVEL);
+    ASMGradCompute::Instance()->succframe_init(MAX_VOL_LEVEL, guess_x);
 
     // calc x using previous x and volume tag
     // x
-    int n = 10;
+    int n = guess_x.size();
+
+
 
     // call lbfgsb minimize routine
     lbfgsbminimize( n,

@@ -23,18 +23,61 @@ namespace as_modeling
       return false;
     }
 
-    int num_levels = MAX_VOL_LEVEL - INITIAL_VOL_LEVEL + 1;
-    
+    char * tmpcam = new char [num_cameras_];
+    camera_orientations_.reset(tmpcam);
+    for (int i = 0; i < num_cameras_; ++i)
+    {
+      // camera orientations
+      Vector4 dir(
+        camera_positions_[i].x - trans_x_,
+        camera_positions_[i].y - trans_y_,
+        camera_positions_[i].z - trans_z_,
+        1.0
+        );
+
+      dir.normaVec();
+
+      if (abs(dir.x)>abs(dir.y) && abs(dir.x)>abs(dir.z))
+      {
+        // along x
+        if (dir.x < 0.0)
+          camera_orientations_[i] = 'X';
+        else
+          camera_orientations_[i] = 'x';
+      }
+      else if (abs(dir.y)>abs(dir.x) && abs(dir.y)>abs(dir.z))
+      {
+        // along y
+        if (dir.y < 0.0)
+          camera_orientations_[i] = 'Y';
+        else
+          camera_orientations_[i] = 'y';
+
+      }
+      else if (abs(dir.z)>abs(dir.x) && abs(dir.z)>abs(dir.y))
+      {
+        // along z
+        if (dir.z < 0.0)
+          camera_orientations_[i] = 'Z';
+        else
+          camera_orientations_[i] = 'z';
+
+      }
+      else
+      {
+        // should not have been here
+        fprintf(stderr, " ERROR : axis specifying error!\n\n");
+      }
+    }
 
     // init image list
-    ground_truth_images_.assign(num_cameras_);
-
+    // num_cameras images
+    // depth dimension   : 1
+    // channels of color : 3
+    ground_truth_images_.assign(num_cameras_,width_,height_,1,3);
 
     // init gradient computer
-    //ASMGradCompute * tmpgc = new ASMGradCompute(this);
-    //grad_computer_.reset(tmpgc);
     ASMGradCompute::Instance()->set_asmodeling(this);
-
     if (!ASMGradCompute::Instance()->init())
     {
       return false;
@@ -71,13 +114,5 @@ namespace as_modeling
 
     return true;
   }
-
-  ////////////////////////////////////////////////////////////////////////////////
-  //
-  //      helper functions
-  //
-  ////////////////////////////////////////////////////////////////////////////////
-
-
 
 } // namespace as_modeling

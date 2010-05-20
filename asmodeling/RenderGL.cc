@@ -19,7 +19,6 @@ namespace as_modeling
 
     if (!InitGLExtensions())
     {
-      // gl init error
       return false;
     }
 

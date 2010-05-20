@@ -5,7 +5,9 @@
 #include <cstdio>
 #include <list>
 
-#include "RenderGL.h"
+#include <CImg.h>
+
+#include "RenderGL.h"  // glew.h must be loaded befor gl.h
 
 #include <cuda_runtime.h>
 #include <cuda_gl_interop.h>
@@ -43,6 +45,10 @@ namespace as_modeling{
     // get the volume data
     bool get_data(int &level, scoped_array<float>& data);
 
+    // set the loaded ground truth images
+
+    bool set_ground_truth_images(cimg_library::CImgList<unsigned char> & gt_images);
+
     // set the initial guess for x
     // construct the volume tags
     // set the projection center for each item
@@ -54,7 +60,7 @@ namespace as_modeling{
 
     // use previous frame result
     // init the new x
-    bool succframe_init(int level);
+    bool ASMGradCompute::succframe_init(int level, std::list<float>& guess_x);
 
   private:
     // set the volume tag and projection center for current level
@@ -119,10 +125,12 @@ namespace as_modeling{
 
     // CUDA device memory
 
-    cudaPitchedPtr * d_vol_pitchedptr;
-    cudaExtent       vol_extent;
-    cudaPitchedPtr * d_full_vol_pptr;
-    cudaExtent       full_vol_extent;
+    cudaPitchedPtr d_vol_pitchedptr;
+    cudaExtent     vol_extent;
+    cudaPitchedPtr d_full_vol_pptr;
+    cudaExtent     full_vol_extent;
+
+    float * d_temp_f;
 
     int * d_projected_centers;
     int * d_tag_volume;
@@ -130,6 +138,9 @@ namespace as_modeling{
     cudaArray * vol_tex_cudaArray;
     cudaArray * rr_tex_cudaArray;
     cudaArray * pr_tex_cudaArray;
+    // 3d, z maps to different images
+    cudaArray * gt_tex_cudaArray;
+    cudaExtent  gt_cudaArray_extent;
 
     float * d_vol_bufferptr;
     size_t vol_buffer_num_bytes_;
