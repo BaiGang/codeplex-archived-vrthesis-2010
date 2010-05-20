@@ -237,9 +237,9 @@ namespace as_modeling
   {
     cudaMemcpy3DParms param = {0};
     param.srcPtr   = make_cudaPitchedPtr(gt_images.GetPixelAt(0,0), 
-      p_asmodeling_->width_*4*sizeof(unsigned char),
+      p_asmodeling_->width_*sizeof(uchar4),
       p_asmodeling_->width_,
-      num_views * p_asmodeling_->height_ );
+      p_asmodeling_->height_ );
 
     param.dstArray = gt_tex_cudaArray;
     param.extent   = gt_cudaArray_extent;
@@ -252,7 +252,7 @@ namespace as_modeling
 
     return true;
   }
-  
+
   bool ASMGradCompute::init(void)
   {
     current_level_ = ASModeling::INITIAL_VOL_LEVEL;
@@ -329,7 +329,6 @@ namespace as_modeling
 
     // alloc array for ground truth image
     cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc<uchar4>();
-
     gt_cudaArray_extent = make_cudaExtent(p_asmodeling_->width_, p_asmodeling_->height_, num_views);
     cutilSafeCall( cudaMalloc3DArray(&gt_tex_cudaArray, &channelDesc, gt_cudaArray_extent) );
 
