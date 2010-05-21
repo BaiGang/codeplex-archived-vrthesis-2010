@@ -12,6 +12,8 @@
 #include <math/geomath.h>
 #include <math/ConvexHull2D.h>
 
+
+
 /////////////////////////////////////////////
 //   Forward declarations
 /////////////////////////////////////////////
@@ -127,7 +129,7 @@ namespace as_modeling
     cudaMemcpy3DParms param = {0};
     param.dstArray = Instance()->vol_tex_cudaArray;
     param.srcPtr   = Instance()->d_full_vol_pptr;
-    param.extent   = Instance()->full_vol_extent;
+    param.extent   = Instance()->vol_cudaArray_extent;
     param.kind     = cudaMemcpyDeviceToDevice;
 
     cutilSafeCall( cudaMemcpy3D(&param) );
@@ -291,6 +293,8 @@ namespace as_modeling
       vol_tex_,
       GL_TEXTURE_3D,
       cudaGraphicsMapFlagsWriteDiscard) );
+
+    vol_cudaArray_extent = make_cudaExtent(max_length, max_length, max_length);
 
     // register render target textures with CUDA
     cutilSafeCall( cudaGraphicsGLRegisterImage(
@@ -498,6 +502,18 @@ namespace as_modeling
     std::list<int> &centers,
     bool is_init_density)
   {
+
+    //////////////////////////////////
+    //cuda_imageutil::BMPImageUtil * debugBMP = new cuda_imageutil::BMPImageUtil[8];
+    //for (int img=0; img<8;++img)
+    //{
+    //  debugBMP[img].LoadImage("../Data/a.bmp");
+    //  debugBMP[img].SetSizes(p_asmodeling_->width_, p_asmodeling_->height_);
+    //  memset(debugBMP[img].GetPixelAt(0,0), 0, sizeof(unsigned char)*3*p_asmodeling_->width_*p_asmodeling_->height_);
+    //}
+    //////////////////////////////////
+
+
     int length = (1<<level);
 
     float wc_x[9];
@@ -584,6 +600,10 @@ namespace as_modeling
             centers.push_back(px);
             centers.push_back(py);
 
+            //////////////////////////////////////////////////
+            //debugBMP[i_camera].GetPixelAt(px,py)[0] = 255;
+            //////////////////////////////////////////////////
+
             // for each corner
             //  calc the projected position on each image/camera
             for (int corner_index = 0; corner_index < 8; ++corner_index)
@@ -647,6 +667,13 @@ namespace as_modeling
         } // for i
       } // for j
     } // for k
+
+    //for (int img=0; img<8;++img)
+    //{
+    //  char path_buf[50];
+    //  sprintf_s(path_buf, 50, "../Data/test%02d.bmp", img);
+    //  debugBMP[img].SaveImage(path_buf);
+    //}
 
   }
 

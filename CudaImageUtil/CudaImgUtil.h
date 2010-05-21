@@ -1,5 +1,5 @@
-#ifndef _CUDA_IMAGE_UTIL_
-#define _CUDA_IMAGE_UTIL_
+#ifndef _CUDA_IMAGE_UTIL_H_
+#define _CUDA_IMAGE_UTIL_H_
 
 //====================================================================//
 //
@@ -60,7 +60,6 @@ namespace cuda_imageutil
 
 	public:
 		// I / O
-
 		// NOTE: I/O issues should not be handle by this base class.
 		// We just deal with in-core fairs.
 		virtual bool LoadImage(char * fname) { return false; };
@@ -70,11 +69,15 @@ namespace cuda_imageutil
 		CudaImageUtil<ElemType, Channels>& operator = (CudaImageUtil<ElemType, Channels>& img)
 		{
 			this->SetSizes( img.GetWidth(), img.GetHeight() );
-			
 			memcpy(this->m_pixelsP, img.GetPixelAt(0, 0), sizeof(ElemType) * m_width * m_height * Channels);
-
 			return *this;
 		}
+    CudaImageUtil<ElemType, Channels>& ClearImage()
+    {
+      memset(this->m_pixelsP, 0, sizeof(ElemType) * m_width * m_height * Channels);
+      return *this;
+    }
+
 
 	private:
 		ElemType *    m_pixelsP;
@@ -96,4 +99,4 @@ namespace cuda_imageutil
 	typedef CudaImageUtil <int8,    3>   Image_3c8i;	// Typically, a CIE-Lab image
 
 }
-#endif //_CUDA_IMAGE_UTIL_
+#endif //_CUDA_IMAGE_UTIL_H_

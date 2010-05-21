@@ -3,4 +3,8 @@ Utils.lib
 </Value></Property><Property><Name>svn:ignore</Name><Value>L-BFGS-B.lib
 TinyXML.lib
 Utils.lib
+</Value></Property><Property><Name>svn:ignore</Name><Value>L-BFGS-B.lib
+TinyXML.lib
+Utils.lib
+CudaImageUtil.lib
 </Value></Property></Properties></ItemProperties>

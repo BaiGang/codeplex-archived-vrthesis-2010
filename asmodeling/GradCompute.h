@@ -1,6 +1,6 @@
 #ifndef _GRAD_COMPUTE_H_
 #define _GRAD_COMPUTE_H_
-
+#include <stdafx.h>
 #include <cstdlib>
 #include <cstdio>
 #include <list>
@@ -134,6 +134,7 @@ namespace as_modeling{
     int * d_tag_volume;
 
     cudaArray * vol_tex_cudaArray;
+    cudaExtent  vol_cudaArray_extent;
     cudaArray * rr_tex_cudaArray;
     cudaArray * pr_tex_cudaArray;
     // 3d, z maps to different images

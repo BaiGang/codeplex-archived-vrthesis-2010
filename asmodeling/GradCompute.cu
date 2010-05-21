@@ -4,6 +4,9 @@
 #include <cutil_inline.h>
 #include <cutil_math.h>
 
+// parallel reduce kernel
+#include "reduction_kernel.cu"
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //    GLOBAL VARIABLES
@@ -62,44 +65,6 @@ void bind_gttex_cuda(cudaArray* data_array)
   bind_tex<uchar4,3>(data_array, ground_truth);
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-//
-//  Dealing with input images
-//
-/////////////////////////////////////////////////////////////////////////////////////////////////////
-__global__ void change_image_layout(unsigned char * raw_image,
-                                    cudaPitchedPtr *image_pptr,
-                                    cudaExtent extent, int iview)
-{
-  unsigned int i = __mul24(blockIdx.x,blockDim.x) + threadIdx.x;
-  unsigned int j = __mul24(blockIdx.y,blockDim.y) + threadIdx.y;
-  if (i >= extent.width / 4 || j >= extent.height)
-    return;
-  unsigned int itl = extent.height * extent.width / 4;
-  unsigned char * base = (unsigned char*)image_pptr->ptr + iview*extent.height*image_pptr->pitch + j * image_pptr->pitch + 4 * i;
-
-  base[0] = raw_image[extent.width/4*j+i];
-  base[1] = raw_image[extent.width/4*j+i + itl];
-  base[2] = raw_image[extent.width/4*j+i + 2*itl];
-  base[3] = 0;
-}
-
-void change_image_layout_cuda(unsigned char * raw_image,
-                              cudaPitchedPtr * image_pptr,
-                              cudaExtent * extent,
-                              int width,
-                              int height,
-                              int iview)
-{
-  dim3 grid_dim((width/16)+((width%16)?1:0), (height/16)+((height%16)?1:0), 1);
-  dim3 block_dim(16, 16, 1);
-
-  cutilSafeCall (cudaThreadSynchronize());
-
-  change_image_layout<<<grid_dim, block_dim>>>
-    (raw_image, image_pptr, *extent, iview);
-}
-
 
 // map (i,j,k) to 1D array index
 __device__ int index3(int i, int j, int k, int length)
@@ -118,21 +83,20 @@ __global__ void construct_volume(
                                  int * tag_vol
                                  )
 {
-  // z = blockDim.x
-  // y = threadDim.y
-  // x = threadDim.x
+  //unsigned int z = blockIdx.x;
+  //unsigned int y = blockIdx.y;
+  //unsigned int x = threadIdx.x;
   // slice_pitch = pitch * height
   // slice = ptr + z * slice_pitch
   // row = (type*)(slice + y*pitch)
   // elem = *(row + x)
 
-  int index = index3(threadIdx.x, threadIdx.y, blockIdx.x, blockDim.x);
+  int index = index3(threadIdx.x, blockIdx.y, blockIdx.x, blockDim.x);
 
   char * slice = (char *)vol_pptr.ptr + blockIdx.x * vol_pptr.pitch * blockDim.x;
 
-  *((float*)(slice+threadIdx.y*vol_pptr.pitch) + threadIdx.x)
+  *((float*)(slice+blockIdx.y*vol_pptr.pitch) + threadIdx.x)
     = device_x[ tag_vol[index] ];
-
 }
 void construct_volume_cuda(
                            float * device_x,
@@ -141,8 +105,8 @@ void construct_volume_cuda(
                            int *   tag_vol
                            )
 {
-  dim3 grid_dim(extent.depth, 1, 1);
-  dim3 block_dim(extent.width, extent.height, 1);
+  dim3 grid_dim(extent.depth, extent.height, 1);
+  dim3 block_dim(extent.width/4, 1, 1);
 
   construct_volume<<< grid_dim, block_dim >>>(
     *density_vol,
@@ -160,19 +124,17 @@ void construct_volume_cuda(
 __global__ void upsample_volume(
                                 cudaPitchedPtr pptr_lower,
                                 cudaExtent     extent_lower,
-                                cudaPitchedPtr pptr_higher
+                                cudaPitchedPtr pptr_higher,
+                                int scale
                                 )
 {
   // for higher level volume
   unsigned int k = blockIdx.x;
-  unsigned int j = threadIdx.y;
+  unsigned int j = blockIdx.y;
   unsigned int i = threadIdx.x;
-
-  int scale = blockDim.x / extent_lower.depth;
 
   char * slice = (char*)pptr_higher.ptr + k*pptr_higher.pitch*blockDim.x;
   float *p_higher = (float*)(slice + j*pptr_higher.pitch) + i;
-
 
   k /= scale;
   j /= scale;
@@ -193,16 +155,17 @@ void upsample_volume_cuda(
   int length = 1 << level;
   int max_length = 1 << max_level;
 
-  dim3 grid_dim(max_length, 1, 1);
-  dim3 block_dim(max_length, max_length, 1);
+  dim3 grid_dim(max_length, max_length, 1);
+  dim3 block_dim(max_length, 1, 1);
 
   cudaExtent ext_low = make_cudaExtent(length, length, length);
+  int scale = max_length / length;
 
   upsample_volume<<< grid_dim, block_dim >>>(
     *lower_lev,
     ext_low,
-    *upper_lev
-    );
+    *upper_lev,
+    scale );
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -221,8 +184,8 @@ __global__ void calc_f(
                        )
 {
   unsigned int i = threadIdx.x;
-  unsigned int j = threadIdx.y;
-  unsigned int k = blockIdx.z;
+  unsigned int j = blockIdx.y;
+  unsigned int k = blockIdx.x;
 
   int index_vol   = index3(i, j, k, blockDim.x);
   int index_array = tag_vol[index_vol];
@@ -238,21 +201,18 @@ __global__ void calc_f(
     {
       for (int vv = v - interval; vv <= v + interval; ++v)
       {
-        //float ff = tex2D<uchar4>(render_result, float(uu), float(vv) )
-        //  - tex3D<uchar4>(ground_truth, float(uu), float(vv), float(i_view) );
-        //f += ff * ff;
+        uchar4 rr4 = tex2D(render_result, float(uu), float(vv));
+        uchar4 gt4 = tex3D(ground_truth, float(uu), float(vv), float(i_view));
+        // USE ONLY R CHANNEL HERE...
+        f += (rr4.x-gt4.x)*(rr4.x-gt4.x)/(255.0*255.0);
       }
     }
-
     f_array[ index_array ] = f;
-  }
+  } // if (index_array != 0)
 }
 
-__global__ void sum_f(float* f_array, float* sum, int n)
-{
-
-}
-
+extern "C"
+void reduceSinglePass(int size, int threads, int blocks, float *d_idata, float *d_odata);
 float calculate_f_cuda(
                        int    level, 
                        int    i_view, 
@@ -267,8 +227,9 @@ float calculate_f_cuda(
 {
   int size = 1 << level;
 
-  dim3 grid_dim(size, 1, 1);
-  dim3 block_dim(size, size, 1);
+  // calc f value for each non-zero cell
+  dim3 grid_dim(size, size, 1);
+  dim3 block_dim(size, 1, 1);
   calc_f<<< grid_dim, block_dim >>>(
     i_view,
     n_view,
@@ -278,19 +239,21 @@ float calculate_f_cuda(
     vol_tag,
     f_array );
 
-  dim3 sum_dim(512, 512, 64);
-  sum_f<<< 1, sum_dim >>>(
-    f_array,
-    sum_array,
-    n_nonzero_items);
+  cutilSafeCall( cudaThreadSynchronize() );
 
-  float result[8];
+  // copy to sum_array for sum
+  reduceSinglePass(n_nonzero_items, 256,
+    (n_nonzero_items/256)+((n_nonzero_items%256)?1:0), 
+    f_array, sum_array);
+
+  // copy and return result
+  float result;
   cudaMemcpy(
-    result,
+    &result,
     sum_array,
-    8,
+    sizeof(float),
     cudaMemcpyDeviceToHost);
-  return result[0];
+  return result;
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //

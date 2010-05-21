@@ -1,5 +1,5 @@
-#ifndef _CUDA_IMG_UTIL_H_
-#define _CUDA_IMG_UTIL_H_
+#ifndef _CUDA_IMG_UTIL_BMP_H_
+#define _CUDA_IMG_UTIL_BMP_H_
 
 #include "CudaImgUtil.h"
 
@@ -35,4 +35,4 @@ namespace cuda_imageutil
 
 } // namespace cuda_imageutil
 
-#endif //_CUDA_IMG_UTIL_H_
+#endif //_CUDA_IMG_UTIL_BMP_H_

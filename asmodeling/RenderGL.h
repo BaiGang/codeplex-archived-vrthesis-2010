@@ -1,6 +1,6 @@
 #ifndef _RENDER_GL_H_
 #define _RENDER_GL_H_
-
+#include <stdafx.h>
 #include <scoped_ptr.h>
 #include "GLSLShader.h"
 #include "GLFBO.h"

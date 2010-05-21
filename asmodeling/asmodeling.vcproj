@@ -189,6 +189,10 @@
 			ReferencedProjectIdentifier="{2608F40E-1FE3-4D31-9DAD-F78FB6362A42}"
 			RelativePathToProject=".\TinyXML\TinyXML.vcproj"
 		/>
+		<ProjectReference
+			ReferencedProjectIdentifier="{B4030BD0-9A10-4960-BE6A-A57B2357FC63}"
+			RelativePathToProject=".\CudaImageUtil\CudaImageUtil.vcproj"
+		/>
 	</References>
 	<Files>
 		<Filter
@@ -257,6 +261,14 @@
 			<File
 				RelativePath=".\GradCompute.cu"
 				>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="CUDA Build Rule"
+						Arch1="11"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\GradCompute.h"
@@ -276,6 +288,32 @@
 					/>
 				</FileConfiguration>
 			</File>
+			<Filter
+				Name="Kernels"
+				>
+				<File
+					RelativePath=".\reduction_kernel.cu"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="CUDA Build Rule"
+							Arch1="11"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="CUDA Build Rule"
+							Arch1="11"
+						/>
+					</FileConfiguration>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="StoreVolumeData"
