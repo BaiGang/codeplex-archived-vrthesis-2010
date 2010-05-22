@@ -2,6 +2,8 @@
 #include "ASModeling.h"
 #include <GL/glut.h>
 
+#define __TEST_RENDER__
+
 namespace as_modeling
 {
   bool RenderGL::init()
@@ -134,6 +136,18 @@ namespace as_modeling
       shader = shader_z_render_.get();
     }
 
+#ifdef __TEST_RENDER__
+    rr_fbo_->BeginDraw2FBO();
+    {
+      glBegin(GL_POINTS);
+      glColor3f(1.0, 1.0, 1.0);
+      glVertex3f(0.0, 0.0, 0.0);
+      glEnd();
+    }
+    rr_fbo_->EndDraw2FBO();
+#endif //__TEST_RENDER__
+
+#ifndef __TEST_RENDER__
     // bind fbo
     rr_fbo_->BeginDraw2FBO();
     {
@@ -254,6 +268,8 @@ namespace as_modeling
       shader->End();
     }
     rr_fbo_->EndDraw2FBO();
+#endif //__TEST_RENDER__
+
   }
 
   void RenderGL::render_perturbed(int i_view, GLuint vol_tex, int slice, int pu, int pv)
@@ -302,8 +318,18 @@ namespace as_modeling
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#ifdef __TEST_RENDER__
+    pr_fbo_->BeginDraw2FBO();
+    {
+      glBegin(GL_POINTS);
+      glColor3f(1.0, 1.0, 1.0);
+      glVertex3f(0.0, 0.0, 0.0);
+      glEnd();
+    }
+    pr_fbo_->EndDraw2FBO();
+#endif //__TEST_RENDER__
 
-
+#ifndef __TEST_RENDER__
     // bind fbo
     pr_fbo_->BeginDraw2FBO();
     {
@@ -439,6 +465,8 @@ namespace as_modeling
       shader->End();
     }
     pr_fbo_->EndDraw2FBO();
+#endif //__TEST_RENDER__
+
   }
 
   RenderGL::RenderGL(ASModeling *p)

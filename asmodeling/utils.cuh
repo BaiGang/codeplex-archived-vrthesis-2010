@@ -12,6 +12,8 @@ texture<uchar4, 2, cudaReadModeElementType> render_result;
 texture<uchar4, 2, cudaReadModeElementType> perturbed_result;
 texture<uchar4, 3, cudaReadModeElementType> ground_truth;
 
+__constant__ float disturb_value = 0.00001;
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //    Bind CUDA arrays to texture references

@@ -28,7 +28,24 @@ __global__ void calc_g(
 
   if (arr_index != 0)
   {
+    int pu = proj_centers[2 * n_view * (arr_index-1)];
+    int pv = proj_centers[2 * n_view * (arr_index-1) + 1];
 
+    float gg = 0.0f;
+
+    for (int uu = pu - interval; uu <= pu + interval; ++uu)
+    {
+      for (int vv = pv - interval; vv <= pv + interval; ++vv)
+      {
+        uchar4 rr4 = tex2D(render_result, float(uu), float(vv));
+        uchar4 gt4 = tex3D(ground_truth, float(uu), float(vv), float(i_view));
+        uchar4 pr4 = tex2D(perturbed_result, float(uu), float(vv));
+
+        gg += -2.0f * (float)(gt4.x-rr4.x) * (float)(pr4.x-rr4.x)/(255.0*255.0*disturb_value);
+      }
+    }
+
+    g_array[arr_index] = g_array[arr_index] + gg;
   } // arr_index != 0
 }
 

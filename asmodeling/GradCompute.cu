@@ -8,7 +8,6 @@
 #include "volume_construction.cu"
 #include "f_calculation.cu"
 #include "g_calculation.cu"
-#include "reduction_kernel.cu"
 
 void construct_volume_cuda (float * device_x,
                             cudaPitchedPtr * density_vol,
@@ -23,6 +22,9 @@ void construct_volume_cuda (float * device_x,
     device_x,
     tag_vol
     );
+
+  // check if kernel execution generated an error
+  cutilCheckMsg("Kernel execution failed");
 }
 
 void upsample_volume_cuda (int level,
@@ -45,6 +47,9 @@ void upsample_volume_cuda (int level,
     ext_low,
     *upper_lev,
     scale );
+
+  // check if kernel execution generated an error
+  cutilCheckMsg("Kernel execution failed");
 }
 
 
@@ -56,10 +61,18 @@ void reduceSinglePass (int size,
                        float *d_idata,
                        float *d_odata );
 
+extern "C"
+void reduce (int size,
+             int threads,
+             int blocks,
+             float *d_idata,
+             float *d_odata );
+
 float calculate_f_cuda (int    level, 
                         int    i_view, 
                         int    n_view,
                         int    n_nonzero_items,
+                        int    powtwo_length,
                         int    interval,
                         int*   projected_centers, 
                         int*   vol_tag,
@@ -80,20 +93,31 @@ float calculate_f_cuda (int    level,
     vol_tag,
     f_array );
 
-  cutilSafeCall( cudaThreadSynchronize() );
+  // check if kernel execution generated an error
+  cutilCheckMsg("Kernel execution failed");
+
 
   // copy to sum_array for sum
-  reduceSinglePass(n_nonzero_items, 256,
-    (n_nonzero_items/256)+((n_nonzero_items%256)?1:0), 
-    f_array, sum_array);
+  //reduceSinglePass(n_nonzero_items, 256,
+  //  (n_nonzero_items/256)+((n_nonzero_items%256)?1:0), 
+  //  f_array, sum_array);
+
+  //reduce(powtwo_length, 256,
+  //  (powtwo_length/256)+((powtwo_length%256)?1:0), 
+  //  f_array, sum_array);
+
+  // check if kernel execution generated an error
+  cutilCheckMsg("Kernel execution failed");
+
+  //cutilSafeCall( cudaThreadSynchronize() );
 
   // copy and return result
-  float result;
-  cudaMemcpy(
-    &result,
-    sum_array,
-    sizeof(float),
-    cudaMemcpyDeviceToHost);
+  float result = 0.0f;
+  //cutilSafeCall( cudaMemcpy(
+  //  &result,
+  //  sum_array,
+  //  sizeof(float),
+  //  cudaMemcpyDeviceToHost ));
   return result;
 }
 
@@ -108,5 +132,21 @@ void calculate_g_cuda( int    level,
                        float* g_array )
 {
   int length = 1 << level;
+  dim3 dim_grid(length, length, 1);
+  dim3 dim_block(length, 1, 1);
 
+  calc_g <<<dim_grid, dim_block>>> (
+    i_view,
+    n_view,
+    n_nonzero_items,
+    interval,
+    projected_centers,
+    vol_tag,
+    g_array
+    );
+
+  // check if kernel execution generated an error
+  cutilCheckMsg("Kernel execution failed");
+
+  cutilSafeCall( cudaGetLastError() );
 }

@@ -12,43 +12,61 @@
 #include <math/geomath.h>
 #include <math/ConvexHull2D.h>
 
-
-
 /////////////////////////////////////////////
 //   Forward declarations
 /////////////////////////////////////////////
-void construct_volume_cuda(float * device_x,
-                           cudaPitchedPtr * density_vol,
-                           cudaExtent extent,
-                           int *   tag_vol );
+void construct_volume_cuda (float * device_x,
+                            cudaPitchedPtr * density_vol,
+                            cudaExtent extent,
+                            int *   tag_vol );
 
-void upsample_volume_cuda(int level,
-                          int max_level,
-                          cudaPitchedPtr * lower_lev,
-                          cudaPitchedPtr * upper_lev );
+void upsample_volume_cuda (int level,
+                           int max_level,
+                           cudaPitchedPtr * lower_lev,
+                           cudaPitchedPtr * upper_lev );
 
-void bind_rrtex_cuda(cudaArray*);
-void bind_prtex_cuda(cudaArray*);
-void bind_gttex_cuda(cudaArray*);
+void bind_rrtex_cuda (cudaArray*);
+void bind_prtex_cuda (cudaArray*);
+void bind_gttex_cuda (cudaArray*);
 
-void change_image_layout_cuda(unsigned char * raw_image,
-                              cudaPitchedPtr * image_pptr,
-                              cudaExtent * extent,
-                              int width,
-                              int height,
-                              int iview );
+void change_image_layout_cuda (unsigned char * raw_image,
+                               cudaPitchedPtr * image_pptr,
+                               cudaExtent * extent,
+                               int width,
+                               int height,
+                               int iview );
 
-float calculate_f_cuda(int    level, 
+float calculate_f_cuda (int    level, 
+                        int    i_view, 
+                        int    n_view,
+                        int    n_nonzero_items,
+                        int    powtwo_length,
+                        int    interval,
+                        int*   projected_centers, 
+                        int*   vol_tag,
+                        float* f_array,
+                        float* sum_array );
+
+void calculate_g_cuda (int    level, 
                        int    i_view, 
                        int    n_view,
                        int    n_nonzero_items,
                        int    interval,
                        int*   projected_centers, 
                        int*   vol_tag,
-                       float* f_array,
-                       float* sum_array );
+                       float* g_array );
 
-void calculate_g_cuda(int, int*, float*, float*);
+//void calculate_g_cuda(int, int*, float*, float*);
+
+static inline int nearest_pow2(int a)
+{
+  int k = 1;
+  while (k < a)
+  {
+    k = k << 1;
+  }
+  return k;
+}
 /////////////////////////////////////////////
 
 
@@ -137,6 +155,12 @@ namespace as_modeling
     // unmap gl graphics resource after writing-to operation
     cutilSafeCall( cudaGraphicsUnmapResources(1, &Instance()->resource_vol_) );
 
+    // reset the array for f[],
+    // this is due to reduction only works for sizes that are power of 2
+    int powtwo_length = nearest_pow2( n );
+    cutilSafeCall( cudaMemset( Instance()->p_device_x, 0, powtwo_length * sizeof(float)));
+
+    fprintf(stderr, "num views: %d\n", Instance()->num_views);
 
     // calc f and g[]
     for (int i_view = 0; i_view < Instance()->num_views; ++i_view)
@@ -155,20 +179,22 @@ namespace as_modeling
       // bind array to cuda tex
       bind_rrtex_cuda(Instance()->rr_tex_cudaArray);
 
+
+
       // launch kernel
       f += calculate_f_cuda(
         Instance()->current_level_,
         i_view,
         Instance()->num_views,
         n,
+        powtwo_length,
         Instance()->p_asmodeling_->render_interval_,
         Instance()->d_projected_centers,
         Instance()->d_tag_volume,
         Instance()->p_device_x,
         Instance()->d_temp_f);
 
-      // unmap resource
-      cutilSafeCall( cudaGraphicsUnmapResources(1, &(Instance()->resource_rr_)) );
+
 
       for (int pt_slice = 0; pt_slice < ASModeling::MAX_VOL_SIZE; ++pt_slice)
       {
@@ -195,6 +221,17 @@ namespace as_modeling
             //  Instance()->d_projected_centers,
             //  Instance()->p_device_x,
             //  Instance()->p_device_g);
+            calculate_g_cuda(
+              Instance()->current_level_,
+              i_view,
+              Instance()->num_views,
+              n,
+              Instance()->p_asmodeling_->render_interval_,
+              Instance()->d_projected_centers,
+              Instance()->d_tag_volume,
+              Instance()->p_device_g );
+
+
 
             // unmap resource
             cutilSafeCall( cudaGraphicsUnmapResources(1, &(Instance()->resource_pr_)) );
@@ -203,7 +240,8 @@ namespace as_modeling
         } // for pv
       } // for each slice
 
-
+      // unmap resource
+      cutilSafeCall( cudaGraphicsUnmapResources(1, &(Instance()->resource_rr_)) );
     } // for i_view
 
 

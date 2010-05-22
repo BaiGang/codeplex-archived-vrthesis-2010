@@ -23,7 +23,7 @@ __global__ void calc_f(
   unsigned int j = blockIdx.y;
   unsigned int k = blockIdx.x;
 
-  int index_vol   = index3(i, j, k, blockDim.x);
+  int index_vol   = index3(threadIdx.x, blockIdx.y, blockIdx.x, blockDim.x);
   int index_array = tag_vol[index_vol];
 
   if (index_array != 0)
