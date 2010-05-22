@@ -175,6 +175,93 @@
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
+		<Configuration
+			Name="EmuDebug|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="1"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="CUDA Build Rule"
+				Include="../../common/inc;../../../shared/inc"
+				Defines="WIN32"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories="../CudaImageUtil;&quot;$(SolutionDir)\Inc&quot;;../TinyXML;../Utils;&quot;../L-BFGS-B&quot;"
+				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
+				MinimalRebuild="true"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="1"
+				UsePrecompiledHeader="0"
+				WarningLevel="3"
+				Detect64BitPortabilityProblems="true"
+				DebugInformationFormat="3"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="TinyXML.lib CudaImageUtil.lib L-BFGS-B.lib Utils.lib glut32.lib glew32.lib cudart.lib cUtil32.lib"
+				ShowProgress="2"
+				OutputFile="$(OutDir)\$(ProjectName).exe"
+				LinkIncremental="1"
+				AdditionalLibraryDirectories="$(SolutionDir)\Lib"
+				GenerateDebugInformation="true"
+				ProgramDatabaseFile="$(OutDir)/reduction.pdb"
+				SubSystem="1"
+				RandomizedBaseAddress="1"
+				DataExecutionPrevention="0"
+				TargetMachine="1"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCManifestTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCAppVerifierTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+				CommandLine="IF EXIST cg_variables.h move cg_variables.h $(ConfigurationName)\"
+			/>
+		</Configuration>
 	</Configurations>
 	<References>
 		<ProjectReference
@@ -304,7 +391,6 @@
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
-						ExcludedFromBuild="true"
 						>
 						<Tool
 							Name="CUDA Build Rule"
@@ -312,7 +398,13 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
-						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="CUDA Build Rule"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="EmuDebug|Win32"
 						>
 						<Tool
 							Name="CUDA Build Rule"
@@ -324,7 +416,6 @@
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
-						ExcludedFromBuild="true"
 						>
 						<Tool
 							Name="CUDA Build Rule"
@@ -332,7 +423,13 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
-						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="CUDA Build Rule"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="EmuDebug|Win32"
 						>
 						<Tool
 							Name="CUDA Build Rule"
@@ -364,7 +461,6 @@
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
-						ExcludedFromBuild="true"
 						>
 						<Tool
 							Name="CUDA Build Rule"
@@ -373,11 +469,17 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
-						ExcludedFromBuild="true"
 						>
 						<Tool
 							Name="CUDA Build Rule"
 							Arch1="11"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="EmuDebug|Win32"
+						>
+						<Tool
+							Name="CUDA Build Rule"
 						/>
 					</FileConfiguration>
 				</File>
@@ -390,7 +492,6 @@
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
-						ExcludedFromBuild="true"
 						>
 						<Tool
 							Name="CUDA Build Rule"
@@ -398,7 +499,13 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
-						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="CUDA Build Rule"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="EmuDebug|Win32"
 						>
 						<Tool
 							Name="CUDA Build Rule"

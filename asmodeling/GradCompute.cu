@@ -113,11 +113,11 @@ float calculate_f_cuda (int    level,
 
   // copy and return result
   float result = 0.0f;
-  //cutilSafeCall( cudaMemcpy(
-  //  &result,
-  //  sum_array,
-  //  sizeof(float),
-  //  cudaMemcpyDeviceToHost ));
+  cutilSafeCall( cudaMemcpy(
+    &result,
+    sum_array,
+    sizeof(float),
+    cudaMemcpyDeviceToHost ));
   return result;
 }
 
