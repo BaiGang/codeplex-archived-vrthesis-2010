@@ -364,6 +364,14 @@
 						Arch1="11"
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="EmuDebug|Win32"
+					>
+					<Tool
+						Name="CUDA Build Rule"
+						Arch1="11"
+					/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\GradCompute.h"
@@ -391,6 +399,7 @@
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
+						ExcludedFromBuild="true"
 						>
 						<Tool
 							Name="CUDA Build Rule"
@@ -398,6 +407,7 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
+						ExcludedFromBuild="true"
 						>
 						<Tool
 							Name="CUDA Build Rule"
@@ -405,6 +415,7 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="EmuDebug|Win32"
+						ExcludedFromBuild="true"
 						>
 						<Tool
 							Name="CUDA Build Rule"
@@ -416,6 +427,7 @@
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
+						ExcludedFromBuild="true"
 						>
 						<Tool
 							Name="CUDA Build Rule"
@@ -423,6 +435,7 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
+						ExcludedFromBuild="true"
 						>
 						<Tool
 							Name="CUDA Build Rule"
@@ -430,6 +443,7 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="EmuDebug|Win32"
+						ExcludedFromBuild="true"
 						>
 						<Tool
 							Name="CUDA Build Rule"
@@ -455,12 +469,21 @@
 							Arch1="11"
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="EmuDebug|Win32"
+						>
+						<Tool
+							Name="CUDA Build Rule"
+							Arch1="11"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\reduction_kernel.cu"
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
+						ExcludedFromBuild="true"
 						>
 						<Tool
 							Name="CUDA Build Rule"
@@ -469,6 +492,7 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
+						ExcludedFromBuild="true"
 						>
 						<Tool
 							Name="CUDA Build Rule"
@@ -477,6 +501,7 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="EmuDebug|Win32"
+						ExcludedFromBuild="true"
 						>
 						<Tool
 							Name="CUDA Build Rule"
@@ -492,6 +517,7 @@
 					>
 					<FileConfiguration
 						Name="Debug|Win32"
+						ExcludedFromBuild="true"
 						>
 						<Tool
 							Name="CUDA Build Rule"
@@ -499,6 +525,7 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="Release|Win32"
+						ExcludedFromBuild="true"
 						>
 						<Tool
 							Name="CUDA Build Rule"
@@ -506,6 +533,7 @@
 					</FileConfiguration>
 					<FileConfiguration
 						Name="EmuDebug|Win32"
+						ExcludedFromBuild="true"
 						>
 						<Tool
 							Name="CUDA Build Rule"

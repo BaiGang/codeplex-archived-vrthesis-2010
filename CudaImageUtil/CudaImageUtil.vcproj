@@ -157,7 +157,7 @@
 			</File>
 		</Filter>
 		<Filter
-			Name="BMP"
+			Name="ImageUtil"
 			>
 			<File
 				RelativePath=".\CudaImgUtilBMP.cc"

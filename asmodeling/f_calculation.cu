@@ -19,11 +19,10 @@ __global__ void calc_f(
                        float * f_array
                        )
 {
-  unsigned int i = threadIdx.x;
-  unsigned int j = blockIdx.y;
-  unsigned int k = blockIdx.x;
-
+  // the index of the volume cell
   int index_vol   = index3(threadIdx.x, blockIdx.y, blockIdx.x, blockDim.x);
+
+  // the index of the correspoing item in the array
   int index_array = tag_vol[index_vol];
 
   if (index_array != 0)
@@ -33,9 +32,9 @@ __global__ void calc_f(
     int v = proj_centers[n_view * 2 * (index_array-1)+1];
 
     float f = 0.0;
-    for (int uu = u - interval; uu <= u + interval; ++u)
+    for (int uu = u - interval; uu <= u + interval; ++uu)
     {
-      for (int vv = v - interval; vv <= v + interval; ++v)
+      for (int vv = v - interval; vv <= v + interval; ++vv)
       {
         uchar4 rr4 = tex2D(render_result, float(uu), float(vv));
         uchar4 gt4 = tex3D(ground_truth, float(uu), float(vv), float(i_view));

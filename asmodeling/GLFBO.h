@@ -4,6 +4,8 @@
 // Fangyang SHEN, VRLab, Beihang University
 // me@shenfy.net
 //
+// Edited by BAI Gang, for unsigned char pixel values...
+//
 // (C) Copyright VRLab, Beihang University 2009.
 //////////////////////////////////////////////////////////////////////
 
@@ -33,7 +35,7 @@ public:
   bool CheckFBOErr(void);
   bool IsReady(void);
 
-  float *ReadPixels(void);
+  unsigned char *ReadPixels(void);
 
   int GetWidth(void) {return m_width;}
   int GetHeight(void) {return m_height;}
@@ -48,7 +50,7 @@ protected:
   GLuint m_colorTexture;
   GLuint m_depthTexture;
 
-  float *m_output;
+  unsigned char *m_output;
   int m_width, m_height;
 };
 

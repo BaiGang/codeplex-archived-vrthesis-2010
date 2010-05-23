@@ -35,9 +35,11 @@ void CGLFBO::Init(int width, int height)
   //initialize color texture
   glGenTextures(1, &m_colorTexture);
   glBindTexture(GL_TEXTURE_2D, m_colorTexture);
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8UI, width, height, 0, GL_RGBA_INTEGER, GL_UNSIGNED_BYTE, NULL);
 
   //initialize frame buffer
   glGenFramebuffersEXT(1, &m_fbo);
@@ -159,15 +161,15 @@ bool CGLFBO::CheckFBOErr()
   return isOK;
 }
 
-float *CGLFBO::ReadPixels()
+unsigned char *CGLFBO::ReadPixels()
 {
   if (m_output == 0)
-    m_output = new float[m_width * m_height * 4];
-  memset(m_output, 0, m_width * m_height * 4 * sizeof(float));
+    m_output = new unsigned char[m_width * m_height * 4];
+  memset(m_output, 0, m_width * m_height * 4 * sizeof(unsigned char));
 
   glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, m_depthTexture);
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, m_fbo);
   glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
-  glReadPixels(0, 0, m_width, m_height, GL_RGBA, GL_FLOAT, m_output);
+  glReadPixels(0, 0, m_width, m_height, GL_RGBA_INTEGER, GL_UNSIGNED_BYTE, m_output);
   return m_output;
 }
