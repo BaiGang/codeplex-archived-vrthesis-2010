@@ -465,9 +465,8 @@ namespace as_modeling
     set_density_tags(level, h_tag_volume, dummy_list, projected_centers_, false);
 
     // allocate space for volume data on device
-    cutilSafeCall( cudaFree(d_vol_pitchedptr.ptr) );
     size_t vol_size = 1 << current_level_;
-    vol_extent = make_cudaExtent(vol_size, vol_size, vol_size);
+    vol_extent = make_cudaExtent(vol_size*sizeof(float), vol_size, vol_size);
     cutilSafeCall( cudaMalloc3D(&d_vol_pitchedptr, vol_extent) );
 
     // copy data to CUDA
@@ -502,7 +501,9 @@ namespace as_modeling
 
     std::list<float> dummy_list;
 
-    set_density_tags(level, h_tag_volume, dummy_list, projected_centers_, FALSE);
+    set_density_tags(level, h_tag_volume, dummy_list, projected_centers_, false);
+
+    int n_nonzero_items = projected_centers_.size() / (2*num_views);
 
     // allocate space for volume data on device
     cutilSafeCall( cudaFree(d_vol_pitchedptr.ptr) );
@@ -510,10 +511,11 @@ namespace as_modeling
     vol_extent = make_cudaExtent(vol_size, vol_size, vol_size);
     cutilSafeCall( cudaMalloc3D(&d_vol_pitchedptr, vol_extent) );
 
-    // copy data to CUDA
-    cutilSafeCall( cudaFree(d_tag_volume) );
-    cutilSafeCall( cudaFree(d_projected_centers) );
+    // TODO:
+    // downsampling to get guess_x
+    // then copy to std::list guess ... 
 
+    // copy data to CUDA
     h_projected_centers = new int [projected_centers_.size()];
     int i = 0;
     for (std::list<int>::const_iterator it = projected_centers_.begin();
@@ -522,12 +524,10 @@ namespace as_modeling
     {
       h_projected_centers[i] = *it;
     }
-    cutilSafeCall( cudaMalloc<int>(&d_tag_volume, sizeof(int)*size) );
-    cutilSafeCall( cudaMalloc<int>(&d_projected_centers, sizeof(int)*projected_centers_.size()) );
+
     cutilSafeCall( cudaMemcpy(d_projected_centers, h_projected_centers, sizeof(int)*projected_centers_.size(), cudaMemcpyHostToDevice));
     cutilSafeCall( cudaMemcpy(d_tag_volume, h_tag_volume, sizeof(int)*size, cudaMemcpyHostToDevice) );
-    delete [] h_projected_centers;
-    delete [] h_tag_volume;
+
 
     return true;
   }
