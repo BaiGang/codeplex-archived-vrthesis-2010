@@ -23,7 +23,11 @@ namespace as_modeling
     {
       int zbase = i_camera * height_;
       sprintf_s(path_buf, 200, "../Data/Camera%02d/Frame%05d.bmp", i_camera, iframe);
-      tmpBMP.LoadImage(path_buf);
+      if (!tmpBMP.LoadImage(path_buf))
+      {
+        fprintf(stderr, "Error when loading %s \n", path_buf);
+        return false;
+      }
       for (int y = 0; y < height_; ++y)
       {
         for (int x = 0; x < width_; ++x)

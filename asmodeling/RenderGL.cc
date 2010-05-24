@@ -2,7 +2,7 @@
 #include "ASModeling.h"
 #include <GL/glut.h>
 
-#define __TEST_RENDER__
+//#define __TEST_RENDER__
 
 namespace as_modeling
 {
@@ -93,6 +93,8 @@ namespace as_modeling
 
   void RenderGL::render_unperturbed(int i_view, GLuint vol_tex)
   {
+    fprintf(stderr, "--- Render unperturbed : view %d \n", i_view);
+
     float proj_mat[16];
     float mv_mat[16];
 

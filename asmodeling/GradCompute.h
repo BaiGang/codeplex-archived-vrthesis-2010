@@ -54,11 +54,11 @@ namespace as_modeling{
 
     // use previous level result
     // init the new x
-    bool level_init(int level, std::list<float>& guess_x);
+    bool level_init(int level, std::list<float>& guess_x, ap::real_1d_array& prev_x);
 
     // use previous frame result
     // init the new x
-    bool ASMGradCompute::succframe_init(int level, std::list<float>& guess_x);
+    bool succframe_init(int level, std::list<float>& guess_x, ap::real_1d_array& prev_x);
 
   private:
     // set the volume tag and projection center for current level
@@ -76,6 +76,7 @@ namespace as_modeling{
     bool set_asmodeling(ASModeling *p);
     ~ASMGradCompute()
     {
+      instance_->release();
       delete instance_;
       delete renderer_;
     }

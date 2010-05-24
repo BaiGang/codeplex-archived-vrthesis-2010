@@ -4,6 +4,8 @@
 #include <cutil_inline.h>
 #include <cutil_math.h>
 
+#include "cuda_bridge.h"
+
 #include "utils.cuh"
 #include "volume_construction.cu"
 #include "f_calculation.cu"
@@ -52,7 +54,54 @@ void upsample_volume_cuda (int level,
   cutilCheckMsg("Kernel execution failed");
 }
 
+void construct_volume_from_previous_cuda (
+  float * device_x,
+  cudaPitchedPtr * density_vol,
+  cudaExtent extent,
+  int * tag_vol
+  )
+{
+  dim3 grid_dim(extent.depth, extent.height, 1);
+  dim3 block_dim(extent.width/4, 1, 1);
 
+  construct_volume_from_prev<<<grid_dim, block_dim>>> (
+    *density_vol,
+    device_x,
+    tag_vol
+    );
+
+  cutilCheckMsg("Kernel execution failed");
+}
+
+void cull_empty_cells_cuda (cudaPitchedPtr * density_vol,
+                            cudaExtent extent,
+                            int * tag_vol )
+{
+  dim3 grid_dim(extent.depth, extent.height, 1);
+  dim3 block_dim(extent.width, 1 ,1);
+
+  cull_empty_cells<<<grid_dim, block_dim>>> (
+    *density_vol,
+    tag_vol );
+
+  cutilCheckMsg("Kernel execution failed");
+}
+
+void get_guess_x_cuda (float * guess_x,
+                       cudaPitchedPtr * density_vol,
+                       cudaExtent extent,
+                       int * tag_vol )
+{
+  dim3 grid_dim(extent.depth, extent.height, 1);
+  dim3 block_dim(extent.width/4, 1, 1);
+
+  get_guess_x<<<grid_dim, block_dim>>> (
+    *density_vol,
+    tag_vol,
+    guess_x );
+
+  cutilCheckMsg("Kernel execution failed");
+}
 
 extern "C"
 void reduceSinglePass (int size,
@@ -98,18 +147,14 @@ float calculate_f_cuda (int    level,
 
 
   // copy to sum_array for sum
-  //reduceSinglePass(n_nonzero_items, 256,
-  //  (n_nonzero_items/256)+((n_nonzero_items%256)?1:0), 
-  //  f_array, sum_array);
-
-  //reduce(powtwo_length, 256,
-  //  (powtwo_length/256)+((powtwo_length%256)?1:0), 
-  //  f_array, sum_array);
+  reduceSinglePass(n_nonzero_items, 256,
+    (n_nonzero_items/256)+((n_nonzero_items%256)?1:0), 
+    f_array, sum_array);
 
   // check if kernel execution generated an error
   cutilCheckMsg("Kernel execution failed");
 
-  //cutilSafeCall( cudaThreadSynchronize() );
+  cutilSafeCall( cudaThreadSynchronize() );
 
   // copy and return result
   float result = 0.0f;
@@ -147,6 +192,5 @@ void calculate_g_cuda( int    level,
 
   // check if kernel execution generated an error
   cutilCheckMsg("Kernel execution failed");
-
   cutilSafeCall( cudaGetLastError() );
 }

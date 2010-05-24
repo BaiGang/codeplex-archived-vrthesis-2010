@@ -73,26 +73,51 @@ namespace as_modeling
       ASMGradCompute::grad_compute
       );
 
-    // finish this optimize call
-    //delete_density_indicator();
+    printf("Level : %d\nreturned info code : %d\n\n", i_level, lbfgsb_info_code_);
+    ++ i_level;
 
     // progressively optimize finer volumes
     while (i_level <= MAX_VOL_LEVEL)
     {
-      // TODO:
-      // subdivide volume and the previous array x
-      
+      ASMGradCompute::Instance()->level_init(
+        i_level, host_x, lbfgsb_x_);
 
-      // TODO:
-      // optimize routine
+      lbfgsb_x_.setbounds(1, host_x.size());
+      lbfgsb_nbd_.setbounds(1, host_x.size());
+      lbfgsb_l_.setbounds(1, host_x.size());
+      lbfgsb_u_.setbounds(1, host_x.size());
 
+      int index_x = 1;
+      for (std::list<float>::const_iterator it = host_x.begin();
+        it != host_x.end();
+        ++ it)
+      {
+        lbfgsb_x_(index_x) = *it;
+
+        lbfgsb_nbd_(index_x) = constrain_type_;
+        lbfgsb_l_(index_x) = lower_boundary_;
+        lbfgsb_u_(index_x) = upper_boundary_;
+
+        ++ index_x;
+      }
+
+      lbfgsbminimize(host_x.size(),
+        lbfgs_m_, 
+        lbfgsb_x_,
+        eps_g_, 
+        eps_f_, 
+        eps_x_,
+        max_iter_,
+        lbfgsb_nbd_,
+        lbfgsb_l_,
+        lbfgsb_u_,
+        lbfgsb_info_code_,
+        ASMGradCompute::grad_compute
+        );
+
+      printf("Level : %d\nreturned info code : %d\n\n", i_level, lbfgsb_info_code_);
       ++ i_level;
     }
-
-    // TODO:
-    // store the resulted volume...
-    // maybe use some kind of compression...
-    //grad_computer_->
 
     return true;
   }

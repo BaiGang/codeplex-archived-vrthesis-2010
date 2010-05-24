@@ -12,61 +12,7 @@
 #include <math/geomath.h>
 #include <math/ConvexHull2D.h>
 
-/////////////////////////////////////////////
-//   Forward declarations
-/////////////////////////////////////////////
-void construct_volume_cuda (float * device_x,
-                            cudaPitchedPtr * density_vol,
-                            cudaExtent extent,
-                            int *   tag_vol );
-
-void upsample_volume_cuda (int level,
-                           int max_level,
-                           cudaPitchedPtr * lower_lev,
-                           cudaPitchedPtr * upper_lev );
-
-void bind_rrtex_cuda (cudaArray*);
-void bind_prtex_cuda (cudaArray*);
-void bind_gttex_cuda (cudaArray*);
-
-void change_image_layout_cuda (unsigned char * raw_image,
-                               cudaPitchedPtr * image_pptr,
-                               cudaExtent * extent,
-                               int width,
-                               int height,
-                               int iview );
-
-float calculate_f_cuda (int    level, 
-                        int    i_view, 
-                        int    n_view,
-                        int    n_nonzero_items,
-                        int    powtwo_length,
-                        int    interval,
-                        int*   projected_centers, 
-                        int*   vol_tag,
-                        float* f_array,
-                        float* sum_array );
-
-void calculate_g_cuda (int    level, 
-                       int    i_view, 
-                       int    n_view,
-                       int    n_nonzero_items,
-                       int    interval,
-                       int*   projected_centers, 
-                       int*   vol_tag,
-                       float* g_array );
-
-//void calculate_g_cuda(int, int*, float*, float*);
-
-static inline int nearest_pow2(int a)
-{
-  int k = 1;
-  while (k < a)
-  {
-    k = k << 1;
-  }
-  return k;
-}
+#include "cuda_bridge.h"
 /////////////////////////////////////////////
 
 
@@ -179,8 +125,6 @@ namespace as_modeling
       // bind array to cuda tex
       bind_rrtex_cuda(Instance()->rr_tex_cudaArray);
 
-
-
       // launch kernel
       f += calculate_f_cuda(
         Instance()->current_level_,
@@ -194,8 +138,7 @@ namespace as_modeling
         Instance()->p_device_x,
         Instance()->d_temp_f);
 
-
-
+      // calc g[]
       for (int pt_slice = 0; pt_slice < ASModeling::MAX_VOL_SIZE; ++pt_slice)
       {
         for (int pv = 0; pv < Instance()->p_asmodeling_->volume_interval_; ++pv)
@@ -217,10 +160,6 @@ namespace as_modeling
             bind_prtex_cuda(Instance()->pr_tex_cudaArray);
 
             //// launch kernel
-            //calculate_g_cuda(Instance()->current_level_,
-            //  Instance()->d_projected_centers,
-            //  Instance()->p_device_x,
-            //  Instance()->p_device_g);
             calculate_g_cuda(
               Instance()->current_level_,
               i_view,
@@ -230,8 +169,6 @@ namespace as_modeling
               Instance()->d_projected_centers,
               Instance()->d_tag_volume,
               Instance()->p_device_g );
-
-
 
             // unmap resource
             cutilSafeCall( cudaGraphicsUnmapResources(1, &(Instance()->resource_pr_)) );
@@ -244,13 +181,11 @@ namespace as_modeling
       cutilSafeCall( cudaGraphicsUnmapResources(1, &(Instance()->resource_rr_)) );
     } // for i_view
 
-
-
     // copy g[] from device to host 
     cutilSafeCall( cudaMemcpy(
       Instance()->p_host_g, 
       Instance()->p_device_g,
-      size,
+      n*sizeof(float),
       cudaMemcpyDeviceToHost) );
 
     // set g[]
@@ -285,9 +220,7 @@ namespace as_modeling
     param.extent   = gt_cudaArray_extent;
     param.kind     = cudaMemcpyHostToDevice;
 
-    // ERROR -- 20100520 --002
     cutilSafeCall( cudaMemcpy3D(&param) );
-
     bind_gttex_cuda( gt_tex_cudaArray );
 
     return true;
@@ -405,6 +338,8 @@ namespace as_modeling
 
     cutilSafeCall( cudaThreadExit() );
 
+    glDeleteTextures(1, &vol_tex_);
+
     delete [] h_projected_centers;
     delete [] h_tag_volume;
     delete [] h_vol_data;
@@ -453,7 +388,7 @@ namespace as_modeling
   }
 
 
-  bool ASMGradCompute::succframe_init(int level, std::list<float>& guess_x)
+  bool ASMGradCompute::succframe_init(int level, std::list<float>& guess_x, ap::real_1d_array& prev_x)
   {
     // init using previous frame's result
     current_level_ = level;
@@ -492,31 +427,50 @@ namespace as_modeling
     return true;
   }
 
-  bool ASMGradCompute::level_init(int level, std::list<float>& guess_x)
+
+  bool ASMGradCompute::level_init(int level, std::list<float>& guess_x, ap::real_1d_array& prev_x)
   {
     current_level_ = level;
 
     int length = 1<<level;
     int size = length * length *length;
+    int n = prev_x.gethighbound();
 
-    std::list<float> dummy_list;
-
-    set_density_tags(level, h_tag_volume, dummy_list, projected_centers_, false);
-
-    int n_nonzero_items = projected_centers_.size() / (2*num_views);
+    // first, we construct volume and upsample
+    // for previous results
+    Instance()->p_host_x[0] = 0.0f;
+    for (int i = 1; i <= n; ++i)
+    {
+      Instance()->p_host_x[i] = prev_x(i);
+    }
 
     // allocate space for volume data on device
     cutilSafeCall( cudaFree(d_vol_pitchedptr.ptr) );
     size_t vol_size = 1 << current_level_;
-    vol_extent = make_cudaExtent(vol_size, vol_size, vol_size);
+    vol_extent = make_cudaExtent(vol_size*sizeof(float), vol_size, vol_size);
     cutilSafeCall( cudaMalloc3D(&d_vol_pitchedptr, vol_extent) );
 
-    // TODO:
-    // downsampling to get guess_x
-    // then copy to std::list guess ... 
+    // copy to device x
+    cutilSafeCall( cudaMemcpy(
+      Instance()->p_device_x,
+      Instance()->p_host_x,
+      (1+n)*(sizeof(float)),
+      cudaMemcpyHostToDevice ) );
+
+    construct_volume_from_previous_cuda(
+      Instance()->p_device_x,
+      &(Instance()->d_vol_pitchedptr),
+      Instance()->vol_extent,
+      Instance()->d_tag_volume );
+
+    // followed calculation of tag volume and projected centers
+    std::list<float> dummy_list;
+    set_density_tags(level, h_tag_volume, dummy_list, projected_centers_, false);
+
+    // cull the empty cells 
+    int n_nonzero_items = projected_centers_.size() / (2*num_views);
 
     // copy data to CUDA
-    h_projected_centers = new int [projected_centers_.size()];
     int i = 0;
     for (std::list<int>::const_iterator it = projected_centers_.begin();
       it != projected_centers_.end();
@@ -528,6 +482,31 @@ namespace as_modeling
     cutilSafeCall( cudaMemcpy(d_projected_centers, h_projected_centers, sizeof(int)*projected_centers_.size(), cudaMemcpyHostToDevice));
     cutilSafeCall( cudaMemcpy(d_tag_volume, h_tag_volume, sizeof(int)*size, cudaMemcpyHostToDevice) );
 
+    cull_empty_cells_cuda(
+      &(Instance()->d_vol_pitchedptr),
+      Instance()->vol_extent,
+      Instance()->d_tag_volume );
+
+    // copy back to initiate guess_x
+    guess_x.clear();
+
+    get_guess_x_cuda(
+      Instance()->p_device_x,
+      &(Instance()->d_vol_pitchedptr),
+      Instance()->vol_extent,
+      Instance()->d_tag_volume );
+
+    cutilSafeCall( cudaMemcpy(
+      Instance()->p_host_x,
+      Instance()->p_device_x,
+      sizeof(float)*(1+n_nonzero_items),
+      cudaMemcpyDeviceToHost) );
+
+    guess_x.push_back(0.0f);
+    for (int i = 1; i <= n_nonzero_items; ++i)
+    {
+      guess_x.push_back( Instance()->p_host_x[i] );
+    }
 
     return true;
   }
@@ -550,7 +529,6 @@ namespace as_modeling
     //  memset(debugBMP[img].GetPixelAt(0,0), 0, sizeof(unsigned char)*3*p_asmodeling_->width_*p_asmodeling_->height_);
     //}
     //////////////////////////////////
-
 
     int length = (1<<level);
 

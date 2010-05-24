@@ -342,6 +342,10 @@
 			Name="GradCompute"
 			>
 			<File
+				RelativePath=".\cuda_bridge.h"
+				>
+			</File>
+			<File
 				RelativePath=".\GradCompute.cc"
 				>
 			</File>

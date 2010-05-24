@@ -5,4 +5,9 @@ Release
 *.user
 Debug
 Release
+</Value></Property><Property><Name>svn:ignore</Name><Value>*.pdb
+*.user
+Debug
+Release
+EmuDebug
 </Value></Property></Properties></ItemProperties>

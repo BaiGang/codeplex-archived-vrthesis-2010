@@ -18,28 +18,26 @@ namespace as_modeling
 
     std::list<float> guess_x;
 
-    // init the grad_computer
-    ASMGradCompute::Instance()->succframe_init(MAX_VOL_LEVEL, guess_x);
-
     // calc x using previous x and volume tag
+    ASMGradCompute::Instance()->succframe_init(MAX_VOL_LEVEL, guess_x, lbfgsb_x_);
+
     // x
     int n = guess_x.size();
 
-
-
     // call lbfgsb minimize routine
-    lbfgsbminimize( n,
-                    lbfgs_m_,
-                    lbfgsb_x_,
-                    eps_g_,
-                    eps_f_,
-                    eps_x_,
-                    max_iter_,
-                    lbfgsb_nbd_,
-                    lbfgsb_l_,
-                    lbfgsb_u_,
-                    lbfgsb_info_code_,
-                    ASMGradCompute::grad_compute );
+    lbfgsbminimize(
+      n,
+      lbfgs_m_,
+      lbfgsb_x_,
+      eps_g_,
+      eps_f_,
+      eps_x_,
+      max_iter_,
+      lbfgsb_nbd_,
+      lbfgsb_l_,
+      lbfgsb_u_,
+      lbfgsb_info_code_,
+      ASMGradCompute::grad_compute );
 
     return true;
   }

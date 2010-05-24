@@ -56,3 +56,64 @@ __global__ void upsample_volume(
 
   *p_higher = *p_lower;
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//  Upsample previous level to current level
+//
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+__global__ void construct_volume_from_prev(
+  cudaPitchedPtr vol_pptr,
+  float * device_x,
+  int * tag_vol )
+{
+  unsigned int i = threadIdx.x / 2;
+  unsigned int j = blockIdx.y / 2;
+  unsigned int k = blockIdx.x / 2;
+  unsigned int size = blockDim.x / 2;
+
+  int index = index3(i, j, k, size);
+
+  char * slice = (char *)vol_pptr.ptr + blockIdx.x * vol_pptr.pitch * blockDim.x;
+
+  *((float*)(slice+blockIdx.y*vol_pptr.pitch) + threadIdx.x)
+    = device_x[ tag_vol[index] ];
+}
+
+__global__ void cull_empty_cells (cudaPitchedPtr vol_pptr,
+                                  int * tag_vol)
+{
+  unsigned int i = threadIdx.x;
+  unsigned int j = blockIdx.y;
+  unsigned int k = blockIdx.x;
+  unsigned int size = blockDim.x;
+
+  int index = index3(i, j, k, size);
+
+  if (tag_vol[index] == 0)
+  {
+    char * slice = (char*)vol_pptr.ptr + blockIdx.x * vol_pptr.pitch * blockDim.x;
+    *((float*)(slice + blockIdx.y*vol_pptr.pitch) + threadIdx.x) = 0.0f;
+  }
+}
+
+__global__ void get_guess_x (cudaPitchedPtr vol_pptr,
+                             int *tag_vol,
+                             float * guess_x)
+{
+  unsigned int i = threadIdx.x;
+  unsigned int j = blockIdx.y;
+  unsigned int k = blockIdx.x;
+  unsigned int size = blockDim.x;
+
+  int index = index3(i, j, k, size);
+  int ind_array = tag_vol[ index ];
+
+  if (ind_array != 0)
+  {
+    char * slice = (char*)vol_pptr.ptr + blockIdx.x * vol_pptr.pitch * blockDim.x;
+    float value = *((float*)(slice + blockIdx.y*vol_pptr.pitch) + threadIdx.x);
+
+    guess_x[ind_array] = value;
+  }
+}
