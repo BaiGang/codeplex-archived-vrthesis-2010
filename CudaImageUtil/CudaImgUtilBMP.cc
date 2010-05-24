@@ -49,7 +49,7 @@ namespace cuda_imageutil
 		int    imgWidth, imgHeight, imgXPelsPerMeter, imgYPelsPerMeter;
 		uint16 imgPlanes, imgBitCount;
 
-		bool invertY = false;
+		bool invertY = true;
 
 		fp = fopen( imageFileName, "rb" );
 		if (!fp)
@@ -142,6 +142,8 @@ namespace cuda_imageutil
 		int x, y;
 		int lineLength;
 
+    bool invertY = true;
+
 		int height = GetHeight();
 		int width  = GetWidth();
 
@@ -181,12 +183,14 @@ namespace cuda_imageutil
 		/* Write pixels */
 		for (y = 0; y < height; y++) 
 		{
+      int yy = invertY ? (height-1-y) : y;
+
 			int nbytes = 0;
 			for (x = 0; x < width; x++) 
 			{
-				putc( *(ptr+(y*3*width)+3*x+2), fp), nbytes++;
-				putc( *(ptr+(y*3*width)+3*x+1), fp), nbytes++;
-				putc( *(ptr+(y*3*width)+3*x+0), fp), nbytes++;
+				putc( *(ptr+(yy*3*width)+3*x+2), fp), nbytes++;
+				putc( *(ptr+(yy*3*width)+3*x+1), fp), nbytes++;
+				putc( *(ptr+(yy*3*width)+3*x+0), fp), nbytes++;
 			}
 			/* Padding for 32-bit boundary */
 			while ((nbytes % 4) != 0) 

@@ -61,6 +61,19 @@ void bind_gttex_cuda(cudaArray* data_array)
   bind_tex<uchar4,3>(data_array, ground_truth);
 }
 
+void unbind_rrtex_cuda()
+{
+  cutilSafeCall( cudaUnbindTexture(&render_result));
+}
+void unbind_prtex_cuda()
+{
+  cutilSafeCall( cudaUnbindTexture(&perturbed_result));
+}
+void unbind_gt_tex_cuda()
+{
+  cutilSafeCall( cudaUnbindTexture(&ground_truth));
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //    Util function to calculate vectorized position of a volume cell

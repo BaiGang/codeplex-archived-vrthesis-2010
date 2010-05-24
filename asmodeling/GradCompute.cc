@@ -118,6 +118,8 @@ namespace as_modeling
       // render to image 1
       Instance()->renderer_->render_unperturbed(i_view, Instance()->vol_tex_);
 
+
+
       cutilSafeCall( cudaGraphicsMapResources(1, &(Instance()->resource_rr_)) );
 
       // get mapped array
@@ -152,6 +154,8 @@ namespace as_modeling
             Instance()->renderer_->render_perturbed(i_view, Instance()->vol_tex_, pt_slice, pu, pv);
 
             // accumulate g[]
+
+            // BREAK AT THE THIRD TIME CALL...
             cutilSafeCall( cudaGraphicsMapResources(1, &(Instance()->resource_pr_)) );
 
             // get mapped array
@@ -174,6 +178,9 @@ namespace as_modeling
               Instance()->d_tag_volume,
               Instance()->p_device_g );
 
+            // unbind texture
+            unbind_prtex_cuda();
+
             // unmap resource
             cutilSafeCall( cudaGraphicsUnmapResources(1, &(Instance()->resource_pr_)) );
 
@@ -181,6 +188,8 @@ namespace as_modeling
         } // for pv
       } // for each slice
 
+      // unbind texture
+      unbind_rrtex_cuda();
       // unmap resource
       cutilSafeCall( cudaGraphicsUnmapResources(1, &(Instance()->resource_rr_)) );
     } // for i_view
@@ -360,6 +369,8 @@ namespace as_modeling
 
     current_level_ = level;
 
+
+
     int length = 1<<level;
     int size = length * length *length;
 
@@ -387,6 +398,47 @@ namespace as_modeling
       sizeof(int)*size, 
       cudaMemcpyHostToDevice) );
 
+    ////////////////////////////////////////
+    //GLuint tmptex;
+    //glGenTextures(1, &tmptex);
+    //glBindTexture(GL_TEXTURE_3D, tmptex);
+    //// set basic texture parameters
+    //glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    //glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    //glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    //glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    //glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    //float tmptexdata[64];
+    //for (int tmp = 0; tmp<64;++tmp)
+    //{
+    //  tmptexdata[tmp] = 0.8f;
+    //}
+    //glTexImage3D(GL_TEXTURE_3D, 0, GL_LUMINANCE32F_ARB, 4, 4, 4, 0, GL_LUMINANCE, GL_FLOAT, tmptexdata);
+
+    //// debug for the cameras in gl...
+    //for (int iview = 0; iview < Instance()->num_views; ++iview)
+    //{
+    //  renderer_->render_unperturbed(iview, tmptex);
+    //  unsigned char * pdata = Instance()->renderer_->rr_fbo_->ReadPixels();
+    //  cuda_imageutil::BMPImageUtil bmp;
+    //  bmp.SetSizes(Instance()->p_asmodeling_->width_, Instance()->p_asmodeling_->height_);
+    //  unsigned char * ppp = pdata;
+    //  for (unsigned int vvv = 0; vvv < bmp.GetHeight(); ++vvv)
+    //  {
+    //    for (unsigned int uuu = 0; uuu < bmp.GetWidth(); ++uuu)
+    //    {
+    //      for (int color = 0; color>3; ++color)
+    //      {
+    //        bmp.GetPixelAt(uuu, vvv)[color] = *ppp;
+    //        ++ ppp;
+    //      }
+    //      ++ ppp;
+    //    }
+    //  }
+    //  char haha[300];
+    //  sprintf_s(haha, "../Data/Camera%02d/proj.bmp", iview);
+    //  bmp.SaveImage(haha);
+    //}
 
     return true;
   }
@@ -517,7 +569,8 @@ namespace as_modeling
 
 
 
-  void ASMGradCompute::set_density_tags(int level,
+  void ASMGradCompute::set_density_tags (
+    int level,
     int *tag_volume,
     std::list<float> &density,
     std::list<int> &centers,
@@ -613,9 +666,9 @@ namespace as_modeling
             {
               for (int ii = 0; ii <= 1; ++ii)
               {
-                wc_x[wc_index] = static_cast<float>(i+ii)/static_cast<float>(length)*p_asmodeling_->box_size_ + p_asmodeling_->trans_x_;
-                wc_y[wc_index] = static_cast<float>(j+jj)/static_cast<float>(length)*p_asmodeling_->box_size_ + p_asmodeling_->trans_y_;
-                wc_z[wc_index] = static_cast<float>(k+kk)/static_cast<float>(length)*p_asmodeling_->box_size_ + p_asmodeling_->trans_z_;
+                wc_x[wc_index] = (static_cast<float>(i+ii)/static_cast<float>(length)-0.5f)*p_asmodeling_->box_size_ + p_asmodeling_->trans_x_;
+                wc_y[wc_index] = (static_cast<float>(j+jj)/static_cast<float>(length)-0.5f)*p_asmodeling_->box_size_ + p_asmodeling_->trans_y_;
+                wc_z[wc_index] = (static_cast<float>(k+kk)/static_cast<float>(length)-0.5f)*p_asmodeling_->box_size_ + p_asmodeling_->trans_z_;
 
                 wc_x[8] += wc_x[wc_index];
                 wc_y[8] += wc_y[wc_index];

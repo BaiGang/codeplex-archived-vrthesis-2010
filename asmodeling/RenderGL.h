@@ -45,7 +45,7 @@ namespace as_modeling
     scoped_ptr<GLSLShader> shader_x_pertuerbed_; // along x axis, perturbed
     scoped_ptr<GLSLShader> shader_y_pertuerbed_; // along y axis, ..
     scoped_ptr<GLSLShader> shader_z_pertuerbed_; // along z axis, ..
-
+  public:
     scoped_ptr<CGLFBO> rr_fbo_;     // render result fbo, for calc f
     scoped_ptr<CGLFBO> pr_fbo_;     // perturbed result fbo, for calc g
 

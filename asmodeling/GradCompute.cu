@@ -194,3 +194,5 @@ void calculate_g_cuda( int    level,
   cutilCheckMsg("Kernel execution failed");
   cutilSafeCall( cudaGetLastError() );
 }
+
+/////////////////////////////
