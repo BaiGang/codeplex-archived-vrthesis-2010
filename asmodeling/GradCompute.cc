@@ -1,5 +1,7 @@
 #include <GL/glew.h>
 
+#include "../CudaImageUtil/CudaImgUtilBMP.h"
+
 #include <cuda_runtime.h>
 #include <cutil_inline.h>
 #include <cutil_gl_inline.h>
@@ -13,6 +15,8 @@
 #include <math/ConvexHull2D.h>
 
 #include "cuda_bridge.h"
+
+
 /////////////////////////////////////////////
 
 
@@ -521,14 +525,55 @@ namespace as_modeling
   {
 
     //////////////////////////////////
-    //cuda_imageutil::BMPImageUtil * debugBMP = new cuda_imageutil::BMPImageUtil[8];
-    //for (int img=0; img<8;++img)
-    //{
-    //  debugBMP[img].LoadImage("../Data/a.bmp");
-    //  debugBMP[img].SetSizes(p_asmodeling_->width_, p_asmodeling_->height_);
-    //  memset(debugBMP[img].GetPixelAt(0,0), 0, sizeof(unsigned char)*3*p_asmodeling_->width_*p_asmodeling_->height_);
-    //}
+    cuda_imageutil::BMPImageUtil * debugBMP = new cuda_imageutil::BMPImageUtil[8];
+    for (int img=0; img<8;++img)
+    {
+      debugBMP[img].SetSizes(p_asmodeling_->width_, p_asmodeling_->height_);
+      debugBMP[img].ClearImage();
+    }
     //////////////////////////////////
+#if 0
+    ///////////////////////
+    //for (int i_view = 0; i_view<num_views; ++i_view)
+    //{
+    //  for (int kk = 0; kk < 2; ++ kk)
+    //  {
+    //    for (int jj = 0; jj < 2; ++ jj)
+    //    {
+    //      for (int ii = 0; ii < 2; ++ii)
+    //      {
+    //        float x = /*p_asmodeling_->trans_x_ +*/ ii*p_asmodeling_->box_size_;
+    //        float y = /*p_asmodeling_->trans_y_ +*/ jj*p_asmodeling_->box_size_;
+    //        float z = /*p_asmodeling_->trans_z_ +*/ kk*p_asmodeling_->box_size_;
+
+    //        Vector4 cwc(x,y,z);
+    //        Vector4  cec = p_asmodeling_->camera_extr_paras_[i_view] * cwc;
+
+    //        cec.x /= cec.z;
+    //        cec.y /= cec.z;
+    //        cec.z /= cec.z;
+
+    //        int pu = static_cast<int>( 0.5+
+    //          p_asmodeling_->camera_intr_paras_[i_view](0,0)* cec.x + p_asmodeling_->camera_intr_paras_[i_view](0,2) );
+    //        int pv = static_cast<int>( 0.5+
+    //          p_asmodeling_->camera_intr_paras_[i_view](1,1)* cec.y + p_asmodeling_->camera_intr_paras_[i_view](1,2) );
+
+
+
+    //        debugBMP[i_view].GetPixelAt(pu,pv)[0] = kk*255;
+    //        debugBMP[i_view].GetPixelAt(pu,pv)[2] = jj*255;
+    //        debugBMP[i_view].GetPixelAt(pu,pv)[1] = ii*255;
+    //        
+    //      }
+    //    }
+    //  }
+    //  char tm[200];
+    //  sprintf_s(tm,"../Data/Projected%02d.BMP", i_view);
+    //  debugBMP[i_view].SaveImage(tm);
+    //}
+    //return;
+    ///////////////////////
+#endif
 
     int length = (1<<level);
 
@@ -568,9 +613,9 @@ namespace as_modeling
             {
               for (int ii = 0; ii <= 1; ++ii)
               {
-                wc_x[wc_index] = 0.50f+static_cast<float>(i+ii)/static_cast<float>(p_asmodeling_->box_width_)*p_asmodeling_->box_size_ + p_asmodeling_->trans_x_;
-                wc_y[wc_index] = 0.50f+static_cast<float>(j+jj)/static_cast<float>(p_asmodeling_->box_height_)*p_asmodeling_->box_size_ + p_asmodeling_->trans_y_;
-                wc_z[wc_index] = 0.50f+static_cast<float>(k+kk)/static_cast<float>(p_asmodeling_->box_depth_)*p_asmodeling_->box_size_ + p_asmodeling_->trans_z_;
+                wc_x[wc_index] = static_cast<float>(i+ii)/static_cast<float>(length)*p_asmodeling_->box_size_ + p_asmodeling_->trans_x_;
+                wc_y[wc_index] = static_cast<float>(j+jj)/static_cast<float>(length)*p_asmodeling_->box_size_ + p_asmodeling_->trans_y_;
+                wc_z[wc_index] = static_cast<float>(k+kk)/static_cast<float>(length)*p_asmodeling_->box_size_ + p_asmodeling_->trans_z_;
 
                 wc_x[8] += wc_x[wc_index];
                 wc_y[8] += wc_y[wc_index];
@@ -613,11 +658,13 @@ namespace as_modeling
               p_asmodeling_->camera_intr_paras_[i_camera](0,0) * cec.x + p_asmodeling_->camera_intr_paras_[i_camera](0,2) );
             int py = static_cast<int>( 0.5+
               p_asmodeling_->camera_intr_paras_[i_camera](1,1) * cec.y + p_asmodeling_->camera_intr_paras_[i_camera](1,2) );
+            
+
             centers.push_back(px);
             centers.push_back(py);
 
             //////////////////////////////////////////////////
-            //debugBMP[i_camera].GetPixelAt(px,py)[0] = 255;
+            debugBMP[i_camera].GetPixelAt(px,py)[0] = 255;
             //////////////////////////////////////////////////
 
             // for each corner
@@ -658,8 +705,12 @@ namespace as_modeling
 
             for (int vv = static_cast<int>(y_min); vv < static_cast<int>(y_max+0.5f); ++vv)
             {
+              if (vv<0 || vv>=p_asmodeling_->height_)
+                continue;
               for (int uu = static_cast<int>(x_min); uu < static_cast<int>(x_max+0.5f); ++uu)
               {
+                if (uu<0 || uu >= p_asmodeling_->width_)
+                  continue;
                 // Currently only R channel
                 unsigned char pix = *(p_asmodeling_->ground_truth_image_.GetPixelAt(uu,vv+zbase));
                 if (pix > 0 && tmpConvexHull.IfInConvexHull(uu*1.0f, vv*1.0f))  // *1.0f to make the compiler happy
@@ -684,12 +735,12 @@ namespace as_modeling
       } // for j
     } // for k
 
-    //for (int img=0; img<8;++img)
-    //{
-    //  char path_buf[50];
-    //  sprintf_s(path_buf, 50, "../Data/test%02d.bmp", img);
-    //  debugBMP[img].SaveImage(path_buf);
-    //}
+    for (int img=0; img<8;++img)
+    {
+      char path_buf[50];
+      sprintf_s(path_buf, 50, "../Data/test%02d.bmp", img);
+      debugBMP[img].SaveImage(path_buf);
+    }
 
   }
 

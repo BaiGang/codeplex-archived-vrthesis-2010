@@ -28,6 +28,7 @@
 //====================================================================//
 
 #include <cassert>
+#include <cstdlib>
 #include "CImgUtiltTpes.h"
 
 namespace cuda_imageutil
@@ -37,6 +38,8 @@ namespace cuda_imageutil
 	{
 	public:
 		typedef ElemType  PixelType[Channels];
+
+    ElemType dummy[Channels];
 
 	public:
 		// Constructor/Destructor
@@ -58,7 +61,9 @@ namespace cuda_imageutil
 		//// Access pixel
 		inline ElemType * GetPixelAt(uint u, uint v)
 		{
-			assert( u < m_width && v < m_height ); 
+			//assert( u < m_width && v < m_height ); 
+      if( u>= m_width || v >= m_height )
+        return dummy;
 			return & m_pixelsP [ (v * m_width + u) * Channels ];
 		}
 
@@ -79,8 +84,8 @@ namespace cuda_imageutil
 		// I / O
 		// NOTE: I/O issues should not be handle by this base class.
 		// We just deal with in-core fairs.
-		virtual bool LoadImage(char * fname) { return false; };
-		virtual bool SaveImage(char * fname) { return false; };
+		virtual bool LoadImage(const char * fname) { return false; };
+		virtual bool SaveImage(const char * fname) { return false; };
 
 	public:
 		CudaImageUtil<ElemType, Channels>& operator = (CudaImageUtil<ElemType, Channels>& img)

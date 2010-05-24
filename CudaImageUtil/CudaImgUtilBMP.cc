@@ -34,7 +34,7 @@ void           WriteUnsignedInt(unsigned int x, FILE *fp);
 
 namespace cuda_imageutil
 {
-	bool BMPImageUtil::LoadImage(char * imageFileName)
+	bool BMPImageUtil::LoadImage(const char * imageFileName)
 	{
 		uint8 *img;
 		uint8 *tmp;
@@ -59,11 +59,11 @@ namespace cuda_imageutil
 		}
 
 		/* Read file header */
-		bmpType = ReadUnsignedShort(fp);
-		bmpSize = ReadUnsignedInt(fp);
+		bmpType      = ReadUnsignedShort(fp);
+		bmpSize      = ReadUnsignedInt(fp);
 		bmpReserved1 = ReadUnsignedShort(fp);
 		bmpReserved2 = ReadUnsignedShort(fp);
-		bmpOffBits = ReadUnsignedInt(fp);
+		bmpOffBits   = ReadUnsignedInt(fp);
 
 		/* Check file header */
 		if (bmpType != type || bmpOffBits != off_bits)
@@ -135,7 +135,7 @@ namespace cuda_imageutil
 		return true;
 	} // LoadImage(char *)
 
-	bool BMPImageUtil::SaveImage(char * imageFileName)
+	bool BMPImageUtil::SaveImage(const char * imageFileName)
 	{
 		FILE *fp;
 		char buf[1024];
