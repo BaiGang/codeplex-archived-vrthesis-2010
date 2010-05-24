@@ -1,3 +1,23 @@
+//Copyright (c) 2010 BAI Gang.
+//
+//Permission is hereby granted, free of charge, to any person obtaining a copy
+//of this software and associated documentation files (the "Software"), to deal
+//in the Software without restriction, including without limitation the rights
+//to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+//copies of the Software, and to permit persons to whom the Software is
+//furnished to do so, subject to the following conditions:
+//
+//The above copyright notice and this permission notice shall be included in
+//all copies or substantial portions of the Software.
+//
+//THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+//THE SOFTWARE.
+
 #include <cstdio>
 
 #include "CudaImgUtilBMP.h"
@@ -46,7 +66,7 @@ namespace cuda_imageutil
 		bmpOffBits = ReadUnsignedInt(fp);
 
 		/* Check file header */
-		if (bmpType != MYBMP_BF_TYPE || bmpOffBits != MYBMP_BF_OFF_BITS)
+		if (bmpType != type || bmpOffBits != off_bits)
 		{
 			fprintf( stderr, "ReadBMP() encountered bad header in file '%s'!\n\n", imageFileName);
 			return false;
@@ -66,9 +86,9 @@ namespace cuda_imageutil
 		imgClrImportant = ReadUnsignedInt(fp);
 
 		/* Check info header */
-		if( imgSize != MYBMP_BI_SIZE || imgWidth <= 0 || 
+		if( imgSize != bi_size || imgWidth <= 0 || 
 			imgHeight <= 0 || imgPlanes != 1 || 
-			imgBitCount != 24 || imgCompression != MYBMP_BI_RGB ||
+			imgBitCount != 24 || imgCompression != RGB ||
 			imgSizeImage == 0 )
 		{
 			fprintf( stderr, "ReadBMP() encountered unsupported bitmap type in '%s'!\n\n", imageFileName);
@@ -139,19 +159,19 @@ namespace cuda_imageutil
 			lineLength = (lineLength / 4 + 1) * 4;
 
 		/* Write file header */
-		WriteUnsignedShort( (unsigned short int) MYBMP_BF_TYPE,								              fp);
-		WriteUnsignedInt  ( (unsigned int)       (MYBMP_BF_OFF_BITS + lineLength * height),	fp);
+		WriteUnsignedShort( (unsigned short int) type,								              fp);
+		WriteUnsignedInt  ( (unsigned int)       (off_bits + lineLength * height),	fp);
 		WriteUnsignedShort( (unsigned short int) 0,											                    fp);
 		WriteUnsignedShort( (unsigned short int) 0,										                      fp);
-		WriteUnsignedInt  ( (unsigned short)     MYBMP_BF_OFF_BITS,                         fp);
+		WriteUnsignedInt  ( (unsigned short)     off_bits,                         fp);
 
 		/* Write info header */
-		WriteUnsignedInt  ( (unsigned short int) MYBMP_BI_SIZE,                             fp);
+		WriteUnsignedInt  ( (unsigned short int) bi_size,                             fp);
 		WriteInt          ( (int)                width,                                     fp);
 		WriteInt          ( (int)                height,                                    fp);
 		WriteUnsignedShort( (unsigned short int) 1,                                         fp);
 		WriteUnsignedShort( (unsigned short int) 24,                                        fp);
-		WriteUnsignedInt  ( (unsigned int)       MYBMP_BI_RGB,                              fp);
+		WriteUnsignedInt  ( (unsigned int)       RGB,                              fp);
 		WriteUnsignedInt  ( (unsigned int)      (lineLength * (unsigned int) height),       fp);
 		WriteInt          ( (int)				         2925,                                      fp);
 		WriteInt          ( (int)				         2925,                                      fp);

@@ -8,19 +8,15 @@
 
 varying vec4 vertexPosEye;  // 视坐标系下的顶点坐标 
 
-//uniform ivec4 disturbPara;//M,KU,KV,slice, M体素间隔，KU，KV扰动序号,slice当前切面是否扰动,
-uniform float fwidth;  //体素分辨率
-//uniform float disturb;  // 扰动差分， delta x
-uniform vec3 lightIntensity; // 光强度
-uniform vec4 lightPosWorld; // 世界坐标系下光源位置
-uniform float absorptionCoefficient;  // 参与介质 属性
-uniform float scatteringCoefficient;  // 参与介质 属性
-uniform vec4 cameraPos;  // 相机位置 （世界坐标系下）
-uniform float stepSize;  // ray marching 的步长
+uniform float     fwidth;  //体素分辨率
+uniform vec3      lightIntensity; // 光强度
+uniform vec4      lightPosWorld; // 世界坐标系下光源位置
+uniform float     absorptionCoefficient;  // 参与介质 属性
+uniform float     scatteringCoefficient;  // 参与介质 属性
+uniform vec4      cameraPos;  // 相机位置 （世界坐标系下）
+uniform float     stepSize;  // ray marching 的步长
 uniform sampler3D volumeTex;  // 保存体数据的三维纹理的id
-//uniform samplerBuffer volumeTex;
-//uniform vec3 principalAxis;   // 主轴
-uniform mat4 cameraInv;  // what the heck?
+uniform mat4      cameraInv;  // what the heck?
 
 const float LOG2E = 1.442695; //1 / log(2)
 const float PI = 3.1415926;

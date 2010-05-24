@@ -568,9 +568,9 @@ namespace as_modeling
             {
               for (int ii = 0; ii <= 1; ++ii)
               {
-                wc_x[wc_index] = static_cast<float>(i+ii)/static_cast<float>(p_asmodeling_->box_width_)*p_asmodeling_->box_size_ + p_asmodeling_->trans_x_;
-                wc_y[wc_index] = static_cast<float>(j+jj)/static_cast<float>(p_asmodeling_->box_height_)*p_asmodeling_->box_size_ + p_asmodeling_->trans_y_;
-                wc_z[wc_index] = static_cast<float>(k+kk)/static_cast<float>(p_asmodeling_->box_depth_)*p_asmodeling_->box_size_ + p_asmodeling_->trans_z_;
+                wc_x[wc_index] = 0.50f+static_cast<float>(i+ii)/static_cast<float>(p_asmodeling_->box_width_)*p_asmodeling_->box_size_ + p_asmodeling_->trans_x_;
+                wc_y[wc_index] = 0.50f+static_cast<float>(j+jj)/static_cast<float>(p_asmodeling_->box_height_)*p_asmodeling_->box_size_ + p_asmodeling_->trans_y_;
+                wc_z[wc_index] = 0.50f+static_cast<float>(k+kk)/static_cast<float>(p_asmodeling_->box_depth_)*p_asmodeling_->box_size_ + p_asmodeling_->trans_z_;
 
                 wc_x[8] += wc_x[wc_index];
                 wc_y[8] += wc_y[wc_index];
@@ -582,9 +582,9 @@ namespace as_modeling
           }
 
           // calc the wc of the cell center
-          wc_x[8] /= 8.0;
-          wc_y[8] /= 8.0;
-          wc_z[8] /= 8.0;
+          wc_x[8] /= 8.0f;
+          wc_y[8] /= 8.0f;
+          wc_z[8] /= 8.0f;
 
           // number of pixels that are not zero valued
           int n_effective_pixels = 0;

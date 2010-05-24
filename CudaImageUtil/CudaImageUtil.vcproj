@@ -152,6 +152,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\CIUChannelReduce.inl"
+				>
+			</File>
+			<File
 				RelativePath=".\CudaImgUtil.h"
 				>
 			</File>

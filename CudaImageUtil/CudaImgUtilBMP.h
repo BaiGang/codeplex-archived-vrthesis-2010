@@ -1,29 +1,58 @@
+//Copyright (c) 2010 BAI Gang.
+//
+//Permission is hereby granted, free of charge, to any person obtaining a copy
+//of this software and associated documentation files (the "Software"), to deal
+//in the Software without restriction, including without limitation the rights
+//to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+//copies of the Software, and to permit persons to whom the Software is
+//furnished to do so, subject to the following conditions:
+//
+//The above copyright notice and this permission notice shall be included in
+//all copies or substantial portions of the Software.
+//
+//THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+//THE SOFTWARE.
+
+
+//Copyright (c) 2010 BAI Gang.
+//
+//Permission is hereby granted, free of charge, to any person obtaining a copy
+//of this software and associated documentation files (the "Software"), to deal
+//in the Software without restriction, including without limitation the rights
+//to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+//copies of the Software, and to permit persons to whom the Software is
+//furnished to do so, subject to the following conditions:
+//
+//The above copyright notice and this permission notice shall be included in
+//all copies or substantial portions of the Software.
+//
+//THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+//IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+//FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+//AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+//LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+//OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+//THE SOFTWARE.
+
 #ifndef _CUDA_IMG_UTIL_BMP_H_
 #define _CUDA_IMG_UTIL_BMP_H_
 
 #include "CudaImgUtil.h"
 
-/* define return codes for WriteBMP() */
-#ifndef GFXIO_ERRORS
-#define GFXIO_ERRORS
-    #define GFXIO_OK            0
-    #define GFXIO_OPENERROR     1
-    #define GFXIO_BADFILE       2
-    #define GFXIO_UNSUPPORTED   3
-#endif
-
-/* some useful bitmap constants, prefixed with nonsense to not overlap with */
-/*    potential MS Windows definitions...                                   */
-#define MYBMP_BF_TYPE           0x4D42
-#define MYBMP_BF_OFF_BITS       54
-#define MYBMP_BI_SIZE           40
-#define MYBMP_BI_RGB            0L
-#define MYBMP_BI_RLE8           1L
-#define MYBMP_BI_RLE4           2L
-#define MYBMP_BI_BITFIELDS      3L
-
 namespace cuda_imageutil
 {
+  const unsigned int type       = 0x4D42;
+  const unsigned int off_bits   = 54;
+  const unsigned int bi_size    = 40;
+  const unsigned int RGB        = 0;
+  const unsigned int RLE8       = 1;
+  const unsigned int RLE4       = 2;
+  const unsigned int BITFields  = 3;
 
 	class BMPImageUtil : public CudaImageUtil<uint8, 3>
 	{
