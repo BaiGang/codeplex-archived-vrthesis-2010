@@ -353,6 +353,8 @@ namespace as_modeling
     full_vol_extent = make_cudaExtent(max_length*sizeof(float), max_length, max_length);
     cutilSafeCall( cudaMalloc3D(&d_full_vol_pptr, full_vol_extent) );
 
+    fprintf(stderr, "d_projected_centers size : %d\n", 2 * p_asmodeling_->num_cameras_ * max_size);
+
     cutilSafeCall( cudaMalloc<int>(&d_projected_centers, 2 * p_asmodeling_->num_cameras_ * max_size) );
     cutilSafeCall( cudaMalloc<int>(&d_tag_volume, max_size) );
 
@@ -432,6 +434,10 @@ namespace as_modeling
     {
       h_projected_centers[i] = *it;
     }
+
+    fprintf(stderr, "\n\n, sizeof projected_centers_ : %d\n", projected_centers_.size());
+    fprintf(stderr, "  Max size : %d\n", 
+      ASModeling::MAX_VOL_SIZE*ASModeling::MAX_VOL_SIZE*ASModeling::MAX_VOL_SIZE);
 
 
     cutilSafeCall( cudaMemcpy(
@@ -548,13 +554,26 @@ namespace as_modeling
       h_projected_centers[i] = *it;
     }
 
-    cutilSafeCall( cudaMemcpy(d_projected_centers, h_projected_centers, sizeof(int)*projected_centers_.size(), cudaMemcpyHostToDevice));
-    cutilSafeCall( cudaMemcpy(d_tag_volume, h_tag_volume, sizeof(int)*size, cudaMemcpyHostToDevice) );
+    fprintf(stderr, "++++++++++++++++++++++++++++++ projected centers size : %d\n", projected_centers_.size());
+
+    cutilSafeCall( cudaMemcpy(
+      d_projected_centers,
+      h_projected_centers,
+      sizeof(int)*projected_centers_.size(),
+      cudaMemcpyHostToDevice));
+
+    cutilSafeCall( cudaMemcpy(
+      d_tag_volume, h_tag_volume,
+      sizeof(int)*size,
+      cudaMemcpyHostToDevice) );
 
     cull_empty_cells_cuda(
       &(Instance()->d_vol_pitchedptr),
       Instance()->vol_extent,
       Instance()->d_tag_volume );
+
+    cutilSafeCall( cudaGetLastError() );
+
 
     // copy back to initiate guess_x
     guess_x.clear();
@@ -564,6 +583,8 @@ namespace as_modeling
       &(Instance()->d_vol_pitchedptr),
       Instance()->vol_extent,
       Instance()->d_tag_volume );
+
+    cutilSafeCall( cudaGetLastError() );
 
     cutilSafeCall( cudaMemcpy(
       Instance()->p_host_x,
@@ -590,18 +611,15 @@ namespace as_modeling
     bool is_init_density)
   {
 
-    //////////////////////////////////
-    /////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////
+#if 0
     cuda_imageutil::BMPImageUtil * debugBMP = new cuda_imageutil::BMPImageUtil[8];
     for (int img=0; img<8;++img)
     {
       debugBMP[img].SetSizes(p_asmodeling_->width_, p_asmodeling_->height_);
       debugBMP[img].ClearImage();
     }
-    /////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////
-    //////////////////////////////////
+#endif
+
 #if 0
     ///////////////////////
     //for (int i_view = 0; i_view<num_views; ++i_view)
@@ -801,12 +819,10 @@ namespace as_modeling
               int py = static_cast<int>( 0.5+
                 p_asmodeling_->camera_intr_paras_[i_camera](1,1) * cec.y + p_asmodeling_->camera_intr_paras_[i_camera](1,2) );
 
-              /////////////////////////////////////////////////////////
-              ////////////////////////////////////////////////////////
+#if 0
               debugBMP[i_camera].GetPixelAt(px,py)[0] = 255;
               debugBMP[i_camera].GetPixelAt(px,py)[1] = p_asmodeling_->ground_truth_image_.GetPixelAt(px, py + zbase)[0] + 20;
-              //////////////////////////////////////////////////
-              /////////////////////////////////////////////////
+#endif
 
               centers.push_back(px);
               centers.push_back(py);
@@ -818,16 +834,15 @@ namespace as_modeling
       } // for j
     } // for k
 
-    /////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////
+#if 0
     for (int img=0; img<8;++img)
     {
       char path_buf[50];
       sprintf_s(path_buf, 50, "../Data/test%02d.bmp", img);
       debugBMP[img].SaveImage(path_buf);
     }
-    /////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////
+#endif
+
   }
 
   bool ASMGradCompute::set_asmodeling(ASModeling *p)
