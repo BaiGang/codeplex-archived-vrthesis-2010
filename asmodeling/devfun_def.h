@@ -11,6 +11,11 @@ void construct_volume_cuda (float * device_x,
                             cudaExtent extent,
                             int *   tag_vol );
 
+void construct_volume_linm_cuda (int length,
+                                 float *devic_x,
+                                 float *density_vol,
+                                 int * tag_vol );
+
 void upsample_volume_cuda (int level,
                            int max_level,
                            cudaPitchedPtr * lower_lev,
@@ -35,9 +40,6 @@ void get_guess_x_cuda (float * guess_x,
 void bind_rrtex_cuda (cudaArray*);
 void bind_prtex_cuda (cudaArray*);
 void bind_gttex_cuda (cudaArray*);
-void unbind_rrtex_cuda();
-void unbind_prtex_cuda();
-void unbind_gt_tex_cuda();
 
 void change_image_layout_cuda (unsigned char * raw_image,
                                cudaPitchedPtr * image_pptr,

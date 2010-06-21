@@ -42,7 +42,7 @@ namespace as_modeling{
     bool release( );
 
     // get the volume data
-    bool get_data(int &level, scoped_array<float>& data);
+    bool get_data(int level, scoped_array<float>& data, ap::real_1d_array &x);
 
     // set the loaded ground truth images
     bool set_ground_truth_images(cuda_imageutil::Image_4c8u& gt_images);
@@ -94,7 +94,7 @@ namespace as_modeling{
     // Renderer
     RenderGL * renderer_;
 
-    // CUDA resources
+    // CUDA Graphics resources
     cudaGraphicsResource * resource_vol_;
     cudaGraphicsResource * resource_rr_;
     cudaGraphicsResource * resource_pr_;
@@ -105,21 +105,21 @@ namespace as_modeling{
     // for cuda access
     GLuint pbo_;
 
-    // buffer texture id
+    // volume texture id
     GLuint vol_tex_;
 
     // 
     int current_level_;
 
     // CUDA host memory
-    float * h_vol_data;
-    int * h_tag_volume;
+    float * h_vol_data;       // 
+    int * h_tag_volume;       // 
     int * h_projected_centers;
 
     std::list<int> projected_centers_;
 
     // for lbfgsb routine
-    float * p_host_x;
+    float * p_host_x;   // x, 
     float * p_host_g;
 
     // CUDA device memory

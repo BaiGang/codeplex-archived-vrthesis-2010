@@ -9,6 +9,7 @@
 
 varying vec4 vertexPosEye;  // 视坐标系下的顶点坐标 
 
+uniform vec3      boxTrans;
 uniform ivec4     disturbPara;//M,KU,KV， isPurt： M体素间隔，KU，KV扰动序号, 是否扰动
 uniform float     fwidth;  //体素分辨率
 uniform float     disturb;  // 扰动差分， delta x
@@ -27,7 +28,8 @@ const float PI = 3.1415926;
 void main()
 {	
   //转换到世界坐标系	
-  vec4 VertexPosWorld = cameraInv * vertexPosEye;	 
+  vec4 VertexPosWorld = cameraInv * vertexPosEye;
+  VertexPosWorld = VertexPosWorld + vec4(boxTrans.xyz, 0.0);
 
   //计算ray
   vec3 raydir = cameraPos.xyz - VertexPosWorld.xyz;	
@@ -64,6 +66,5 @@ void main()
 
   gl_FragData[0].rgb = lightScatt.xyz;
   gl_FragData[0].a = attenuationTerm;   
-
 
 }

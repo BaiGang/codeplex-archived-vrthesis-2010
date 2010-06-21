@@ -1,3 +1,4 @@
+#include <stdafx.h>
 #include <cstdio>
 
 #include "ASModeling.h"
@@ -11,17 +12,18 @@ namespace as_modeling
   /////////////////////////////////////////////////
   bool ASModeling::Initialize(const char * conf_filename, const char * camera_filename)
   {
+    if (!load_configure_file(conf_filename))
+    {
+      fprintf(stderr, "Failed in loading configure file.\n");
+      return false;
+    }
+
     if (!load_camera_file(camera_filename))
     {
       fprintf(stderr, "Failed in loading camera file.\n");
       return false;
     }
 
-    if (!load_configure_file(conf_filename))
-    {
-      fprintf(stderr, "Failed in loading configure file.\n");
-      return false;
-    }
 
     char * tmpcam = new char [num_cameras_];
     camera_orientations_.reset(tmpcam);
@@ -85,6 +87,9 @@ namespace as_modeling
     {
       return false;
     }
+
+    // result storage and i/o
+    result_data_.SetSizes(MAX_VOL_SIZE, MAX_VOL_SIZE*MAX_VOL_SIZE);
 
     return true;
   }

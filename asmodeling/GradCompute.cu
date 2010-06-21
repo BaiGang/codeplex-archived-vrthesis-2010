@@ -4,7 +4,7 @@
 #include <cutil_inline.h>
 #include <cutil_math.h>
 
-#include "cuda_bridge.h"
+#include "devfun_def.h"
 
 #include "utils.cuh"
 #include "volume_construction.cu"
@@ -16,8 +16,8 @@ void construct_volume_cuda (float * device_x,
                             cudaExtent extent,
                             int *   tag_vol )
 {
-  dim3 grid_dim(extent.depth, extent.height, 1);
-  dim3 block_dim(extent.width/4, 1, 1);
+  dim3 grid_dim(extent.depth, extent.depth, 1);
+  dim3 block_dim(extent.depth, 1, 1);
 
   construct_volume<<< grid_dim, block_dim >>>(
     *density_vol,
@@ -27,6 +27,24 @@ void construct_volume_cuda (float * device_x,
 
   // check if kernel execution generated an error
   cutilCheckMsg("Kernel execution failed");
+}
+
+void construct_volume_linm_cuda (int length,
+                                 float *devic_x,
+                                 float *density_vol,
+                                 int * tag_vol )
+{
+  dim3 grid_dim(length, length, 1);
+  dim3 block_dim(length, 1, 1);
+
+  construct_volume_linm<<<grid_dim, block_dim>>>(
+    density_vol,
+    devic_x,
+    tag_vol );
+
+  // check if kernel execution generated an error
+  cutilCheckMsg("Kernel execution failed");
+
 }
 
 void upsample_volume_cuda (int level,
@@ -61,8 +79,8 @@ void construct_volume_from_previous_cuda (
   int * tag_vol
   )
 {
-  dim3 grid_dim(extent.depth, extent.height, 1);
-  dim3 block_dim(extent.width/4, 1, 1);
+  dim3 grid_dim(extent.depth, extent.depth, 1);
+  dim3 block_dim(extent.depth, 1, 1);
 
   construct_volume_from_prev<<<grid_dim, block_dim>>> (
     *density_vol,
@@ -77,8 +95,8 @@ void cull_empty_cells_cuda (cudaPitchedPtr * density_vol,
                             cudaExtent extent,
                             int * tag_vol )
 {
-  dim3 grid_dim(extent.depth, extent.height, 1);
-  dim3 block_dim(extent.width, 1 ,1);
+  dim3 grid_dim(extent.depth, extent.depth, 1);
+  dim3 block_dim(extent.depth, 1 ,1);
 
   cull_empty_cells<<<grid_dim, block_dim>>> (
     *density_vol,
@@ -92,8 +110,8 @@ void get_guess_x_cuda (float * guess_x,
                        cudaExtent extent,
                        int * tag_vol )
 {
-  dim3 grid_dim(extent.depth, extent.height, 1);
-  dim3 block_dim(extent.width/4, 1, 1);
+  dim3 grid_dim(extent.depth, extent.depth, 1);
+  dim3 block_dim(extent.depth, 1, 1);
 
   get_guess_x<<<grid_dim, block_dim>>> (
     *density_vol,
@@ -163,6 +181,9 @@ float calculate_f_cuda (int    level,
     sum_array,
     sizeof(float),
     cudaMemcpyDeviceToHost ));
+
+  cutilSafeCall( cudaGetLastError() );
+
   return result;
 }
 

@@ -10,9 +10,9 @@
 //	Simple Wrapper for OpenGL Frame Buffer Object
 //
 //////////////////////////////////////////////////////////////////////
-//#include "StdAfx.h"
+#include <stdAfx.h>
+#include <gl/glew.h>
 #include "GLFBO.h"
-//#include "GLCamera.h"
 #include <iostream>
 
 CGLFBO::CGLFBO(void) :
@@ -35,11 +35,9 @@ void CGLFBO::Init(int width, int height)
   //initialize color texture
   glGenTextures(1, &m_colorTexture);
   glBindTexture(GL_TEXTURE_2D, m_colorTexture);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16F, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+  glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA32F_ARB, width, height, 0, GL_RGBA, GL_FLOAT, NULL);
 
   //initialize frame buffer
   glGenFramebuffersEXT(1, &m_fbo);
@@ -88,13 +86,10 @@ void CGLFBO::BeginDraw2FBO()
   if (!m_fbo || !m_depthTexture || !m_colorTexture)
     return;
 
-  //pCamera->SetAspectRatio((float)m_width / m_height);
-
-  //glBindTexture(GL_TEXTURE_2D, 0);
   glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, m_depthTexture);
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, m_fbo);
   glPushAttrib(GL_VIEWPORT_BIT);
-  //glViewport(0, 0, m_width, m_height);
+
   glDrawBuffer(GL_COLOR_ATTACHMENT0_EXT);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
@@ -161,15 +156,15 @@ bool CGLFBO::CheckFBOErr()
   return isOK;
 }
 
-unsigned char *CGLFBO::ReadPixels()
+float *CGLFBO::ReadPixels()
 {
   if (m_output == 0)
-    m_output = new unsigned char[m_width * m_height * 4];
-  memset(m_output, 0, m_width * m_height * 4 * sizeof(unsigned char));
+    m_output = new float[m_width * m_height * 4];
+  memset(m_output, 0, m_width * m_height * 4 * sizeof(float));
 
   glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, m_depthTexture);
   glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, m_fbo);
   glReadBuffer(GL_COLOR_ATTACHMENT0_EXT);
-  glReadPixels(0, 0, m_width, m_height, GL_RGBA, GL_UNSIGNED_BYTE, m_output);
+  glReadPixels(0, 0, m_width, m_height, GL_RGBA, GL_FLOAT, m_output);
   return m_output;
 }

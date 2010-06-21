@@ -79,10 +79,10 @@ namespace as_modeling
     ///////////////////////////////////////////////////
     // consts
     ///////////////////////////////////////////////////
-    static const int INITIAL_VOL_SIZE    = 32;
-    static const int MAX_VOL_SIZE        = 128;
     static const int INITIAL_VOL_LEVEL   = 5;
     static const int MAX_VOL_LEVEL       = 7;
+    static const int INITIAL_VOL_SIZE    = 1 << INITIAL_VOL_LEVEL;
+    static const int MAX_VOL_SIZE        = 1 << MAX_VOL_LEVEL;
 
     ////////////////////////////////////////////////////
     //               helper routines
@@ -103,12 +103,15 @@ namespace as_modeling
     // data (very minor on CPU side)
     ////////////////////////////////////////////
 
-    // captured images  
+    // captured images
+    // We use one big chunk to hold all captured images
     cuda_imageutil::Image_4c8u ground_truth_image_;
 
     // density field result
     scoped_array<float> frame_volume_result_;
     scoped_array<float> frame_compressed_result_;
+
+    cuda_imageutil::BMPImageUtil result_data_;
 
     //////////////////////////////////////////////
     // ALL CONFIGURE PARAMETERS

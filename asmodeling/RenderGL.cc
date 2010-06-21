@@ -2,7 +2,7 @@
 #include "ASModeling.h"
 #include <GL/glut.h>
 
-//#define __TEST_RENDER__
+//#define __TEST_RENDKER__
 
 namespace as_modeling
 {
@@ -91,9 +91,9 @@ namespace as_modeling
     return true;
   }
 
-  void RenderGL::render_unperturbed(int i_view, GLuint vol_tex)
+  void RenderGL::render_unperturbed(int i_view, GLuint vol_tex, int length)
   {
-    fprintf(stderr, "--- Render unperturbed : view %d \n", i_view);
+    //fprintf(stderr, "--- Render unperturbed : view %d \n", i_view);
 
     float proj_mat[16];
     float mv_mat[16];
@@ -110,7 +110,8 @@ namespace as_modeling
     glMatrixMode(GL_MODELVIEW);
     glLoadMatrixf(mv_mat);
 
-    //// adjust the volume
+    // model tranformation
+    // adjust the volume
     //glTranslatef(asml_->trans_x_, asml_->trans_y_, asml_->trans_z_);
 
     // get the inversed camera matrix
@@ -120,7 +121,7 @@ namespace as_modeling
     // choose shader
 
     GLSLShader * shader = NULL;
-    float step_size = asml_->box_size_ / static_cast<float>(asml_->box_width_);
+    float step_size = asml_->box_size_ / static_cast<float>(length);
 
     if (asml_->camera_orientations_[i_view] == 'x' || asml_->camera_orientations_[i_view] == 'X')
     {
@@ -141,10 +142,13 @@ namespace as_modeling
 #ifdef __TEST_RENDER__
     rr_fbo_->BeginDraw2FBO();
     {
-      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-      glBegin(GL_POINTS);
-      glColor3f(1.0, 1.0, 1.0);
+      glBegin(GL_TRIANGLES);
+      glColor3f(1.0, 0.0, 0.0);
       glVertex3f(0.0, 0.0, 0.0);
+      glColor3f(0.0, 1.0, 0.0);
+      glVertex3f(1.0, 1.0, 0.0);
+      glColor3f(0.0, 0.0, 1.0);
+      glVertex3f(1.0, 0.0, 0.0);
       glEnd();
     }
     rr_fbo_->EndDraw2FBO();
@@ -157,7 +161,7 @@ namespace as_modeling
       shader->Begin();
 
       // set shader uniforms
-      shader->SetUniform1f("fwidth", static_cast<float>(asml_->box_width_));
+      shader->SetUniform3f("boxTrans", asml_->trans_x_, asml_->trans_y_, asml_->trans_z_);
       shader->SetUniform3f("lightIntensity", asml_->light_intensity_, 
         asml_->light_intensity_, asml_->light_intensity_);
       shader->SetUniform4f("lightPosWorld", asml_->light_x_, 
@@ -179,9 +183,9 @@ namespace as_modeling
 
       if ('X' == asml_->camera_orientations_[i_view])
       {
-        for (int i = 0; i < asml_->box_width_; ++i)
+        for (int i = 0; i < length; ++i)
         {
-          float tex_x_coord = (i+0.5) / static_cast<float>(asml_->box_width_);
+          float tex_x_coord = (i+0.5) / static_cast<float>(length);
           float geo_x_coord = asml_->box_size_ * tex_x_coord + asml_->trans_x_;
 
           glBegin(GL_QUADS);
@@ -194,9 +198,9 @@ namespace as_modeling
       }
       else if ('x' == asml_->camera_orientations_[i_view])
       {
-        for (int i = asml_->box_width_ - 1; i >= 0; --i)
+        for (int i = length - 1; i >= 0; --i)
         {
-          float tex_x_coord = (i+0.5) / static_cast<float>(asml_->box_width_);
+          float tex_x_coord = (i+0.5) / static_cast<float>(length);
           float geo_x_coord = asml_->box_size_ * tex_x_coord + asml_->trans_x_;
 
           glBegin(GL_QUADS);
@@ -273,14 +277,36 @@ namespace as_modeling
     rr_fbo_->EndDraw2FBO();
 #endif //__TEST_RENDER__
 
+
+#if 0
+    float * data = rr_fbo_->ReadPixels();
+    cuda_imageutil::BMPImageUtil tmpBmp;
+    tmpBmp.SetSizes(width_, height_);
+    for (int y = 0; y < height_; ++y)
+    {
+      for (int x = 0; x < width_; ++x)
+      {
+        tmpBmp.GetPixelAt(x,y)[0] = static_cast<unsigned char> (
+          254.0f * data[(y*width_+x)*4] );
+        tmpBmp.GetPixelAt(x,y)[1] = static_cast<unsigned char> (
+          254.0f * data[(y*width_+x)*4 + 1]);
+        tmpBmp.GetPixelAt(x,y)[2] = static_cast<unsigned char> (
+          254.0f * data[(y*width_+x)*4 + 2]);
+      }
+    }
+    tmpBmp.SaveImage("../Data/res/show.bmp");
+#endif
+
   }
 
-  void RenderGL::render_perturbed(int i_view, GLuint vol_tex, int slice, int pu, int pv)
+  void RenderGL::render_perturbed(int i_view, GLuint vol_tex, int length, int slice, int pu, int pv)
   {
     float proj_mat[16];
     float mv_mat[16];
 
     float half_size = 0.5 * asml_->box_size_;
+
+    //fprintf(stderr, "--- Render perturbed : view %d \n", i_view);
 
     // get MODELVIEW and PROJECTION matrices
     asml_->gl_projection_mats_[i_view].GetData(proj_mat);
@@ -293,7 +319,7 @@ namespace as_modeling
     glLoadMatrixf(mv_mat);
 
     //// adjust the volume
-    //glTranslatef(asml_->trans_x_, asml_->trans_y_, asml_->trans_z_);
+    glTranslatef(asml_->trans_x_, asml_->trans_y_, asml_->trans_z_);
 
     // get the inversed camera matrix
     float inv_camera[16];
@@ -302,7 +328,7 @@ namespace as_modeling
     // choose shader
 
     GLSLShader * shader = NULL;
-    float step_size = asml_->box_size_ / static_cast<float>(asml_->box_width_);
+    float step_size = asml_->box_size_ / static_cast<float>(length);
 
     if (asml_->camera_orientations_[i_view] == 'x' || asml_->camera_orientations_[i_view] == 'X')
     {
@@ -339,9 +365,7 @@ namespace as_modeling
       shader->Begin();
 
       // set shader uniforms
-      //shader->SetUniform4i("disturbPara", asml_->volume_interval_, pu, pv, slice);
-      shader->SetUniform1f("disturb", asml_->disturb_);
-      shader->SetUniform1f("fwidth", static_cast<float>(asml_->box_width_));
+      shader->SetUniform3f("boxTrans", asml_->trans_x_, asml_->trans_y_, asml_->trans_z_);
       shader->SetUniform1f("disturb", asml_->disturb_);
       shader->SetUniform3f("lightIntensity", asml_->light_intensity_, 
         asml_->light_intensity_, asml_->light_intensity_);
@@ -364,9 +388,9 @@ namespace as_modeling
 
       if ('X' == asml_->camera_orientations_[i_view])
       {
-        for (int i = 0; i < asml_->box_width_; ++i)
+        for (int i = 0; i < length; ++i)
         {
-          float tex_x_coord = (i+0.5) / static_cast<float>(asml_->box_width_);
+          float tex_x_coord = (i+0.5) / static_cast<float>(length);
           float geo_x_coord = asml_->box_size_ * tex_x_coord + asml_->trans_x_;
 
           shader->SetUniform4i("disturbPara", asml_->volume_interval_, pu, pv, (slice==i)?1:0);
@@ -381,9 +405,9 @@ namespace as_modeling
       }
       else if ('x' == asml_->camera_orientations_[i_view])
       {
-        for (int i = asml_->box_width_ - 1; i >= 0; --i)
+        for (int i = length - 1; i >= 0; --i)
         {
-          float tex_x_coord = (i+0.5) / static_cast<float>(asml_->box_width_);
+          float tex_x_coord = (i+0.5) / static_cast<float>(length);
           float geo_x_coord = asml_->box_size_ * tex_x_coord + asml_->trans_x_;
 
           shader->SetUniform4i("disturbPara", asml_->volume_interval_, pu, pv, (slice==i)?1:0);

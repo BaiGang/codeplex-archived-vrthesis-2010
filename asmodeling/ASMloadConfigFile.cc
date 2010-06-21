@@ -3,7 +3,7 @@
 // Bai, Gang.
 // March 22ed, 2010.
 
-
+#include <stdafx.h>
 #include <cstdio>
 #include <tinyxml.h>
 

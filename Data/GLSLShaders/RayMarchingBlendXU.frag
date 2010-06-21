@@ -8,7 +8,7 @@
 
 varying vec4   vertexPosEye;  // 视坐标系下的顶点坐标 
 
-uniform float     fwidth;  //体素分辨率
+uniform vec3      boxTrans;
 uniform vec3      lightIntensity; // 光强度
 uniform vec4      lightPosWorld; // 世界坐标系下光源位置
 uniform float     absorptionCoefficient;  // 参与介质 属性
@@ -25,6 +25,7 @@ void main()
 {	
   //转换到世界坐标系	
   vec4 VertexPosWorld = cameraInv * vertexPosEye;	 
+  VertexPosWorld = VertexPosWorld + vec4(boxTrans.xyz, 0.0);
 
   //计算ray
   vec3 raydir = cameraPos.xyz - VertexPosWorld.xyz;	

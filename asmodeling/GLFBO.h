@@ -35,7 +35,7 @@ public:
   bool CheckFBOErr(void);
   bool IsReady(void);
 
-  unsigned char *ReadPixels(void);
+  float *ReadPixels(void);
 
   int GetWidth(void) {return m_width;}
   int GetHeight(void) {return m_height;}
@@ -50,7 +50,7 @@ protected:
   GLuint m_colorTexture;
   GLuint m_depthTexture;
 
-  unsigned char *m_output;
+  float *m_output;
   int m_width, m_height;
 };
 

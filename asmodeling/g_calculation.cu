@@ -19,11 +19,7 @@ __global__ void calc_g(
                        float* g_array
                        )
 {
-  unsigned int k = __mul24(gridDim.x, blockIdx.x);
-  unsigned int j = __mul24(gridDim.y, blockIdx.y);
-  unsigned int i = __mul24(blockDim.x, threadIdx.x);
-
-  int vol_index = index3(i, j, k, blockDim.x);
+  int vol_index = index3(threadIdx.x, blockIdx.y, blockIdx.x, blockDim.x);
   int arr_index = tag_vol[vol_index];
 
   if (arr_index != 0)
@@ -37,11 +33,11 @@ __global__ void calc_g(
     {
       for (int vv = pv - interval; vv <= pv + interval; ++vv)
       {
-        uchar4 rr4 = tex2D(render_result, float(uu), float(vv));
+        float4 rr4 = tex2D(render_result, float(uu), float(vv));
         uchar4 gt4 = tex3D(ground_truth, float(uu), float(vv), float(i_view));
-        uchar4 pr4 = tex2D(perturbed_result, float(uu), float(vv));
+        float4 pr4 = tex2D(perturbed_result, float(uu), float(vv));
 
-        gg += -2.0f * (float)(gt4.x-rr4.x) * (float)(pr4.x-rr4.x)/(255.0*255.0*disturb_value);
+        gg += -2.0f * (gt4.x/255.0-rr4.x) * (float)(pr4.x-rr4.x)/(disturb_value);
       }
     }
 

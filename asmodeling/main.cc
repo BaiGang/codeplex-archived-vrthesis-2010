@@ -1,3 +1,4 @@
+#include <stdafx.h>
 #include <cstdio>
 #include <cstdlib>
 

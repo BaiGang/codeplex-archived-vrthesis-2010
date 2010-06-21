@@ -342,7 +342,7 @@
 			Name="GradCompute"
 			>
 			<File
-				RelativePath=".\cuda_bridge.h"
+				RelativePath=".\devfun_def.h"
 				>
 			</File>
 			<File

@@ -3,6 +3,7 @@
 // Bai, Gang.
 // March 22ed, 2010.
 
+#include <stdafx.h>
 #include <cstdio>
 
 #include "ASModeling.h"
@@ -103,10 +104,10 @@ namespace as_modeling
       float zn = 0.1f;
       float zf = 1000.0f;
       memset(proj, 0, sizeof(proj));
-      proj[0] = 2*camera_intr_paras_[i](0,0)/camera_width_;
-      proj[5] = 2*camera_intr_paras_[i](1,1)/camera_height_;
-      proj[8] = -2*(camera_intr_paras_[i](0,2)-camera_width_/2.0f)/camera_width_;
-      proj[9] = 2*(camera_intr_paras_[i](1,2)-camera_height_/2.0f)/camera_height_;
+      proj[0] = 2.0f*camera_intr_paras_[i](0,0)/camera_width_;
+      proj[5] = 2.0f*camera_intr_paras_[i](1,1)/camera_height_;
+      proj[8] = -2.0f*(camera_intr_paras_[i](0,2)-camera_width_*0.5f)/camera_width_;
+      proj[9] = 2.0f*(camera_intr_paras_[i](1,2)-camera_height_*0.5f)/camera_height_;
       proj[10] = -(zf+zn)/(zf-zn);
       proj[11] = -1.0f;
       proj[14] = -2.0f*(zf*zn)/(zf-zn);
@@ -122,61 +123,76 @@ namespace as_modeling
     FILE *debug = fopen("../Data/debug_camera.txt", "w");
     for (int i = 0; i < num_cameras_; ++i)
     {
-      // intr para
+      //// intr para
 
-      for(int j=0; j<4;++j)
-      {
-        for (int k=0; k<4;++k)
-        {
-          fprintf(debug, "%f  ", camera_intr_paras_[i](j,k));
-        }
-        fprintf(debug, "\n");
-      }
-      fprintf(debug, "\n");
+      //for(int j=0; j<4;++j)
+      //{
+      //  for (int k=0; k<4;++k)
+      //  {
+      //    fprintf(debug, "%f  ", camera_intr_paras_[i](j,k));
+      //  }
+      //  fprintf(debug, "\n");
+      //}
+      //fprintf(debug, "\n");
 
 
-      // extr para
+      //// extr para
 
-      for(int j=0; j<4;++j)
-      {
-        for (int k=0; k<4;++k)
-        {
-          fprintf(debug, "%f  ", camera_extr_paras_[i](j,k));
-        }
-        fprintf(debug, "\n");
-      }
-      fprintf(debug, "\n");
+      //for(int j=0; j<4;++j)
+      //{
+      //  for (int k=0; k<4;++k)
+      //  {
+      //    fprintf(debug, "%f  ", camera_extr_paras_[i](j,k));
+      //  }
+      //  fprintf(debug, "\n");
+      //}
+      //fprintf(debug, "\n");
 
       // gl extr para
+      fprintf(debug, "GL Extr Para : \n");
       for(int j=0; j<4;++j)
       {
         for (int k=0; k<4;++k)
         {
-          fprintf(debug, "%f  ", camera_gl_extr_paras_[i](j,k));
+          fprintf(debug, "%f\t", camera_gl_extr_paras_[i](j,k));
         }
         fprintf(debug, "\n");
       }
       fprintf(debug, "\n");
-      // camera position
 
-      for(int j=0; j<4; ++j)
+      // gl projection
+      fprintf(debug, "GL projection : \n");
+      for (int j = 0; j < 4; ++j)
       {
-        fprintf(debug, "%f  ", camera_positions_[i][j]);
-      }
-      fprintf(debug, "\n");
-
-      // inverse gl extr para
-      Matrix4 mulres = camera_gl_extr_paras_[i] * camera_inv_gl_extr_paras_[i];
-      for(int j=0; j<4; ++j)
-      {
-        for(int k=0; k<4;++k)
+        for (int k = 0; k < 4; ++k)
         {
-          fprintf(debug, "%f  ", mulres(j,k));
+          fprintf(debug, "%f\t", gl_projection_mats_[i](j,k));
         }
         fprintf(debug, "\n");
       }
+      fprintf(debug, "\n");
+
+      // camera position
+      fprintf(debug, " Camera Position : \n");
+      for(int j=0; j<4; ++j)
+      {
+        fprintf(debug, "%f\t", camera_positions_[i][j]);
+      }
+      fprintf(debug, "\n");
+
+      //// inverse gl extr para
+      //Matrix4 mulres = camera_gl_extr_paras_[i] * camera_inv_gl_extr_paras_[i];
+      //for(int j=0; j<4; ++j)
+      //{
+      //  for(int k=0; k<4;++k)
+      //  {
+      //    fprintf(debug, "%f  ", mulres(j,k));
+      //  }
+      //  fprintf(debug, "\n");
+      //}
 
     } // for i
+    fclose(debug);
 #endif
 
     return true;

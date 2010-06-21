@@ -1,3 +1,4 @@
+#include <stdafx.h>
 #include <GL/glew.h>
 
 #include "../CudaImageUtil/CudaImgUtilBMP.h"
@@ -14,7 +15,9 @@
 #include <math/geomath.h>
 #include <math/ConvexHull2D.h>
 
-#include "cuda_bridge.h"
+#include "../Utils/Timer/CPUTimer.h"
+
+#include "devfun_def.h"
 
 
 /////////////////////////////////////////////
@@ -27,6 +30,12 @@ namespace as_modeling
 
   void ASMGradCompute::grad_compute(const ap::real_1d_array& x, double &f, ap::real_1d_array &g)
   {
+    fprintf(stderr, "=== == === == Grad Computing ....\n");
+    Timer tmer_1, tmer_2, tmer_3;
+    tmer_1.start();
+
+    tmer_2.start();
+
     f = 0.0;
 
     // length of x[] and g[]
@@ -46,7 +55,7 @@ namespace as_modeling
     cutilSafeCall( cudaMemcpy(
       Instance()->p_device_x,
       Instance()->p_host_x,
-      size+1,
+      size+sizeof(float),  // {xi...} plus {0.0}
       cudaMemcpyHostToDevice) );
 
     // set g[] to zero
@@ -102,6 +111,10 @@ namespace as_modeling
 
     cutilSafeCall( cudaMemcpy3D(&param) );
 
+    fprintf(stderr, "--- === --- COPY to GPU used %lf secs.\n", tmer_2.stop());
+
+    tmer_3.start();
+
     // unmap gl graphics resource after writing-to operation
     cutilSafeCall( cudaGraphicsUnmapResources(1, &Instance()->resource_vol_) );
 
@@ -110,15 +123,14 @@ namespace as_modeling
     int powtwo_length = nearest_pow2( n );
     cutilSafeCall( cudaMemset( Instance()->p_device_x, 0, powtwo_length * sizeof(float)));
 
-    fprintf(stderr, "num views: %d\n", Instance()->num_views);
+
+    int length = 1 << Instance()->current_level_;
 
     // calc f and g[]
     for (int i_view = 0; i_view < Instance()->num_views; ++i_view)
     {
       // render to image 1
-      Instance()->renderer_->render_unperturbed(i_view, Instance()->vol_tex_);
-
-
+      Instance()->renderer_->render_unperturbed(i_view, Instance()->vol_tex_, length);
 
       cutilSafeCall( cudaGraphicsMapResources(1, &(Instance()->resource_rr_)) );
 
@@ -145,17 +157,17 @@ namespace as_modeling
         Instance()->d_temp_f);
 
       // calc g[]
-      for (int pt_slice = 0; pt_slice < ASModeling::MAX_VOL_SIZE; ++pt_slice)
+      for (int pt_slice = 0; pt_slice < 1 << (Instance()->current_level_); ++pt_slice)
       {
+        //fprintf(stderr, " --- --- perturbing slice %d...\n", pt_slice);
+
         for (int pv = 0; pv < Instance()->p_asmodeling_->volume_interval_; ++pv)
         {
           for (int pu = 0; pu < instance_->p_asmodeling_->volume_interval_; ++pu)
           {
-            Instance()->renderer_->render_perturbed(i_view, Instance()->vol_tex_, pt_slice, pu, pv);
+            Instance()->renderer_->render_perturbed(i_view, Instance()->vol_tex_, length, pt_slice, pu, pv);
 
             // accumulate g[]
-
-            // BREAK AT THE THIRD TIME CALL...
             cutilSafeCall( cudaGraphicsMapResources(1, &(Instance()->resource_pr_)) );
 
             // get mapped array
@@ -178,9 +190,6 @@ namespace as_modeling
               Instance()->d_tag_volume,
               Instance()->p_device_g );
 
-            // unbind texture
-            unbind_prtex_cuda();
-
             // unmap resource
             cutilSafeCall( cudaGraphicsUnmapResources(1, &(Instance()->resource_pr_)) );
 
@@ -188,11 +197,12 @@ namespace as_modeling
         } // for pv
       } // for each slice
 
-      // unbind texture
-      unbind_rrtex_cuda();
       // unmap resource
       cutilSafeCall( cudaGraphicsUnmapResources(1, &(Instance()->resource_rr_)) );
     } // for i_view
+
+
+    fprintf(stderr, "-- == == -- ++ Calc F and G in this interation used %lf secs.\n", tmer_3.stop());
 
     // copy g[] from device to host 
     cutilSafeCall( cudaMemcpy(
@@ -207,15 +217,50 @@ namespace as_modeling
       g(i+1) = Instance()->p_host_g[i];
     }
 
+    fprintf(stderr, "=== == === == Grad Computing Used %lf secs.\n", tmer_1.stop());
+
   } // static grad_compute
 
 
-  bool ASMGradCompute::get_data(int & level, scoped_array<float>& data)
+  bool ASMGradCompute::get_data(int level, scoped_array<float>& data, ap::real_1d_array &x)
   {
     int length = 1<<level;
-    int size = length * length * length;
-    float * tmpptr = new float[size];
+    int vol_size = length * length * length;
+    float * tmpptr = new float[vol_size];
     data.reset(tmpptr);
+
+    // construct volume
+    // length of x[] and g[]
+    int n = x.gethighbound();
+
+    // alloc size
+    size_t size = n * sizeof(float);
+
+    // set host_x using x[]
+    Instance()->p_host_x[0] = 0.0f;
+    for (int i = 1; i <=n; ++i)
+    {
+      Instance()->p_host_x[i] = static_cast<float>(x(i));
+    }
+
+    // copy to device x
+    cutilSafeCall( cudaMemcpy(
+      Instance()->p_device_x,
+      Instance()->p_host_x,
+      size+sizeof(float),  // {xi...} plus {0.0}
+      cudaMemcpyHostToDevice) );
+
+    // construct on cuda
+    construct_volume_linm_cuda(length, Instance()->p_device_x, Instance()->d_temp_f, Instance()->d_tag_volume);
+
+    // copy back to HOST
+    cutilSafeCall( cudaMemcpy(
+      data.get(),
+      Instance()->d_temp_f,
+      sizeof(float) * vol_size,
+      cudaMemcpyDeviceToHost) );
+
+    // set
 
     return true;
   }
@@ -242,7 +287,7 @@ namespace as_modeling
   bool ASMGradCompute::init(void)
   {
     current_level_ = ASModeling::INITIAL_VOL_LEVEL;
-    int max_length = 1<<(p_asmodeling_->MAX_VOL_LEVEL);
+    int max_length = ASModeling::MAX_VOL_SIZE;
     int max_size = max_length * max_length * max_length;
     int tex_buffer_size = max_size * sizeof(float);
 
@@ -335,6 +380,8 @@ namespace as_modeling
 
   bool ASMGradCompute::release(void)
   {
+    fprintf(stderr, " <========>  Releasing ASMGradCompute..\n");
+
     cutilSafeCall( cudaGraphicsUnregisterResource(resource_vol_));
 
     cutilSafeCall( cudaFree( d_projected_centers ) );
@@ -367,9 +414,9 @@ namespace as_modeling
   {
     // ground truth images have already been loaded...
 
+    fprintf(stderr, " <<====>> Initing frame, level %d\n", level);
+
     current_level_ = level;
-
-
 
     int length = 1<<level;
     int size = length * length *length;
@@ -386,6 +433,7 @@ namespace as_modeling
       h_projected_centers[i] = *it;
     }
 
+
     cutilSafeCall( cudaMemcpy(
       d_projected_centers,
       h_projected_centers,
@@ -398,47 +446,6 @@ namespace as_modeling
       sizeof(int)*size, 
       cudaMemcpyHostToDevice) );
 
-    ////////////////////////////////////////
-    //GLuint tmptex;
-    //glGenTextures(1, &tmptex);
-    //glBindTexture(GL_TEXTURE_3D, tmptex);
-    //// set basic texture parameters
-    //glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    //glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    //glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-    //glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    //glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    //float tmptexdata[64];
-    //for (int tmp = 0; tmp<64;++tmp)
-    //{
-    //  tmptexdata[tmp] = 0.8f;
-    //}
-    //glTexImage3D(GL_TEXTURE_3D, 0, GL_LUMINANCE32F_ARB, 4, 4, 4, 0, GL_LUMINANCE, GL_FLOAT, tmptexdata);
-
-    //// debug for the cameras in gl...
-    //for (int iview = 0; iview < Instance()->num_views; ++iview)
-    //{
-    //  renderer_->render_unperturbed(iview, tmptex);
-    //  unsigned char * pdata = Instance()->renderer_->rr_fbo_->ReadPixels();
-    //  cuda_imageutil::BMPImageUtil bmp;
-    //  bmp.SetSizes(Instance()->p_asmodeling_->width_, Instance()->p_asmodeling_->height_);
-    //  unsigned char * ppp = pdata;
-    //  for (unsigned int vvv = 0; vvv < bmp.GetHeight(); ++vvv)
-    //  {
-    //    for (unsigned int uuu = 0; uuu < bmp.GetWidth(); ++uuu)
-    //    {
-    //      for (int color = 0; color>3; ++color)
-    //      {
-    //        bmp.GetPixelAt(uuu, vvv)[color] = *ppp;
-    //        ++ ppp;
-    //      }
-    //      ++ ppp;
-    //    }
-    //  }
-    //  char haha[300];
-    //  sprintf_s(haha, "../Data/Camera%02d/proj.bmp", iview);
-    //  bmp.SaveImage(haha);
-    //}
 
     return true;
   }
@@ -488,6 +495,8 @@ namespace as_modeling
   {
     current_level_ = level;
 
+    fprintf(stderr, "  <<++++>> Initing level, %d\n", level);
+
     int length = 1<<level;
     int size = length * length *length;
     int n = prev_x.gethighbound();
@@ -513,11 +522,15 @@ namespace as_modeling
       (1+n)*(sizeof(float)),
       cudaMemcpyHostToDevice ) );
 
+    cutilSafeCall( cudaGetLastError() );
+
     construct_volume_from_previous_cuda(
       Instance()->p_device_x,
       &(Instance()->d_vol_pitchedptr),
       Instance()->vol_extent,
       Instance()->d_tag_volume );
+
+    cutilSafeCall( cudaGetLastError() );
 
     // followed calculation of tag volume and projected centers
     std::list<float> dummy_list;
@@ -569,7 +582,7 @@ namespace as_modeling
 
 
 
-  void ASMGradCompute::set_density_tags (
+  void ASMGradCompute::set_density_tags(
     int level,
     int *tag_volume,
     std::list<float> &density,
@@ -578,12 +591,16 @@ namespace as_modeling
   {
 
     //////////////////////////////////
+    /////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////
     cuda_imageutil::BMPImageUtil * debugBMP = new cuda_imageutil::BMPImageUtil[8];
     for (int img=0; img<8;++img)
     {
       debugBMP[img].SetSizes(p_asmodeling_->width_, p_asmodeling_->height_);
       debugBMP[img].ClearImage();
     }
+    /////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////
     //////////////////////////////////
 #if 0
     ///////////////////////
@@ -637,9 +654,8 @@ namespace as_modeling
     wc_x[8] = wc_y[8] = wc_z[8] = 0.0;
 
     PT2DVEC pts;
-    pts.reserve(16);
+    pts.reserve(32);
 
-    //tag_volume = new int [length*length*length];
 
     if (is_init_density)
     {
@@ -666,9 +682,12 @@ namespace as_modeling
             {
               for (int ii = 0; ii <= 1; ++ii)
               {
-                wc_x[wc_index] = (static_cast<float>(i+ii)/static_cast<float>(length)-0.5f)*p_asmodeling_->box_size_ + p_asmodeling_->trans_x_;
-                wc_y[wc_index] = (static_cast<float>(j+jj)/static_cast<float>(length)-0.5f)*p_asmodeling_->box_size_ + p_asmodeling_->trans_y_;
-                wc_z[wc_index] = (static_cast<float>(k+kk)/static_cast<float>(length)-0.5f)*p_asmodeling_->box_size_ + p_asmodeling_->trans_z_;
+                wc_x[wc_index] = (static_cast<float>(i+ii)/static_cast<float>(length) - 0.5f)
+                  * p_asmodeling_->box_size_ + p_asmodeling_->trans_x_;
+                wc_y[wc_index] = (static_cast<float>(j+jj)/static_cast<float>(length) - 0.5f)
+                  * p_asmodeling_->box_size_ + p_asmodeling_->trans_y_;
+                wc_z[wc_index] = (static_cast<float>(k+kk)/static_cast<float>(length) - 0.5f)
+                  * p_asmodeling_->box_size_ + p_asmodeling_->trans_z_;
 
                 wc_x[8] += wc_x[wc_index];
                 wc_y[8] += wc_y[wc_index];
@@ -696,34 +715,11 @@ namespace as_modeling
 
             int zbase = i_camera*p_asmodeling_->height_;
 
-            // calc the projected pixel of the current cell 
-            Vector4 cwc;
-            cwc.x = wc_x[8];
-            cwc.y = wc_y[8];
-            cwc.z = wc_z[8];
-            cwc.w = 1.0;
-            Vector4 cec;
-            cec = p_asmodeling_->camera_extr_paras_[i_camera] * cwc;
-            cec.x /= cec.z;
-            cec.y /= cec.z;
-            cec.z /= cec.z;
-            int px = static_cast<int>( 0.5+
-              p_asmodeling_->camera_intr_paras_[i_camera](0,0) * cec.x + p_asmodeling_->camera_intr_paras_[i_camera](0,2) );
-            int py = static_cast<int>( 0.5+
-              p_asmodeling_->camera_intr_paras_[i_camera](1,1) * cec.y + p_asmodeling_->camera_intr_paras_[i_camera](1,2) );
-            
-
-            centers.push_back(px);
-            centers.push_back(py);
-
-            //////////////////////////////////////////////////
-            debugBMP[i_camera].GetPixelAt(px,py)[0] = 255;
-            //////////////////////////////////////////////////
-
             // for each corner
             //  calc the projected position on each image/camera
             for (int corner_index = 0; corner_index < 8; ++corner_index)
             {
+
               // calc the projected pixel on the image of the current camera
 
               // Set world coordinates position
@@ -766,7 +762,7 @@ namespace as_modeling
                   continue;
                 // Currently only R channel
                 unsigned char pix = *(p_asmodeling_->ground_truth_image_.GetPixelAt(uu,vv+zbase));
-                if (pix > 0 && tmpConvexHull.IfInConvexHull(uu*1.0f, vv*1.0f))  // *1.0f to make the compiler happy
+                if (pix > 0 && tmpConvexHull.IfInConvexHull(uu*1.0f, vv*1.0f))  // "*1.0f" to make the compiler happy
                 {
                   ++ n_effective_pixels;
                   luminance_sum += pix;
@@ -775,26 +771,63 @@ namespace as_modeling
             }
           } // for i_camera
 
+          // this cell do has some projected matters
           if (n_effective_pixels != 0)
           {
+            // set tags
             ++ tag_index;
             int vol_index = p_asmodeling_->index3(i, j, k, length);
             tag_volume[vol_index] = tag_index;
 
             if (is_init_density)
               density.push_back( static_cast<float>(luminance_sum) / (255.0f*n_effective_pixels) );
-          }
+
+            // calc the projected pixels of the current cell 
+            for (int i_camera = 0; i_camera < p_asmodeling_->num_cameras_; ++i_camera)
+            {
+              int zbase = i_camera*p_asmodeling_->height_;
+              Vector4 cwc;
+              cwc.x = wc_x[8];
+              cwc.y = wc_y[8];
+              cwc.z = wc_z[8];
+              cwc.w = 1.0;
+              Vector4 cec;
+              cec = p_asmodeling_->camera_extr_paras_[i_camera] * cwc;
+              cec.x /= cec.z;
+              cec.y /= cec.z;
+              cec.z /= cec.z;
+              int px = static_cast<int>( 0.5+
+                p_asmodeling_->camera_intr_paras_[i_camera](0,0) * cec.x + p_asmodeling_->camera_intr_paras_[i_camera](0,2) );
+              int py = static_cast<int>( 0.5+
+                p_asmodeling_->camera_intr_paras_[i_camera](1,1) * cec.y + p_asmodeling_->camera_intr_paras_[i_camera](1,2) );
+
+              /////////////////////////////////////////////////////////
+              ////////////////////////////////////////////////////////
+              debugBMP[i_camera].GetPixelAt(px,py)[0] = 255;
+              debugBMP[i_camera].GetPixelAt(px,py)[1] = p_asmodeling_->ground_truth_image_.GetPixelAt(px, py + zbase)[0] + 20;
+              //////////////////////////////////////////////////
+              /////////////////////////////////////////////////
+
+              centers.push_back(px);
+              centers.push_back(py);
+            } // for each camera
+
+          } // if (n_effective_pixels != 0)
+
         } // for i
       } // for j
     } // for k
 
+    /////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////
     for (int img=0; img<8;++img)
     {
       char path_buf[50];
       sprintf_s(path_buf, 50, "../Data/test%02d.bmp", img);
       debugBMP[img].SaveImage(path_buf);
     }
-
+    /////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////
   }
 
   bool ASMGradCompute::set_asmodeling(ASModeling *p)

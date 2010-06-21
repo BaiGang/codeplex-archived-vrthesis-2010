@@ -44,7 +44,12 @@ namespace cuda_imageutil
 	public:
 		// Constructor/Destructor
 		CudaImageUtil() : m_width(0), m_height(0), m_pixelsP(NULL)
-		{};
+		{
+      for (uint i = 0; i < Channels; ++i)
+      {
+        dummy[i] = ElemType(0);
+      }
+    };
 		~CudaImageUtil()
 		{
 			if (m_pixelsP != NULL)

@@ -19,8 +19,8 @@ namespace as_modeling
     bool release();
 
     void render(int i); // dummy
-    void render_unperturbed(int i_view, GLuint vol_tex);
-    void render_perturbed(int i_view, GLuint vol_tex, int slice, int pu, int pv);
+    void render_unperturbed(int i_view, GLuint vol_tex, int length);
+    void render_perturbed(int i_view, GLuint vol_tex, int length, int slice, int pu, int pv);
 
     inline const GLuint& get_render_result_tex()
     {return rr_fbo_->GetColorTex();}
@@ -29,6 +29,11 @@ namespace as_modeling
 
     explicit RenderGL(ASModeling *p);
 
+    ///// For Debugging...
+    inline float * get_render_res()
+    {
+      return rr_fbo_->ReadPixels();
+    }
 
   private:
     // no default ctor

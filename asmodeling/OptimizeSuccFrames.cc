@@ -1,3 +1,4 @@
+#include <stdafx.h>
 #include "ASModeling.h"
 #include "GradCompute.h"
 #include <lbfgsb.h>

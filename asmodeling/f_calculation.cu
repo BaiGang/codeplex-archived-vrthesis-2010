@@ -36,10 +36,10 @@ __global__ void calc_f(
     {
       for (int vv = v - interval; vv <= v + interval; ++vv)
       {
-        uchar4 rr4 = tex2D(render_result, float(uu), float(vv));
+        float4 rr4 = tex2D(render_result, float(uu), float(vv));
         uchar4 gt4 = tex3D(ground_truth, float(uu), float(vv), float(i_view));
         // USE ONLY R CHANNEL HERE...
-        f += (rr4.x-gt4.x)*(rr4.x-gt4.x)/(255.0*255.0);
+        f += (rr4.x-gt4.x/255.0)*(rr4.x-gt4.x/255.0);
       }
     }
     f_array[ index_array ] = f;

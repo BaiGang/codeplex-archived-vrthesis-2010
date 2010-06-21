@@ -1,8 +1,11 @@
+#include <stdafx.h>
 #include <cstdio>
 
 #include "ASModeling.h"
 #include "GradCompute.h"
 #include <lbfgsb.h>
+
+#include "../Utils/Timer/CPUTimer.h"
 
 ////////////////////////////////////////////////////////////
 //
@@ -24,15 +27,43 @@ namespace as_modeling
       return false;
     }
 
-    // set groundtruth image to CUDA
-    //set_groundtruth_image();
+    Timer tmer;
 
     ASMGradCompute::Instance()->set_ground_truth_images(ground_truth_image_);
+
+    ////////////////////////////////////////////
+    //// for debugging
+    //cuda_imageutil::BMPImageUtil tmpbmp;
+    //tmpbmp.SetSizes(ground_truth_image_.GetWidth(), ground_truth_image_.GetHeight());
+    //for (int k = 0; k < num_cameras_; ++k)
+    //{
+    //  for (int j = 0; j < ground_truth_image_.GetHeight(); ++j)
+    //  {
+    //    for (int i = 0; i < ground_truth_image_.GetWidth(); ++i)
+    //    {
+    //      for (int c = 0; c < 3; ++c)
+    //      {
+    //        tmpbmp.GetPixelAt( i, k*ground_truth_image_.GetHeight()+j )[0] 
+    //        = ground_truth_image_.GetPixelAt( i, k*ground_truth_image_.GetHeight()+j )[0];
+    //        tmpbmp.GetPixelAt( i, k*ground_truth_image_.GetHeight()+j )[1] 
+    //        = ground_truth_image_.GetPixelAt( i, k*ground_truth_image_.GetHeight()+j )[1];
+    //        tmpbmp.GetPixelAt( i, k*ground_truth_image_.GetHeight()+j )[2] 
+    //        = ground_truth_image_.GetPixelAt( i, k*ground_truth_image_.GetHeight()+j )[2];
+    //      }
+    //    }
+    //  }
+    //}
+    //tmpbmp.SaveImage("../Data/groundtruth.bmp");
+    ////////////////////////////////////////////
 
     int i_level = INITIAL_VOL_LEVEL;
     std::list<float> host_x;
 
+    tmer.start();
+
     ASMGradCompute::Instance()->frame_init(i_level, host_x);
+
+    fprintf(stderr, "TIMING : frame_init of level %d, used %lf secs.\n", i_level, tmer.stop());
 
     ///////////////////////////////////////////////////////////////////////
     //
@@ -58,6 +89,8 @@ namespace as_modeling
       ++ index_x;
     }
 
+    tmer.start();
+
     // optimize the most coarse volume
     lbfgsbminimize(host_x.size(),
       lbfgs_m_, 
@@ -73,14 +106,21 @@ namespace as_modeling
       ASMGradCompute::grad_compute
       );
 
+    fprintf(stderr, "TIMING : call lbfgsbminimize of level %d, used %lf secs.\n", i_level, tmer.stop());
+
     printf("Level : %d\nreturned info code : %d\n\n", i_level, lbfgsb_info_code_);
+
     ++ i_level;
 
     // progressively optimize finer volumes
     while (i_level <= MAX_VOL_LEVEL)
     {
+      fprintf(stderr, "===||||==== Optimizing level %d...\n", i_level);
+
+      tmer.start();
       ASMGradCompute::Instance()->level_init(
         i_level, host_x, lbfgsb_x_);
+      fprintf(stderr, "TIMING : level start of level %d used %lf secs.", i_level, tmer.stop());
 
       lbfgsb_x_.setbounds(1, host_x.size());
       lbfgsb_nbd_.setbounds(1, host_x.size());
@@ -101,6 +141,7 @@ namespace as_modeling
         ++ index_x;
       }
 
+      tmer.start();
       lbfgsbminimize(host_x.size(),
         lbfgs_m_, 
         lbfgsb_x_,
@@ -114,10 +155,19 @@ namespace as_modeling
         lbfgsb_info_code_,
         ASMGradCompute::grad_compute
         );
-
+      fprintf(stderr, "TIMING : call lbfgsbminimize of level %d, used %lf secs.\n", i_level, tmer.stop());
       printf("Level : %d\nreturned info code : %d\n\n", i_level, lbfgsb_info_code_);
       ++ i_level;
     }
+
+    // get data
+    // copy the volume data to HOST
+    if (!ASMGradCompute::Instance()->get_data(MAX_VOL_LEVEL, frame_volume_result_, lbfgsb_x_))
+    {
+      fprintf( stderr, "===== Could not get volume data...\n" );
+      return false;
+    }
+
 
     return true;
   }

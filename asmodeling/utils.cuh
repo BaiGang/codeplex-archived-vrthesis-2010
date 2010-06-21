@@ -8,8 +8,8 @@
 //    GLOBAL VARIABLES
 //
 //////////////////////////////////////////////////////////////////////////////////////////////////////
-texture<uchar4, 2, cudaReadModeElementType> render_result;
-texture<uchar4, 2, cudaReadModeElementType> perturbed_result;
+texture<float4, 2, cudaReadModeElementType> render_result;
+texture<float4, 2, cudaReadModeElementType> perturbed_result;
 texture<uchar4, 3, cudaReadModeElementType> ground_truth;
 
 __constant__ float disturb_value = 0.00001;
@@ -46,13 +46,13 @@ void bind_tex(cudaArray* data_array, texture<pixel_T, dim, cudaReadModeElementTy
 // bind input array to render result tex ref
 void bind_rrtex_cuda(cudaArray* data_array)
 {
-  bind_tex<uchar4,2>(data_array, render_result);
+  bind_tex<float4,2>(data_array, render_result);
 }
 
 // bind input array to perturbed result tex ref
 void bind_prtex_cuda(cudaArray* data_array)
 {
-  bind_tex<uchar4,2>(data_array, perturbed_result);
+  bind_tex<float4,2>(data_array, perturbed_result);
 }
 
 // bind input array to ground truth tex ref

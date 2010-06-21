@@ -1,3 +1,4 @@
+#include <stdafx.h>
 #include <cstdio>
 
 #include "ASModeling.h"
@@ -28,14 +29,21 @@ namespace as_modeling
         fprintf(stderr, "Error when loading %s \n", path_buf);
         return false;
       }
+
       for (int y = 0; y < height_; ++y)
       {
         for (int x = 0; x < width_; ++x)
         {
+#if 0
+          ground_truth_image_.GetPixelAt(x,zbase+height_-y)[0] = tmpBMP.GetPixelAt(x,y)[0];
+          ground_truth_image_.GetPixelAt(x,zbase+height_-y)[1] = tmpBMP.GetPixelAt(x,y)[1];
+          ground_truth_image_.GetPixelAt(x,zbase+height_-y)[2] = tmpBMP.GetPixelAt(x,y)[2];
+#else
           ground_truth_image_.GetPixelAt(x,zbase+y)[0] = tmpBMP.GetPixelAt(x,y)[0];
           ground_truth_image_.GetPixelAt(x,zbase+y)[1] = tmpBMP.GetPixelAt(x,y)[1];
           ground_truth_image_.GetPixelAt(x,zbase+y)[2] = tmpBMP.GetPixelAt(x,y)[2];
-          ground_truth_image_.GetPixelAt(x,zbase+y)[3] = 0;
+#endif
+          ground_truth_image_.GetPixelAt(x,zbase+y)[3] = 1.0f;
         }
       }
     } // for each camera
