@@ -144,7 +144,7 @@ namespace as_modeling
       bind_rrtex_cuda(Instance()->rr_tex_cudaArray);
 
       // launch kernel
-      f += calculate_f_cuda(
+      float ff = calculate_f_cuda(
         Instance()->current_level_,
         i_view,
         Instance()->num_views,
@@ -155,6 +155,8 @@ namespace as_modeling
         Instance()->d_tag_volume,
         Instance()->p_device_x,
         Instance()->d_temp_f);
+      fprintf(stderr, "++ ++ ++ F value of view %d is %f\n", i_view, ff);
+      f += ff;
 
       // calc g[]
       for (int pt_slice = 0; pt_slice < 1 << (Instance()->current_level_); ++pt_slice)
@@ -201,6 +203,7 @@ namespace as_modeling
       cutilSafeCall( cudaGraphicsUnmapResources(1, &(Instance()->resource_rr_)) );
     } // for i_view
 
+    fprintf(stderr, "==+++++=== F value : %f\n", f);
 
     fprintf(stderr, "-- == == -- ++ Calc F and G in this interation used %lf secs.\n", tmer_3.stop());
 
@@ -355,7 +358,7 @@ namespace as_modeling
 
     fprintf(stderr, "d_projected_centers size : %d\n", 2 * p_asmodeling_->num_cameras_ * max_size);
 
-    cutilSafeCall( cudaMalloc<int>(&d_projected_centers, 2 * p_asmodeling_->num_cameras_ * max_size) );
+    cutilSafeCall( cudaMalloc<uint16>(&d_projected_centers, 2 * p_asmodeling_->num_cameras_ * max_size) );
     cutilSafeCall( cudaMalloc<int>(&d_tag_volume, max_size) );
 
     cutilSafeCall( cudaMalloc<float>(&p_device_x, max_size) );
@@ -371,7 +374,7 @@ namespace as_modeling
     // alloc memory on HOST
     //////////////////////////////////////////////////////////
     h_vol_data = new float [max_size];
-    h_projected_centers = new int [2 * p_asmodeling_->num_cameras_ * max_size];
+    h_projected_centers = new uint16 [2 * p_asmodeling_->num_cameras_ * max_size];
     h_tag_volume = new int [ max_size ];
 
     p_host_g = new float [max_size];
@@ -428,7 +431,7 @@ namespace as_modeling
 
     // copy data to CUDA
     int i = 0;
-    for (std::list<int>::const_iterator it = projected_centers_.begin();
+    for (std::list<uint16>::const_iterator it = projected_centers_.begin();
       it != projected_centers_.end();
       ++i, ++it)
     {
@@ -443,7 +446,7 @@ namespace as_modeling
     cutilSafeCall( cudaMemcpy(
       d_projected_centers,
       h_projected_centers,
-      sizeof(int)*projected_centers_.size(),
+      sizeof(uint16)*projected_centers_.size(),
       cudaMemcpyHostToDevice));
 
     cutilSafeCall( cudaMemcpy(
@@ -475,7 +478,7 @@ namespace as_modeling
 
     // copy data to CUDA
     int i = 0;
-    for (std::list<int>::const_iterator  it = projected_centers_.begin();
+    for (std::list<uint16>::const_iterator  it = projected_centers_.begin();
       it != projected_centers_.end();
       ++it, ++i)
     {
@@ -485,7 +488,7 @@ namespace as_modeling
     cutilSafeCall( cudaMemcpy(
       d_projected_centers,
       h_projected_centers,
-      sizeof(int)*projected_centers_.size(),
+      sizeof(uint16)*projected_centers_.size(),
       cudaMemcpyHostToDevice) );
     cutilSafeCall( cudaMemcpy(
       d_tag_volume,
@@ -547,7 +550,7 @@ namespace as_modeling
 
     // copy data to CUDA
     int i = 0;
-    for (std::list<int>::const_iterator it = projected_centers_.begin();
+    for (std::list<uint16>::const_iterator it = projected_centers_.begin();
       it != projected_centers_.end();
       ++i, ++it)
     {
@@ -559,7 +562,7 @@ namespace as_modeling
     cutilSafeCall( cudaMemcpy(
       d_projected_centers,
       h_projected_centers,
-      sizeof(int)*projected_centers_.size(),
+      sizeof(uint16)*projected_centers_.size(),
       cudaMemcpyHostToDevice));
 
     cutilSafeCall( cudaMemcpy(
@@ -607,7 +610,7 @@ namespace as_modeling
     int level,
     int *tag_volume,
     std::list<float> &density,
-    std::list<int> &centers,
+    std::list<uint16> &centers,
     bool is_init_density)
   {
 

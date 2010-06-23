@@ -68,7 +68,8 @@ namespace as_modeling{
     //  density : a list of non-zero density values, z-y-x lay out
     //  is_init_density : if true, the density will be set,
     //                    else, just set the tag_volume
-    void set_density_tags(int level, int *tag_volume, std::list<float> &density, std::list<int> &centers, bool is_init_density);
+    void set_density_tags(int level, int *tag_volume, std::list<float> &density, 
+      std::list<uint16> &centers, bool is_init_density);
 
 
   public:
@@ -114,9 +115,9 @@ namespace as_modeling{
     // CUDA host memory
     float * h_vol_data;       // 
     int * h_tag_volume;       // 
-    int * h_projected_centers;
+    uint16 * h_projected_centers;
 
-    std::list<int> projected_centers_;
+    std::list<uint16> projected_centers_;
 
     // for lbfgsb routine
     float * p_host_x;   // x, 
@@ -131,7 +132,7 @@ namespace as_modeling{
 
     float * d_temp_f;
 
-    int * d_projected_centers;
+    uint16 * d_projected_centers;
     int * d_tag_volume;
 
     cudaArray * vol_tex_cudaArray;

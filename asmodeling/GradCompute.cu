@@ -1,3 +1,4 @@
+
 #include <cstdio>
 
 #include <cuda_runtime.h>
@@ -10,6 +11,8 @@
 #include "volume_construction.cu"
 #include "f_calculation.cu"
 #include "g_calculation.cu"
+
+typedef unsigned short uint16;
 
 void construct_volume_cuda (float * device_x,
                             cudaPitchedPtr * density_vol,
@@ -135,16 +138,16 @@ void reduce (int size,
              float *d_idata,
              float *d_odata );
 
-float calculate_f_cuda (int    level, 
-                        int    i_view, 
-                        int    n_view,
-                        int    n_nonzero_items,
-                        int    powtwo_length,
-                        int    interval,
-                        int*   projected_centers, 
-                        int*   vol_tag,
-                        float* f_array,
-                        float* sum_array )
+float calculate_f_cuda (int      level, 
+                        int      i_view, 
+                        int      n_view,
+                        int      n_nonzero_items,
+                        int      powtwo_length,
+                        int      interval,
+                        uint16*  projected_centers, 
+                        int*     vol_tag,
+                        float*   f_array,
+                        float*   sum_array )
 {
   int size = 1 << level;
 
@@ -188,14 +191,14 @@ float calculate_f_cuda (int    level,
 }
 
 
-void calculate_g_cuda( int    level, 
-                       int    i_view, 
-                       int    n_view,
-                       int    n_nonzero_items,
-                       int    interval,
-                       int*   projected_centers, 
-                       int*   vol_tag,
-                       float* g_array )
+void calculate_g_cuda( int      level, 
+                       int      i_view, 
+                       int      n_view,
+                       int      n_nonzero_items,
+                       int      interval,
+                       uint16*  projected_centers, 
+                       int*     vol_tag,
+                       float*   g_array )
 {
   int length = 1 << level;
   dim3 dim_grid(length, length, 1);

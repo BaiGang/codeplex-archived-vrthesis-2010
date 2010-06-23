@@ -14,7 +14,7 @@ __global__ void calc_g(
                        int n_view,           // num of different views/cameras
                        int n,                // num of items in array x, f, and g
                        int interval,         // the occupycation radius of projection
-                       int * proj_centers,   // 
+                       unsigned short * proj_centers,   // 
                        int * tag_vol,
                        float* g_array
                        )

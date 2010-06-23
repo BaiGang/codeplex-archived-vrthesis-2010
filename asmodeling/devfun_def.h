@@ -3,6 +3,8 @@
 
 #include <cuda_runtime.h>
 
+typedef unsigned short uint16;
+
 /////////////////////////////////////////////
 //   Forward declarations
 /////////////////////////////////////////////
@@ -48,25 +50,25 @@ void change_image_layout_cuda (unsigned char * raw_image,
                                int height,
                                int iview );
 
-float calculate_f_cuda (int    level, 
-                        int    i_view, 
-                        int    n_view,
-                        int    n_nonzero_items,
-                        int    powtwo_length,
-                        int    interval,
-                        int*   projected_centers, 
-                        int*   vol_tag,
-                        float* f_array,
-                        float* sum_array );
+float calculate_f_cuda (int     level, 
+                        int     i_view, 
+                        int     n_view,
+                        int     n_nonzero_items,
+                        int     powtwo_length,
+                        int     interval,
+                        uint16* projected_centers, 
+                        int*    vol_tag,
+                        float*  f_array,
+                        float*  sum_array );
 
-void calculate_g_cuda (int    level, 
-                       int    i_view, 
-                       int    n_view,
-                       int    n_nonzero_items,
-                       int    interval,
-                       int*   projected_centers, 
-                       int*   vol_tag,
-                       float* g_array );
+void calculate_g_cuda (int      level, 
+                       int      i_view, 
+                       int      n_view,
+                       int      n_nonzero_items,
+                       int      interval,
+                       uint16*  projected_centers, 
+                       int*     vol_tag,
+                       float*   g_array );
 
 static inline int nearest_pow2(int a)
 {
