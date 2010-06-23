@@ -21,6 +21,7 @@
 
 
 /////////////////////////////////////////////
+#define __DEBUG_IMAGE_
 
 
 namespace as_modeling
@@ -614,7 +615,7 @@ namespace as_modeling
     bool is_init_density)
   {
 
-#if 0
+#ifdef __DEBUG_IMAGE_
     cuda_imageutil::BMPImageUtil * debugBMP = new cuda_imageutil::BMPImageUtil[8];
     for (int img=0; img<8;++img)
     {
@@ -726,6 +727,7 @@ namespace as_modeling
 
           // number of pixels that are not zero valued
           int n_effective_pixels = 0;
+          int ep_count_per_image[100];
           // sum of the values of all non-zero pixels
           unsigned int luminance_sum = 0;
 
@@ -733,6 +735,7 @@ namespace as_modeling
           for (int i_camera = 0; i_camera < p_asmodeling_->num_cameras_; ++i_camera)
           {
             pts.clear();
+            ep_count_per_image[i_camera] = 0;
 
             int zbase = i_camera*p_asmodeling_->height_;
 
@@ -762,8 +765,10 @@ namespace as_modeling
 
               // Projection
               Point2D tmpPt;
-              tmpPt.x = p_asmodeling_->camera_intr_paras_[i_camera](0,0) * ec.x + p_asmodeling_->camera_intr_paras_[i_camera](0,2);
-              tmpPt.y = p_asmodeling_->camera_intr_paras_[i_camera](1,1) * ec.y + p_asmodeling_->camera_intr_paras_[i_camera](1,2);
+              tmpPt.x = static_cast<int>(0.5f + 
+                p_asmodeling_->camera_intr_paras_[i_camera](0,0) * ec.x + p_asmodeling_->camera_intr_paras_[i_camera](0,2));
+              tmpPt.y = static_cast<int>(0.5f +
+                p_asmodeling_->camera_intr_paras_[i_camera](1,1) * ec.y + p_asmodeling_->camera_intr_paras_[i_camera](1,2));
               pts.push_back(tmpPt);
             }
 
@@ -773,27 +778,43 @@ namespace as_modeling
             float x_min, x_max, y_min, y_max;
             tmpConvexHull.GetBoundingBox(x_min, x_max, y_min, y_max);
 
-            for (int vv = static_cast<int>(y_min); vv < static_cast<int>(y_max+0.5f); ++vv)
+            for (int vv = static_cast<int>(y_min+0.5f); vv < static_cast<int>(y_max+0.5f); ++vv)
             {
               if (vv<0 || vv>=p_asmodeling_->height_)
                 continue;
-              for (int uu = static_cast<int>(x_min); uu < static_cast<int>(x_max+0.5f); ++uu)
+              for (int uu = static_cast<int>(x_min+0.5f); uu < static_cast<int>(x_max+0.5f); ++uu)
               {
                 if (uu<0 || uu >= p_asmodeling_->width_)
                   continue;
+
+                if (!tmpConvexHull.IfInConvexHull(uu*1.0f, vv*1.0f))
+                  continue;
+
                 // Currently only R channel
                 unsigned char pix = *(p_asmodeling_->ground_truth_image_.GetPixelAt(uu,vv+zbase));
-                if (pix > 0 && tmpConvexHull.IfInConvexHull(uu*1.0f, vv*1.0f))  // "*1.0f" to make the compiler happy
+                if (pix > 0)
                 {
-                  ++ n_effective_pixels;
+                  ++ ep_count_per_image[i_camera];
                   luminance_sum += pix;
                 }
               }
             }
           } // for i_camera
 
+          n_effective_pixels = 0;
+          bool is_effective = true;
+          for (int icam = 0; icam < p_asmodeling_->num_cameras_; ++icam)
+          {
+            if (0 == ep_count_per_image[icam])
+            {
+              is_effective = false;
+              break;
+            }
+            n_effective_pixels += ep_count_per_image[icam];
+          }
+
           // this cell do has some projected matters
-          if (n_effective_pixels != 0)
+          if (is_effective)
           {
             // set tags
             ++ tag_index;
@@ -822,9 +843,9 @@ namespace as_modeling
               int py = static_cast<int>( 0.5+
                 p_asmodeling_->camera_intr_paras_[i_camera](1,1) * cec.y + p_asmodeling_->camera_intr_paras_[i_camera](1,2) );
 
-#if 0
+#ifdef __DEBUG_IMAGE_
               debugBMP[i_camera].GetPixelAt(px,py)[0] = 255;
-              debugBMP[i_camera].GetPixelAt(px,py)[1] = p_asmodeling_->ground_truth_image_.GetPixelAt(px, py + zbase)[0] + 20;
+              debugBMP[i_camera].GetPixelAt(px,py)[1] = p_asmodeling_->ground_truth_image_.GetPixelAt(px, py + zbase)[0];
 #endif
 
               centers.push_back(px);
@@ -837,11 +858,11 @@ namespace as_modeling
       } // for j
     } // for k
 
-#if 0
+#ifdef __DEBUG_IMAGE_
     for (int img=0; img<8;++img)
     {
       char path_buf[50];
-      sprintf_s(path_buf, 50, "../Data/test%02d.bmp", img);
+      sprintf_s(path_buf, 50, "../Data/Camera%02d/test%02d.bmp", img, img);
       debugBMP[img].SaveImage(path_buf);
     }
 #endif

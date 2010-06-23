@@ -74,6 +74,7 @@ void unbind_gt_tex_cuda()
   cutilSafeCall( cudaUnbindTexture(&ground_truth));
 }
 
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //    Util function to calculate vectorized position of a volume cell
