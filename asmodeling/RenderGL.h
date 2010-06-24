@@ -58,6 +58,9 @@ namespace as_modeling
     int width_;
     int height_;
 
+    ////////////////////
+    int counter;
+
   };
 } // namespace as_modeling
 

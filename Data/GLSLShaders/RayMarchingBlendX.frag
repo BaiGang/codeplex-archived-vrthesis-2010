@@ -29,7 +29,7 @@ void main()
 {	
   //转换到世界坐标系	
   vec4 VertexPosWorld = cameraInv * vertexPosEye;
-  VertexPosWorld = VertexPosWorld + vec4(boxTrans.xyz, 0.0);
+  //VertexPosWorld = VertexPosWorld - vec4(boxTrans.xyz, 0.0);
 
   //计算ray
   vec3 raydir = cameraPos.xyz - VertexPosWorld.xyz;	

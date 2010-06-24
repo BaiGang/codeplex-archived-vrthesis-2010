@@ -2,12 +2,15 @@
 #include "ASModeling.h"
 #include <GL/glut.h>
 
-//#define __TEST_RENDKER__
+//#define __TEST_RENDER__
 
 namespace as_modeling
 {
   bool RenderGL::init()
   {
+    //////////////
+    counter = 0;
+
     // glut for creation of OpenGL context
     int tmpargc = 2;
     int * argc = &tmpargc;
@@ -79,7 +82,6 @@ namespace as_modeling
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
-
     glBlendFuncSeparate(GL_DST_ALPHA, GL_ONE, GL_DST_ALPHA, GL_ZERO);
 
     return true;
@@ -142,14 +144,33 @@ namespace as_modeling
 #ifdef __TEST_RENDER__
     rr_fbo_->BeginDraw2FBO();
     {
-      glBegin(GL_TRIANGLES);
-      glColor3f(1.0, 0.0, 0.0);
-      glVertex3f(0.0, 0.0, 0.0);
-      glColor3f(0.0, 1.0, 0.0);
-      glVertex3f(1.0, 1.0, 0.0);
-      glColor3f(0.0, 0.0, 1.0);
-      glVertex3f(1.0, 0.0, 0.0);
+      //glBegin(GL_TRIANGLES);
+      //glColor3f(1.0, 0.0, 0.0);
+      //glVertex3f(0.0, 0.0, 0.0);
+      //glColor3f(0.0, 1.0, 0.0);
+      //glVertex3f(1.0, 1.0, 0.0);
+      //glColor3f(0.0, 0.0, 1.0);
+      //glVertex3f(1.0, 0.0, 0.0);
+      //glEnd();
+
+      int length = 32;
+      glBegin(GL_POINTS);
+      for (int ii=-1; ii<2; ii+=2)
+      {
+        for (int jj=-1; jj<2; jj+=2)
+        {
+          for (int kk=-1; kk<2; kk+=2)
+          {
+            glColor3f(1.0f*(ii+1)/2.0, 1.0f*(jj+1)/2.0f, 1.0f*(kk+1)/2.0f);
+            glVertex3f(
+              asml_->trans_x_ + ii*1.0 * half_size,
+              asml_->trans_y_ + jj*1.0 * half_size,
+              asml_->trans_z_ + kk*1.0 * half_size );
+          }
+        }
+      }
       glEnd();
+
     }
     rr_fbo_->EndDraw2FBO();
 #endif //__TEST_RENDER__
@@ -158,6 +179,11 @@ namespace as_modeling
     // bind fbo
     rr_fbo_->BeginDraw2FBO();
     {
+      glClearColor(0.0, 0.0, 0.0, 1.0);
+      glDisable(GL_DEPTH_TEST);
+      glEnable(GL_BLEND);
+      glBlendFuncSeparate(GL_DST_ALPHA, GL_ONE, GL_DST_ALPHA, GL_ZERO);
+
       shader->Begin();
 
       // set shader uniforms
@@ -278,7 +304,7 @@ namespace as_modeling
 #endif //__TEST_RENDER__
 
 
-#if 0
+#if 1
     float * data = rr_fbo_->ReadPixels();
     cuda_imageutil::BMPImageUtil tmpBmp;
     tmpBmp.SetSizes(width_, height_);
@@ -287,14 +313,17 @@ namespace as_modeling
       for (int x = 0; x < width_; ++x)
       {
         tmpBmp.GetPixelAt(x,y)[0] = static_cast<unsigned char> (
-          254.0f * data[(y*width_+x)*4] );
+          254.0f * data[((height_-1-y)*width_+x)*4] );
         tmpBmp.GetPixelAt(x,y)[1] = static_cast<unsigned char> (
-          254.0f * data[(y*width_+x)*4 + 1]);
+          254.0f * data[((height_-1-y)*width_+x)*4 + 1]);
         tmpBmp.GetPixelAt(x,y)[2] = static_cast<unsigned char> (
-          254.0f * data[(y*width_+x)*4 + 2]);
+          254.0f * data[((height_-1-y)*width_+x)*4 + 2]);
       }
     }
-    tmpBmp.SaveImage("../Data/res/show.bmp");
+    char path_buf[100];
+    sprintf(path_buf, "../Data/Camera%02d/show%06d.bmp", i_view, counter);
+    tmpBmp.SaveImage(path_buf);
+    ++counter;
 #endif
 
   }
@@ -362,6 +391,11 @@ namespace as_modeling
     // bind fbo
     pr_fbo_->BeginDraw2FBO();
     {
+      glClearColor(0.0, 0.0, 0.0, 1.0);
+      glDisable(GL_DEPTH_TEST);
+      glEnable(GL_BLEND);
+      glBlendFuncSeparate(GL_DST_ALPHA, GL_ONE, GL_DST_ALPHA, GL_ZERO);
+
       shader->Begin();
 
       // set shader uniforms

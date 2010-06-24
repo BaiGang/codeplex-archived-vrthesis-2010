@@ -21,7 +21,7 @@
 
 
 /////////////////////////////////////////////
-#define __DEBUG_IMAGE_
+//#define __DEBUG_IMAGE_
 
 
 namespace as_modeling
@@ -110,6 +110,14 @@ namespace as_modeling
     param.extent   = Instance()->vol_cudaArray_extent;
     param.kind     = cudaMemcpyDeviceToDevice;
 
+#if 1
+    scoped_array<float> tmp;
+    //get_data(5, tmp, const_cast<ap::real_1d_array>(x));
+
+    // TODO :
+    //   Show the result here...
+
+#endif
     cutilSafeCall( cudaMemcpy3D(&param) );
 
     fprintf(stderr, "--- === --- COPY to GPU used %lf secs.\n", tmer_2.stop());
@@ -132,6 +140,28 @@ namespace as_modeling
     {
       // render to image 1
       Instance()->renderer_->render_unperturbed(i_view, Instance()->vol_tex_, length);
+
+      ////////////////////////////////////////////////////////////////
+      //float * data = renderer_->rr_fbo_->ReadPixels();
+      //cuda_imageutil::BMPImageUtil tmpBmp;
+      //tmpBmp.SetSizes(p_asmodeling_->width_, p_asmodeling_->height_);
+      //for (int y = 0; y < height_; ++y)
+      //{
+      //  for (int x = 0; x < width_; ++x)
+      //  {
+      //    tmpBmp.GetPixelAt(x,y)[0] = static_cast<unsigned char> (
+      //      254.0f * data[(y*width_+x)*4] );
+      //    //tmpBmp.GetPixelAt(x,y)[1] = static_cast<unsigned char> (
+      //    //  254.0f * data[(y*width_+x)*4 + 1]);
+      //    //tmpBmp.GetPixelAt(x,y)[2] = static_cast<unsigned char> (
+      //    //  254.0f * data[(y*width_+x)*4 + 2]);
+      //    tmpBmp.GetPixelAt(x,y)[1] = p_asmodeling_->ground_truth_image_.GetPixelAt(x, y+i_view * p_asmodeling_->height_);
+      //  }
+      //}
+      //char path_buf[100];
+      //sprintf(path_buf, "../Data/Camera%02d/show.bmp", i_view);
+      //tmpBmp.SaveImage(path_buf);
+      ////////////////////////////////////////////////////////////////////
 
       cutilSafeCall( cudaGraphicsMapResources(1, &(Instance()->resource_rr_)) );
 
@@ -158,6 +188,7 @@ namespace as_modeling
         Instance()->d_temp_f);
       fprintf(stderr, "++ ++ ++ F value of view %d is %f\n", i_view, ff);
       f += ff;
+      //f += 1.0f;
 
       // calc g[]
       for (int pt_slice = 0; pt_slice < 1 << (Instance()->current_level_); ++pt_slice)
@@ -381,6 +412,24 @@ namespace as_modeling
     p_host_g = new float [max_size];
     p_host_x = new float [max_size];
 
+//#if 1
+//    // test render here
+//    glBindTexture(GL_TEXTURE_3D, vol_tex_);
+//    float *tmp = new float[max_size];
+//    for (int i = 0; i < max_size; ++i)
+//    {
+//      tmp[i] = 0.5f;
+//    }
+//    glTexImage3D(GL_TEXTURE_3D, 0, GL_LUMINANCE32F_ARB, max_length, max_length, max_length, 0, GL_LUMINANCE, GL_FLOAT, tmp);
+//    CUT_CHECK_ERROR_GL2();
+//
+//    for (int i = 0; i < p_asmodeling_->num_cameras_; ++i)
+//    {
+//      renderer_->render_unperturbed(i, vol_tex_, max_length);
+//    }
+//
+//#endif
+
     return true;
   }
 
@@ -405,6 +454,8 @@ namespace as_modeling
     cutilSafeCall( cudaThreadExit() );
 
     glDeleteTextures(1, &vol_tex_);
+
+    delete renderer_;
 
     delete [] h_projected_centers;
     delete [] h_tag_volume;
@@ -567,7 +618,8 @@ namespace as_modeling
       cudaMemcpyHostToDevice));
 
     cutilSafeCall( cudaMemcpy(
-      d_tag_volume, h_tag_volume,
+      d_tag_volume,
+      h_tag_volume,
       sizeof(int)*size,
       cudaMemcpyHostToDevice) );
 
@@ -625,46 +677,45 @@ namespace as_modeling
 #endif
 
 #if 0
-    ///////////////////////
-    //for (int i_view = 0; i_view<num_views; ++i_view)
-    //{
-    //  for (int kk = 0; kk < 2; ++ kk)
-    //  {
-    //    for (int jj = 0; jj < 2; ++ jj)
-    //    {
-    //      for (int ii = 0; ii < 2; ++ii)
-    //      {
-    //        float x = /*p_asmodeling_->trans_x_ +*/ ii*p_asmodeling_->box_size_;
-    //        float y = /*p_asmodeling_->trans_y_ +*/ jj*p_asmodeling_->box_size_;
-    //        float z = /*p_asmodeling_->trans_z_ +*/ kk*p_asmodeling_->box_size_;
+    /////////////////////
+    int tlength = 32;
+    for (int i_view = 0; i_view<num_views; ++i_view)
+    {
+      for (int kk = -tlength; kk <= tlength; ++kk)
+      {
+        for (int jj = -tlength; jj <= tlength; ++jj)
+        {
+          for (int ii = -tlength; ii <= tlength; ++ii)
+          {
+            float x = p_asmodeling_->trans_x_ + ii*0.5/tlength*p_asmodeling_->box_size_;
+            float y = p_asmodeling_->trans_y_ + jj*0.5/tlength*p_asmodeling_->box_size_;
+            float z = p_asmodeling_->trans_z_ + kk*0.5/tlength*p_asmodeling_->box_size_;
 
-    //        Vector4 cwc(x,y,z);
-    //        Vector4  cec = p_asmodeling_->camera_extr_paras_[i_view] * cwc;
+            Vector4 cwc(x,y,z);
+            Vector4  cec = p_asmodeling_->camera_extr_paras_[i_view] * cwc;
 
-    //        cec.x /= cec.z;
-    //        cec.y /= cec.z;
-    //        cec.z /= cec.z;
+            cec.x /= cec.z;
+            cec.y /= cec.z;
+            cec.z /= cec.z;
 
-    //        int pu = static_cast<int>( 0.5+
-    //          p_asmodeling_->camera_intr_paras_[i_view](0,0)* cec.x + p_asmodeling_->camera_intr_paras_[i_view](0,2) );
-    //        int pv = static_cast<int>( 0.5+
-    //          p_asmodeling_->camera_intr_paras_[i_view](1,1)* cec.y + p_asmodeling_->camera_intr_paras_[i_view](1,2) );
+            int pu = static_cast<int>( 0.5+
+              p_asmodeling_->camera_intr_paras_[i_view](0,0)* cec.x + p_asmodeling_->camera_intr_paras_[i_view](0,2) );
+            int pv = static_cast<int>( 0.5+
+              p_asmodeling_->camera_intr_paras_[i_view](1,1)* cec.y + p_asmodeling_->camera_intr_paras_[i_view](1,2) );
 
+            debugBMP[i_view].GetPixelAt(pu,pv)[0] = 255;
+            debugBMP[i_view].GetPixelAt(pu,pv)[1] = 255;
+            debugBMP[i_view].GetPixelAt(pu,pv)[2] = 255;
 
-
-    //        debugBMP[i_view].GetPixelAt(pu,pv)[0] = kk*255;
-    //        debugBMP[i_view].GetPixelAt(pu,pv)[2] = jj*255;
-    //        debugBMP[i_view].GetPixelAt(pu,pv)[1] = ii*255;
-    //        
-    //      }
-    //    }
-    //  }
-    //  char tm[200];
-    //  sprintf_s(tm,"../Data/Projected%02d.BMP", i_view);
-    //  debugBMP[i_view].SaveImage(tm);
-    //}
-    //return;
-    ///////////////////////
+          }
+        }
+      }
+      char tm[200];
+      sprintf_s(tm,"../Data/Camera%02d/Projected.BMP", i_view);
+      debugBMP[i_view].SaveImage(tm);
+      debugBMP[i_view].ClearImage();
+    }
+    /////////////////////
 #endif
 
     int length = (1<<level);
@@ -672,8 +723,6 @@ namespace as_modeling
     float wc_x[9];
     float wc_y[9];
     float wc_z[9];
-
-    wc_x[8] = wc_y[8] = wc_z[8] = 0.0;
 
     PT2DVEC pts;
     pts.reserve(32);
@@ -698,6 +747,7 @@ namespace as_modeling
           // calc the world coordinates of the 8 corners of the current cell
           // NOTE : NO ROTATION
           int wc_index = 0;
+          wc_x[8] = wc_y[8] = wc_z[8] = 0.0;
           for (int kk = 0; kk <= 1; ++kk)
           {
             for (int jj = 0; jj <= 1; ++jj)
@@ -849,7 +899,7 @@ namespace as_modeling
 #endif
 
               centers.push_back(px);
-              centers.push_back(py);
+              centers.push_back(p_asmodeling_->height_ - py);
             } // for each camera
 
           } // if (n_effective_pixels != 0)
@@ -859,6 +909,42 @@ namespace as_modeling
     } // for k
 
 #ifdef __DEBUG_IMAGE_
+    // calc the projected pixels of the current cell 
+    int cn_ind = 0;
+    for (int k = -1; k < 2; k+=2)
+    {
+      for (int j = -1; j < 2; j+=2)
+      {
+        for (int i = -1; i < 2; i+=2)
+        {
+          for (int i_camera = 0; i_camera < p_asmodeling_->num_cameras_; ++i_camera)
+          {
+            Vector4 cwc;
+            cwc.x = i*0.5*p_asmodeling_->box_size_ + p_asmodeling_->trans_x_;
+            cwc.y = j*0.5*p_asmodeling_->box_size_ + p_asmodeling_->trans_y_;
+            cwc.z = k*0.5*p_asmodeling_->box_size_ + p_asmodeling_->trans_z_;
+            cwc.w = 1.0;
+            Vector4 cec;
+            cec = p_asmodeling_->camera_extr_paras_[i_camera] * cwc;
+            cec.x /= cec.z;
+            cec.y /= cec.z;
+            cec.z /= cec.z;
+            int px = static_cast<int>( 0.5+
+              p_asmodeling_->camera_intr_paras_[i_camera](0,0) * cec.x + p_asmodeling_->camera_intr_paras_[i_camera](0,2) );
+            int py = static_cast<int>( 0.5+
+              p_asmodeling_->camera_intr_paras_[i_camera](1,1) * cec.y + p_asmodeling_->camera_intr_paras_[i_camera](1,2) );
+
+            debugBMP[i_camera].GetPixelAt(px,py)[0] = 254 * (i+1)/2;
+            debugBMP[i_camera].GetPixelAt(px,py)[1] = 254 * (j+1)/2;
+            debugBMP[i_camera].GetPixelAt(px,py)[2] = 254 * (k+1)/2;
+
+          } // for each camera
+
+          ++ cn_ind;
+        }
+      }
+    }
+
     for (int img=0; img<8;++img)
     {
       char path_buf[50];
