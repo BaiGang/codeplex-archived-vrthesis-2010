@@ -8,7 +8,7 @@
 
 varying vec4   vertexPosEye;  // 视坐标系下的顶点坐标 
 
-uniform vec3      boxTrans;
+//uniform vec3      boxTrans;
 uniform vec3      lightIntensity; // 光强度
 uniform vec4      lightPosWorld; // 世界坐标系下光源位置
 uniform float     absorptionCoefficient;  // 参与介质 属性

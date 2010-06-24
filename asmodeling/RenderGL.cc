@@ -187,7 +187,7 @@ namespace as_modeling
       shader->Begin();
 
       // set shader uniforms
-      shader->SetUniform3f("boxTrans", asml_->trans_x_, asml_->trans_y_, asml_->trans_z_);
+      //shader->SetUniform3f("boxTrans", asml_->trans_x_, asml_->trans_y_, asml_->trans_z_);
       shader->SetUniform3f("lightIntensity", asml_->light_intensity_, 
         asml_->light_intensity_, asml_->light_intensity_);
       shader->SetUniform4f("lightPosWorld", asml_->light_x_, 
@@ -399,7 +399,7 @@ namespace as_modeling
       shader->Begin();
 
       // set shader uniforms
-      shader->SetUniform3f("boxTrans", asml_->trans_x_, asml_->trans_y_, asml_->trans_z_);
+      //shader->SetUniform3f("boxTrans", asml_->trans_x_, asml_->trans_y_, asml_->trans_z_);
       shader->SetUniform1f("disturb", asml_->disturb_);
       shader->SetUniform3f("lightIntensity", asml_->light_intensity_, 
         asml_->light_intensity_, asml_->light_intensity_);
