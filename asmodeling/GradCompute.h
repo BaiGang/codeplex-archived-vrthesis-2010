@@ -50,15 +50,15 @@ namespace as_modeling{
     // set the initial guess for x
     // construct the volume tags
     // set the projection center for each item
-    bool frame_init(int level, std::list<float>& guess_x);
+    bool frame_init(int level, std::vector<float>& guess_x);
 
     // use previous level result
     // init the new x
-    bool level_init(int level, std::list<float>& guess_x, ap::real_1d_array& prev_x);
+    bool level_init(int level, std::vector<float>& guess_x, ap::real_1d_array& prev_x);
 
     // use previous frame result
     // init the new x
-    bool succframe_init(int level, std::list<float>& guess_x, ap::real_1d_array& prev_x);
+    bool succframe_init(int level, std::vector<float>& guess_x, ap::real_1d_array& prev_x);
 
   private:
     // set the volume tag and projection center for current level
@@ -68,7 +68,7 @@ namespace as_modeling{
     //  density : a list of non-zero density values, z-y-x lay out
     //  is_init_density : if true, the density will be set,
     //                    else, just set the tag_volume
-    void set_density_tags(int level, int *tag_volume, std::list<float> &density, 
+    void set_density_tags(int level, int *tag_volume, std::vector<float> &density, 
       std::list<uint16> &centers, bool is_init_density);
 
 

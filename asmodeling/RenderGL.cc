@@ -2,6 +2,9 @@
 #include "ASModeling.h"
 #include <GL/glut.h>
 
+#include "../Utils/PFMImage.h"
+
+
 //#define __TEST_RENDER__
 
 namespace as_modeling
@@ -184,6 +187,8 @@ namespace as_modeling
       glEnable(GL_BLEND);
       glBlendFuncSeparate(GL_DST_ALPHA, GL_ONE, GL_DST_ALPHA, GL_ZERO);
 
+      glClear(GL_COLOR_BUFFER_BIT);
+
       shader->Begin();
 
       // set shader uniforms
@@ -207,12 +212,25 @@ namespace as_modeling
       shader->SetUniformMatrix4fv("cameraInv", 1, GL_FALSE, inv_camera);
 
 
+#if 0
+      float tex_x_coord = (length/2+0.5) / static_cast<float>(length);
+      float geo_x_coord = asml_->box_size_ * tex_x_coord + asml_->trans_x_ - half_size;
+
+      glBegin(GL_QUADS);
+      glTexCoord3f(tex_x_coord, 0.0f, 0.0f); glVertex3f(geo_x_coord, asml_->trans_y_ - half_size, asml_->trans_z_ - half_size);
+      glTexCoord3f(tex_x_coord, 1.0f, 0.0f); glVertex3f(geo_x_coord, asml_->trans_y_ + half_size, asml_->trans_z_ - half_size);
+      glTexCoord3f(tex_x_coord, 1.0f, 1.0f); glVertex3f(geo_x_coord, asml_->trans_y_ + half_size, asml_->trans_z_ + half_size);
+      glTexCoord3f(tex_x_coord, 0.0f, 1.0f); glVertex3f(geo_x_coord, asml_->trans_y_ - half_size, asml_->trans_z_ + half_size);
+      glEnd();
+#endif
+
       if ('X' == asml_->camera_orientations_[i_view])
       {
         for (int i = 0; i < length; ++i)
+        //int i = 31;
         {
           float tex_x_coord = (i+0.5) / static_cast<float>(length);
-          float geo_x_coord = asml_->box_size_ * tex_x_coord + asml_->trans_x_;
+          float geo_x_coord = asml_->box_size_ * tex_x_coord + asml_->trans_x_ - half_size;
 
           glBegin(GL_QUADS);
           glTexCoord3f(tex_x_coord, 0.0f, 0.0f); glVertex3f(geo_x_coord, asml_->trans_y_ - half_size, asml_->trans_z_ - half_size);
@@ -225,9 +243,10 @@ namespace as_modeling
       else if ('x' == asml_->camera_orientations_[i_view])
       {
         for (int i = length - 1; i >= 0; --i)
+        //int i = 31;
         {
           float tex_x_coord = (i+0.5) / static_cast<float>(length);
-          float geo_x_coord = asml_->box_size_ * tex_x_coord + asml_->trans_x_;
+          float geo_x_coord = asml_->box_size_ * tex_x_coord + asml_->trans_x_ - half_size;
 
           glBegin(GL_QUADS);
           glTexCoord3f(tex_x_coord, 0.0f, 0.0f); glVertex3f(geo_x_coord, asml_->trans_y_ - half_size, asml_->trans_z_ - half_size);
@@ -239,10 +258,10 @@ namespace as_modeling
       }
       else if ('Y' == asml_->camera_orientations_[i_view])
       {
-        for (int j = 0; j < asml_->box_height_; ++j)
+        for (int j = 0; j < length; ++j)
         {
-          float tex_y_coord = (j+0.5) / static_cast<float>(asml_->box_height_);
-          float geo_y_coord = tex_y_coord * asml_->box_size_ + asml_->trans_y_;
+          float tex_y_coord = (j+0.5) / static_cast<float>(length);
+          float geo_y_coord = tex_y_coord * asml_->box_size_ + asml_->trans_y_ - half_size;
 
           glBegin(GL_QUADS);
           glTexCoord3f(0.0f, tex_y_coord, 0.0f); glVertex3f(asml_->trans_x_ - half_size, geo_y_coord, asml_->trans_z_ - half_size);
@@ -254,10 +273,10 @@ namespace as_modeling
       }
       else if ('y' == asml_->camera_orientations_[i_view])
       {
-        for (int j = asml_->box_height_-1; j >= 0; --j)
+        for (int j = length-1; j >= 0; --j)
         {
-          float tex_y_coord = (j+0.5) / static_cast<float>(asml_->box_height_);
-          float geo_y_coord = tex_y_coord * asml_->box_size_ + asml_->trans_y_;
+          float tex_y_coord = (j+0.5) / static_cast<float>(length);
+          float geo_y_coord = tex_y_coord * asml_->box_size_ + asml_->trans_y_ - half_size;
 
           glBegin(GL_QUADS);
           glTexCoord3f(0.0f, tex_y_coord, 0.0f); glVertex3f(asml_->trans_x_ - half_size, geo_y_coord, asml_->trans_z_ - half_size);
@@ -269,10 +288,10 @@ namespace as_modeling
       }
       else if ('Z' == asml_->camera_orientations_[i_view])
       {
-        for (int k = 0; k < asml_->box_depth_; ++k)
+        for (int k = 0; k < length; ++k)
         {
-          float tex_z_coord = (k+0.5) / static_cast<float>(asml_->box_depth_);
-          float geo_z_coord = tex_z_coord * asml_->box_size_ + asml_->trans_z_;
+          float tex_z_coord = (k+0.5) / static_cast<float>(length);
+          float geo_z_coord = tex_z_coord * asml_->box_size_ + asml_->trans_z_ - half_size;
 
           glBegin(GL_QUADS);
           glTexCoord3f(0.0f, 0.0f, tex_z_coord); glVertex3f(asml_->trans_x_ - half_size, asml_->trans_y_ - half_size, geo_z_coord);
@@ -284,10 +303,10 @@ namespace as_modeling
       }
       else if ('z' == asml_->camera_orientations_[i_view])
       {
-        for (int k = asml_->box_depth_ - 1; k >= 0; --k)
+        for (int k = length - 1; k >= 0; --k)
         {
-          float tex_z_coord = (k+0.5) / static_cast<float>(asml_->box_depth_);
-          float geo_z_coord = tex_z_coord * asml_->box_size_ + asml_->trans_z_;
+          float tex_z_coord = (k+0.5) / static_cast<float>(length);
+          float geo_z_coord = tex_z_coord * asml_->box_size_ + asml_->trans_z_ - half_size;
 
           glBegin(GL_QUADS);
           glTexCoord3f(0.0f, 0.0f, tex_z_coord); glVertex3f(asml_->trans_x_ - half_size, asml_->trans_y_ - half_size, geo_z_coord);
@@ -298,6 +317,8 @@ namespace as_modeling
         }
       }
 
+      glFinish();
+
       shader->End();
     }
     rr_fbo_->EndDraw2FBO();
@@ -306,7 +327,18 @@ namespace as_modeling
 
 #if 1
     float * data = rr_fbo_->ReadPixels();
-    cuda_imageutil::BMPImageUtil tmpBmp;
+    float * img = new float [3 * width_ * height_];
+    for (int y = 0; y < height_; ++y)
+    {
+      for (int x = 0; x < width_; ++x)
+      {
+        for (int c = 0; c < 3; ++c)
+        {
+          img[y * width_ * 3 + x * 3 + c] = data[y * width_ * 4 + x * 4 + c];
+        }
+      }
+    }
+  /*  cuda_imageutil::BMPImageUtil tmpBmp;
     tmpBmp.SetSizes(width_, height_);
     for (int y = 0; y < height_; ++y)
     {
@@ -319,10 +351,16 @@ namespace as_modeling
         tmpBmp.GetPixelAt(x,y)[2] = static_cast<unsigned char> (
           254.0f * data[((height_-1-y)*width_+x)*4 + 2]);
       }
-    }
+    }*/
     char path_buf[100];
-    sprintf(path_buf, "../Data/Camera%02d/show%06d.bmp", i_view, counter);
-    tmpBmp.SaveImage(path_buf);
+    sprintf(path_buf, "../Data/Camera%02d/show%06d.pfm", i_view, counter);
+    PFMImage * tmpimg = new PFMImage(width_, height_, 1, img);
+    tmpimg->WriteImage(path_buf);
+    delete [] img;
+    delete tmpimg;
+
+    //sprintf(path_buf, "../Data/Camera%02d/show%06d.bmp", i_view, counter);
+    //tmpBmp.SaveImage(path_buf);
     ++counter;
 #endif
 
@@ -396,6 +434,8 @@ namespace as_modeling
       glEnable(GL_BLEND);
       glBlendFuncSeparate(GL_DST_ALPHA, GL_ONE, GL_DST_ALPHA, GL_ZERO);
 
+      glClear(GL_COLOR_BUFFER_BIT);
+
       shader->Begin();
 
       // set shader uniforms
@@ -423,9 +463,10 @@ namespace as_modeling
       if ('X' == asml_->camera_orientations_[i_view])
       {
         for (int i = 0; i < length; ++i)
+        //int i =1;
         {
           float tex_x_coord = (i+0.5) / static_cast<float>(length);
-          float geo_x_coord = asml_->box_size_ * tex_x_coord + asml_->trans_x_;
+          float geo_x_coord = asml_->box_size_ * tex_x_coord + asml_->trans_x_ - half_size;
 
           shader->SetUniform4i("disturbPara", asml_->volume_interval_, pu, pv, (slice==i)?1:0);
 
@@ -440,9 +481,10 @@ namespace as_modeling
       else if ('x' == asml_->camera_orientations_[i_view])
       {
         for (int i = length - 1; i >= 0; --i)
+        //int i = 1;
         {
           float tex_x_coord = (i+0.5) / static_cast<float>(length);
-          float geo_x_coord = asml_->box_size_ * tex_x_coord + asml_->trans_x_;
+          float geo_x_coord = asml_->box_size_ * tex_x_coord + asml_->trans_x_ - half_size;
 
           shader->SetUniform4i("disturbPara", asml_->volume_interval_, pu, pv, (slice==i)?1:0);
 
@@ -456,10 +498,10 @@ namespace as_modeling
       }
       else if ('Y' == asml_->camera_orientations_[i_view])
       {
-        for (int j = 0; j < asml_->box_height_; ++j)
+        for (int j = 0; j < length; ++j)
         {
-          float tex_y_coord = (j+0.5) / static_cast<float>(asml_->box_height_);
-          float geo_y_coord = tex_y_coord * asml_->box_size_ + asml_->trans_y_;
+          float tex_y_coord = (j+0.5) / static_cast<float>(length);
+          float geo_y_coord = tex_y_coord * asml_->box_size_ + asml_->trans_y_ - half_size;
 
           shader->SetUniform4i("disturbPara", asml_->volume_interval_, pu, pv, (slice==j)?1:0);
 
@@ -473,10 +515,10 @@ namespace as_modeling
       }
       else if ('y' == asml_->camera_orientations_[i_view])
       {
-        for (int j = asml_->box_height_-1; j >= 0; --j)
+        for (int j = length-1; j >= 0; --j)
         {
-          float tex_y_coord = (j+0.5) / static_cast<float>(asml_->box_height_);
-          float geo_y_coord = tex_y_coord * asml_->box_size_ + asml_->trans_y_;
+          float tex_y_coord = (j+0.5) / static_cast<float>(length);
+          float geo_y_coord = tex_y_coord * asml_->box_size_ + asml_->trans_y_ - half_size;
 
           shader->SetUniform4i("disturbPara", asml_->volume_interval_, pu, pv, (slice==j)?1:0);
 
@@ -490,10 +532,10 @@ namespace as_modeling
       }
       else if ('Z' == asml_->camera_orientations_[i_view])
       {
-        for (int k = 0; k < asml_->box_depth_; ++k)
+        for (int k = 0; k < length; ++k)
         {
-          float tex_z_coord = (k+0.5) / static_cast<float>(asml_->box_depth_);
-          float geo_z_coord = tex_z_coord * asml_->box_size_ + asml_->trans_z_;
+          float tex_z_coord = (k+0.5) / static_cast<float>(length);
+          float geo_z_coord = tex_z_coord * asml_->box_size_ + asml_->trans_z_ - half_size;
 
           shader->SetUniform4i("disturbPara", asml_->volume_interval_, pu, pv, (slice==k)?1:0);
 
@@ -507,10 +549,10 @@ namespace as_modeling
       }
       else if ('z' == asml_->camera_orientations_[i_view])
       {
-        for (int k = asml_->box_depth_ - 1; k >= 0; --k)
+        for (int k = length - 1; k >= 0; --k)
         {
-          float tex_z_coord = (k+0.5) / static_cast<float>(asml_->box_depth_);
-          float geo_z_coord = tex_z_coord * asml_->box_size_ + asml_->trans_z_;
+          float tex_z_coord = (k+0.5) / static_cast<float>(length);
+          float geo_z_coord = tex_z_coord * asml_->box_size_ + asml_->trans_z_ - half_size;
 
           shader->SetUniform4i("disturbPara", asml_->volume_interval_, pu, pv, (slice==k)?1:0);
 

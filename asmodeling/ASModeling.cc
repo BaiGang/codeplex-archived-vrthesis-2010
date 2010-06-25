@@ -73,6 +73,11 @@ namespace as_modeling
       }
     }
 
+    for (int i = 0; i < num_cameras_; ++i)
+    {
+      fprintf(stderr, "Camera %02d : %c\n", i, camera_orientations_[i]);
+    }
+
     // init image list
     // num_cameras images
     if (!ground_truth_image_.SetSizes(width_, height_*num_cameras_))

@@ -30,6 +30,14 @@ void construct_volume_from_previous_cuda
  int * tag_vol
  );
 
+////////////////////////////////////////
+// read pptr volume to linear memory
+////////////////////////////////////////
+void get_volume_cuda( int level,
+                      cudaPitchedPtr vol_pptr,
+                      //int * tag_vol,
+                      float * den_vol );
+
 void cull_empty_cells_cuda (cudaPitchedPtr* density_vol,
                             cudaExtent extent,
                             int * tag_vol );

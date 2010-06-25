@@ -11,20 +11,12 @@ __global__ void construct_volume(
                                  int * tag_vol
                                  )
 {
-  //unsigned int z = blockIdx.x;
-  //unsigned int y = blockIdx.y;
-  //unsigned int x = threadIdx.x;
-  // slice_pitch = pitch * height
-  // slice = ptr + z * slice_pitch
-  // row = (type*)(slice + y*pitch)
-  // elem = *(row + x)
-
   int index = index3(threadIdx.x, blockIdx.y, blockIdx.x, blockDim.x);
 
   char * slice = (char *)vol_pptr.ptr + blockIdx.x * vol_pptr.pitch * blockDim.x;
+  float *  row = (float*)(slice + blockIdx.y * vol_pptr.pitch);
 
-  *((float*)(slice+blockIdx.y*vol_pptr.pitch) + threadIdx.x)
-    = device_x[ tag_vol[index] ];
+  row[threadIdx.x] = device_x[ tag_vol[index] ];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -34,16 +26,39 @@ __global__ void construct_volume(
 //
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 __global__ void construct_volume_linm(
-                                 float * density_vol,
-                                 float * device_x,
-                                 int   * tag_vol
-                                 )
+                                      float * density_vol,
+                                      float * device_x,
+                                      int   * tag_vol
+                                      )
 {
   int index = index3(threadIdx.x, blockIdx.y, blockIdx.x, blockDim.x);
 
   density_vol[index] = device_x[ tag_vol[index] ];
 }
-                                 
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//    Get volume data from the pitched ptr
+//
+/////////////////////////////////////////////////////////////////////////////////////////////////////
+__global__ void get_volume(cudaPitchedPtr vol_pptr,
+                           //int   * tag_vol,
+                           float * den_vol)
+{
+  //unsigned int i = threadIdx.x;
+  //unsigned int j = blockIdx.y;
+  //unsigned int k = blockIdx.x;
+  //unsigned int size = blockDim.x;
+
+  int vol_index = index3(threadIdx.x, blockIdx.y, blockIdx.x, blockDim.x);
+  //int arr_index = tag_vol[ vol_index ];
+
+  char * slice = (char*)vol_pptr.ptr + blockIdx.x * vol_pptr.pitch * blockDim.x;
+  float *  row = (float*)(slice + blockIdx.y * vol_pptr.pitch);
+
+  den_vol[vol_index] = row [threadIdx.x];
+}
+
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -67,7 +82,7 @@ __global__ void upsample_volume(
 
   k /= scale;
   j /= scale;
-  k /= scale;
+  i /= scale;
 
   slice = (char*)pptr_lower.ptr + k*pptr_lower.pitch*extent_lower.depth;
   float *p_lower  = (float*)(slice + j*pptr_lower.pitch) + i;
@@ -135,3 +150,4 @@ __global__ void get_guess_x (cudaPitchedPtr vol_pptr,
     guess_x[ind_array] = value;
   }
 }
+

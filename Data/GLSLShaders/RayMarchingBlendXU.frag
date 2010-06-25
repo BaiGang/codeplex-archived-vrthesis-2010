@@ -27,7 +27,7 @@ void main()
   vec4 VertexPosWorld = cameraInv * vertexPosEye;	 
   //VertexPosWorld = VertexPosWorld - vec4(boxTrans.xyz, 0.0);
 
-  //º∆À„ray
+   //º∆À„ray
   vec3 raydir = cameraPos.xyz - VertexPosWorld.xyz;	
   raydir = normalize(raydir);
   float dotProduct = dot(raydir.xyz, vec3(1.0, 0.0, 0.0));
@@ -52,6 +52,5 @@ void main()
 
   gl_FragData[0].rgb = lightScatt.xyz;
   gl_FragData[0].a = attenuationTerm;   
-
 
 }

@@ -57,7 +57,7 @@ namespace as_modeling
     ////////////////////////////////////////////
 
     int i_level = INITIAL_VOL_LEVEL;
-    std::list<float> host_x;
+    std::vector<float> host_x;
 
     tmer.start();
 
@@ -76,7 +76,7 @@ namespace as_modeling
     lbfgsb_u_.setbounds(1, host_x.size());
 
     int index_x = 1;
-    for (std::list<float>::const_iterator it = host_x.begin();
+    for (std::vector<float>::const_iterator it = host_x.begin();
       it != host_x.end();
       ++ it)
     {
@@ -128,7 +128,7 @@ namespace as_modeling
       lbfgsb_u_.setbounds(1, host_x.size());
 
       int index_x = 1;
-      for (std::list<float>::const_iterator it = host_x.begin();
+      for (std::vector<float>::const_iterator it = host_x.begin();
         it != host_x.end();
         ++ it)
       {

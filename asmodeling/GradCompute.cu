@@ -22,6 +22,9 @@ void construct_volume_cuda (float * device_x,
   dim3 grid_dim(extent.depth, extent.depth, 1);
   dim3 block_dim(extent.depth, 1, 1);
 
+  fprintf(stderr, "Lauching Kernel \"construct_volume\", <<<(%d %d %d),(%d %d %d)>>>",
+    extent.depth, extent.depth, 1, extent.depth, 1, 1);
+
   construct_volume<<< grid_dim, block_dim >>>(
     *density_vol,
     device_x,
@@ -64,6 +67,9 @@ void upsample_volume_cuda (int level,
 
   cudaExtent ext_low = make_cudaExtent(length, length, length);
   int scale = max_length / length;
+
+  fprintf(stderr, "<+> Lauching kernel \"upsampe_volume\",upper: %d, lower: %d, scale: %d\n",
+    max_length, length, scale);
 
   upsample_volume<<< grid_dim, block_dim >>>(
     *lower_lev,
@@ -217,6 +223,32 @@ void calculate_g_cuda( int      level,
   // check if kernel execution generated an error
   cutilCheckMsg("Kernel execution failed");
   cutilSafeCall( cudaGetLastError() );
+}
+
+
+////////////////////////////////////////
+// read pptr volume to linear memory
+////////////////////////////////////////
+void get_volume_cuda( int level,
+                      cudaPitchedPtr vol_pptr,
+                      //int * tag_vol,
+                      float * den_vol )
+{
+  int length = 1 << level;
+  dim3 dim_grid(length, length, 1);
+  dim3 dim_block(length, 1, 1);
+
+  get_volume<<<dim_grid, dim_block>>> (
+    vol_pptr,
+    //tag_vol,
+    den_vol
+    );
+  // check if kernel execution generated an error
+  cutilCheckMsg("Kernel execution failed");
+  cutilSafeCall( cudaGetLastError() );
+
+  fprintf(stderr, "..Finished kernel call of \"get_volume\"\n");
+
 }
 
 /////////////////////////////

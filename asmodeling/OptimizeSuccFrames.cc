@@ -17,7 +17,7 @@ namespace as_modeling
     // get result from previous frame
     //  x_pre
 
-    std::list<float> guess_x;
+    std::vector<float> guess_x;
 
     // calc x using previous x and volume tag
     ASMGradCompute::Instance()->succframe_init(MAX_VOL_LEVEL, guess_x, lbfgsb_x_);
