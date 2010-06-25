@@ -2,7 +2,7 @@
 #include "ASModeling.h"
 #include <GL/glut.h>
 
-#include "../Utils/PFMImage.h"
+#include "../Utils/image/PFMImage.h"
 
 
 //#define __TEST_RENDER__

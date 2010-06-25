@@ -16,7 +16,7 @@
 #include <math/ConvexHull2D.h>
 
 #include "../Utils/Timer/CPUTimer.h"
-#include "../Utils/PFMImage.h"
+#include "../Utils/image/PFMImage.h"
 
 
 #include "devfun_def.h"
