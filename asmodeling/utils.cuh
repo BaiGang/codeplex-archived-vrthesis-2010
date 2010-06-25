@@ -75,6 +75,11 @@ void unbind_gt_tex_cuda()
 }
 
 
+__device__ inline uint float_to_uint8(float value)
+{
+    return min(max(__float2int_rn((255 * value + 0.5f) / (1.0f + 1.0f/255.0f)), 0), 255);
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //
 //    Util function to calculate vectorized position of a volume cell
