@@ -447,12 +447,20 @@ namespace as_modeling
 
     fprintf(stderr, "d_projected_centers size : %d\n", 2 * p_asmodeling_->num_cameras_ * max_size);
 
-    cutilSafeCall( cudaMalloc<uint16>(&d_projected_centers, 2 * p_asmodeling_->num_cameras_ * max_size) );
-    cutilSafeCall( cudaMalloc<int>(&d_tag_volume, max_size) );
+    //cutilSafeCall( cudaMalloc<uint16>(&d_projected_centers, 2 * p_asmodeling_->num_cameras_ * max_size) );
+    cutilSafeCall( cudaMalloc((void**)(&d_projected_centers), 2 * p_asmodeling_->num_cameras_ * max_size * sizeof(uint16)) );
 
-    cutilSafeCall( cudaMalloc<float>(&p_device_x, max_size) );
-    cutilSafeCall( cudaMalloc<float>(&p_device_g, max_size) );
-    cutilSafeCall( cudaMalloc<float>(&d_temp_f,   max_size) );
+    //cutilSafeCall( cudaMalloc<int>(&d_tag_volume, max_size) );
+    cutilSafeCall( cudaMalloc((void**)(&d_tag_volume), max_size * sizeof(int)) );
+
+    //cutilSafeCall( cudaMalloc<float>(&p_device_x, max_size) );
+    cutilSafeCall( cudaMalloc((void**)(&p_device_x), max_size*sizeof(float)) );
+
+    //cutilSafeCall( cudaMalloc<float>(&p_device_g, max_size) );
+    cutilSafeCall( cudaMalloc((void**)(&p_device_g), max_size * sizeof(float)) );
+
+    //cutilSafeCall( cudaMalloc<float>(&d_temp_f,   max_size) );
+    cutilSafeCall( cudaMalloc((void**)(&d_temp_f), max_size * sizeof(float)) );
 
     // alloc array for ground truth image
     cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc<uchar4>();
