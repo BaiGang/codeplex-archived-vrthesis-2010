@@ -11,7 +11,12 @@
     <height value="520" />
     <CameraWidth value="696" />
     <CameraHeight value="520" />
-    <RenderInterval value="2" />
+    <RenderInterval>
+      <Level5 value="3" />
+      <Level6 value="3" />
+      <Level7 value="2" />
+      <Level8 value="2" />
+    </RenderInterval>
     <RotAngle value="0" />
   </Render>
   <Light>
@@ -33,7 +38,12 @@
     <VolWidth value="256" />
     <VolHeight value="256" />
     <VolDepth value="256" />
-    <VolInterval value="4" />
+    <VolInterval>
+      <Level5 value="4" />
+      <Level6 value="4" />
+      <Level7 value="8" />
+      <Level8 value="8" />
+    </VolInterval>
   </Volume>
   <LBFGSB>
     <!-- #    ConstrainType   If ConstrainType is equal to:                   -->

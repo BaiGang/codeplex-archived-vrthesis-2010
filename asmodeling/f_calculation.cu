@@ -16,9 +16,10 @@ __global__ void calc_f(
                        int n_view,           // num of different views/cameras
                        //int n,                // num of items in array x, f, and g
                        int interval,         // the occupycation radius of projection
-                       unsigned short * proj_centers,   // 
+                       uint16 * proj_centers,   // 
                        int * tag_vol,
-                       float * f_array
+                       float * f_array/*,
+                       float * data*/
                        )
 {
   // the index of the volume cell
@@ -30,12 +31,16 @@ __global__ void calc_f(
   if (index_array != 0)
   {
     // pixel on the image
-    int u = proj_centers[n_view * 2 * (index_array-1) + 2 * i_view];
-    int v = proj_centers[n_view * 2 * (index_array-1) + 2 * i_view + 1];
+    int ptru = n_view * 2 * (index_array-1) + 2 * i_view;
+    uint16 u = proj_centers[ ptru ];
+    uint16 v = proj_centers[ ptru + 1];
 
     // pixel inside the image
     if (u < img_width && v < img_height)
     {
+      ///////////
+      //data [v * img_width + u] = 1.0f;
+      //////////
 
       float f = 0.0;
       for (int uu = u - interval; uu <= u + interval; ++uu)

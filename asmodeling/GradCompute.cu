@@ -15,8 +15,6 @@
 // for testing
 #include "Test.cu"
 
-typedef unsigned short uint16;
-
 void construct_volume_cuda (float * device_x,
                             cudaPitchedPtr * density_vol,
                             cudaExtent extent,
@@ -162,7 +160,8 @@ float calculate_f_cuda (int      level,
                         uint16*  projected_centers, 
                         int*     vol_tag,
                         float*   f_array,
-                        float*   sum_array )
+                        float*   sum_array/*,
+                        float *  data*/)
 {
   int size = 1 << level;
 
@@ -181,7 +180,8 @@ float calculate_f_cuda (int      level,
     interval,
     projected_centers,
     vol_tag,
-    f_array );
+    f_array/*,
+    data*/);
 
   // check if kernel execution generated an error
   cutilCheckMsg("Kernel execution failed");
@@ -326,7 +326,7 @@ void tst_g(int width, int height, int iview, float * h_data)
 }
 
 void tst_pcenters(int level, int width, int height, int iview, int nview,
-                  unsigned short * pcenters, int * tag_vol, float * h_data)
+                  uint16 * pcenters, int * tag_vol, float * h_data)
 {
   int length = 1 << level;
   dim3 dim_grid(length, length, 1);

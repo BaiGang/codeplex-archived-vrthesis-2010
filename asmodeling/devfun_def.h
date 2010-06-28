@@ -1,6 +1,7 @@
 #ifndef __CUDA_BRIDGE_H__
 #define __CUDA_BRIDGE_H__
 
+
 #include <cuda_runtime.h>
 
 typedef unsigned short uint16;
@@ -69,14 +70,14 @@ float calculate_f_cuda (int     level,
                         uint16* projected_centers, 
                         int*    vol_tag,
                         float*  f_array,
-                        float*  sum_array );
+                        float*  sum_array/*,
+                        float * data*/);
 
 void calculate_g_cuda (int      level, 
                        int      img_width,
                        int      img_height,
                        int      i_view, 
                        int      n_view,
-                       //int      n_nonzero_items,
                        int      interval,
                        uint16*  projected_centers, 
                        int*     vol_tag,

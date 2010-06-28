@@ -20,7 +20,7 @@ namespace as_modeling
 
     void render(int i); // dummy
     void render_unperturbed(int i_view, GLuint vol_tex, int length);
-    void render_perturbed(int i_view, GLuint vol_tex, int length, int slice, int pu, int pv);
+    void render_perturbed(int i_view, GLuint vol_tex, int length, int interval, int slice, int pu, int pv);
 
     inline const GLuint& get_render_result_tex()
     {return rr_fbo_->GetColorTex();}

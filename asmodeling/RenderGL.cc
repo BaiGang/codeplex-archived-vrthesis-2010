@@ -351,7 +351,7 @@ namespace as_modeling
 
   }
 
-  void RenderGL::render_perturbed(int i_view, GLuint vol_tex, int length, int slice, int pu, int pv)
+  void RenderGL::render_perturbed(int i_view, GLuint vol_tex, int length, int interval, int slice, int pu, int pv)
   {
     float proj_mat[16];
     float mv_mat[16];
@@ -370,8 +370,8 @@ namespace as_modeling
     glMatrixMode(GL_MODELVIEW);
     glLoadMatrixf(mv_mat);
 
-    //// adjust the volume
-    glTranslatef(asml_->trans_x_, asml_->trans_y_, asml_->trans_z_);
+    ////// adjust the volume
+    //glTranslatef(asml_->trans_x_, asml_->trans_y_, asml_->trans_z_);
 
     // get the inversed camera matrix
     float inv_camera[16];
@@ -424,7 +424,7 @@ namespace as_modeling
       shader->Begin();
 
       // set shader uniforms
-      //shader->SetUniform3f("boxTrans", asml_->trans_x_, asml_->trans_y_, asml_->trans_z_);
+      shader->SetUniform1f("fwidth", 1.0f*length);
       shader->SetUniform1f("disturb", asml_->disturb_);
       shader->SetUniform3f("lightIntensity", asml_->light_intensity_, 
         asml_->light_intensity_, asml_->light_intensity_);
@@ -453,7 +453,7 @@ namespace as_modeling
           float tex_x_coord = (i+0.5) / static_cast<float>(length);
           float geo_x_coord = asml_->box_size_ * tex_x_coord + asml_->trans_x_ - half_size;
 
-          shader->SetUniform4i("disturbPara", asml_->volume_interval_, pu, pv, (slice==i)?1:0);
+          shader->SetUniform4i("disturbPara", interval, pu, pv, (slice==i)?1:0);
 
           glBegin(GL_QUADS);
           glTexCoord3f(tex_x_coord, 0.0f, 0.0f); glVertex3f(geo_x_coord, asml_->trans_y_ - half_size, asml_->trans_z_ - half_size);
@@ -471,7 +471,7 @@ namespace as_modeling
           float tex_x_coord = (i+0.5) / static_cast<float>(length);
           float geo_x_coord = asml_->box_size_ * tex_x_coord + asml_->trans_x_ - half_size;
 
-          shader->SetUniform4i("disturbPara", asml_->volume_interval_, pu, pv, (slice==i)?1:0);
+          shader->SetUniform4i("disturbPara", interval, pu, pv, (slice==i)?1:0);
 
           glBegin(GL_QUADS);
           glTexCoord3f(tex_x_coord, 0.0f, 0.0f); glVertex3f(geo_x_coord, asml_->trans_y_ - half_size, asml_->trans_z_ - half_size);
@@ -488,7 +488,7 @@ namespace as_modeling
           float tex_y_coord = (j+0.5) / static_cast<float>(length);
           float geo_y_coord = tex_y_coord * asml_->box_size_ + asml_->trans_y_ - half_size;
 
-          shader->SetUniform4i("disturbPara", asml_->volume_interval_, pu, pv, (slice==j)?1:0);
+          shader->SetUniform4i("disturbPara", interval, pu, pv, (slice==j)?1:0);
 
           glBegin(GL_QUADS);
           glTexCoord3f(0.0f, tex_y_coord, 0.0f); glVertex3f(asml_->trans_x_ - half_size, geo_y_coord, asml_->trans_z_ - half_size);
@@ -505,7 +505,7 @@ namespace as_modeling
           float tex_y_coord = (j+0.5) / static_cast<float>(length);
           float geo_y_coord = tex_y_coord * asml_->box_size_ + asml_->trans_y_ - half_size;
 
-          shader->SetUniform4i("disturbPara", asml_->volume_interval_, pu, pv, (slice==j)?1:0);
+          shader->SetUniform4i("disturbPara", interval, pu, pv, (slice==j)?1:0);
 
           glBegin(GL_QUADS);
           glTexCoord3f(0.0f, tex_y_coord, 0.0f); glVertex3f(asml_->trans_x_ - half_size, geo_y_coord, asml_->trans_z_ - half_size);
@@ -522,7 +522,7 @@ namespace as_modeling
           float tex_z_coord = (k+0.5) / static_cast<float>(length);
           float geo_z_coord = tex_z_coord * asml_->box_size_ + asml_->trans_z_ - half_size;
 
-          shader->SetUniform4i("disturbPara", asml_->volume_interval_, pu, pv, (slice==k)?1:0);
+          shader->SetUniform4i("disturbPara", interval, pu, pv, (slice==k)?1:0);
 
           glBegin(GL_QUADS);
           glTexCoord3f(0.0f, 0.0f, tex_z_coord); glVertex3f(asml_->trans_x_ - half_size, asml_->trans_y_ - half_size, geo_z_coord);
@@ -539,7 +539,7 @@ namespace as_modeling
           float tex_z_coord = (k+0.5) / static_cast<float>(length);
           float geo_z_coord = tex_z_coord * asml_->box_size_ + asml_->trans_z_ - half_size;
 
-          shader->SetUniform4i("disturbPara", asml_->volume_interval_, pu, pv, (slice==k)?1:0);
+          shader->SetUniform4i("disturbPara", interval, pu, pv, (slice==k)?1:0);
 
           glBegin(GL_QUADS);
           glTexCoord3f(0.0f, 0.0f, tex_z_coord); glVertex3f(asml_->trans_x_ - half_size, asml_->trans_y_ - half_size, geo_z_coord);
@@ -555,7 +555,7 @@ namespace as_modeling
     pr_fbo_->EndDraw2FBO();
 #endif //__TEST_RENDER__
 
-#if 0
+#if 1
     float * data = rr_fbo_->ReadPixels();
     float * img = new float [3 * width_ * height_];
     for (int y = 0; y < height_; ++y)

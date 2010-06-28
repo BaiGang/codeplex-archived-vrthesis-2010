@@ -83,10 +83,30 @@ namespace as_modeling
       return false;
     TXIntValue(pElem, &camera_height_ );
 
-    pElem = hRender->FirstChild("RenderInterval").Element();
+    TiXmlHandle* hRInterval = &(hRender->FirstChild("RenderInterval"));
+    if (!hRInterval)
+      return false;
+
+    pElem = hRInterval->FirstChild("Level5").Element();
     if (!pElem)
       return false;
-    TXIntValue(pElem, &render_interval_ );
+    TXIntValue(pElem, &(render_interval_array_[5]));
+
+    pElem = hRInterval->FirstChild("Level6").Element();
+    if (!pElem)
+      return false;
+    TXIntValue(pElem, &(render_interval_array_[6]));
+
+    pElem = hRInterval->FirstChild("Level7").Element();
+    if (!pElem)
+      return false;
+    TXIntValue(pElem, &(render_interval_array_[7]));
+
+    pElem = hRInterval->FirstChild("Level8").Element();
+    if (!pElem)
+      return false;
+    TXIntValue(pElem, &(render_interval_array_[8]));
+
 
     pElem = hRender->FirstChild("RotAngle").Element();
     if (!pElem)
@@ -160,10 +180,29 @@ namespace as_modeling
       return false;
     TXFloatValue(pElem, &trans_z_);
 
-    pElem = hVolume->FirstChild("VolInterval").Element();
+    TiXmlHandle* hVInterval = &(hVolume->FirstChild("VolInterval"));
+    if (!hVInterval)
+      return false;
+
+    pElem = hVInterval->FirstChild("Level5").Element();
     if (!pElem)
       return false;
-    TXIntValue(pElem, &volume_interval_);
+    TXIntValue(pElem, &volume_interval_array_[5]);
+
+    pElem = hVInterval->FirstChild("Level6").Element();
+    if (!pElem)
+      return false;
+    TXIntValue(pElem, &volume_interval_array_[6]);
+
+    pElem = hVInterval->FirstChild("Level7").Element();
+    if (!pElem)
+      return false;
+    TXIntValue(pElem, &volume_interval_array_[7]);
+
+    pElem = hVInterval->FirstChild("Level8").Element();
+    if (!pElem)
+      return false;
+    TXIntValue(pElem, &volume_interval_array_[8]);
 
     // L-BFGS-B parameters
     TiXmlHandle * hLbfgsb = & (hRoot.FirstChild("LBFGSB"));

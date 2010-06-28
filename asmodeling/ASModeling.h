@@ -134,7 +134,7 @@ namespace as_modeling
     int height_;
     int camera_width_;
     int camera_height_;
-    int render_interval_;
+    int render_interval_array_[32];  // 1 to 32, we use 5, 6, 7, 8
     int rot_angles_;
 
     ////////////////////////////////////////////
@@ -156,7 +156,7 @@ namespace as_modeling
     float trans_x_;
     float trans_y_;
     float trans_z_;
-    int volume_interval_;
+    int volume_interval_array_[32];
 
     ////////////////////////////////////////////
     //  octree parameters  -- deprecated

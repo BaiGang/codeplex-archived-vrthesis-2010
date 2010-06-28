@@ -110,6 +110,9 @@ namespace as_modeling
 
     printf("Level : %d\nreturned info code : %d\n\n", i_level, lbfgsb_info_code_);
 
+    //ASMGradCompute::Instance()->get_data(i_level, frame_volume_result_, lbfgsb_x_);
+    //fprintf(stderr, "\n\n Reconstructed results saved...\n\n");
+
     ++ i_level;
 
     // progressively optimize finer volumes
