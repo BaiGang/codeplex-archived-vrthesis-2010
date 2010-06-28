@@ -513,8 +513,44 @@
 					</FileConfiguration>
 				</File>
 				<File
+					RelativePath=".\Test.cu"
+					>
+					<FileConfiguration
+						Name="Debug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="CUDA Build Rule"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="Release|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="CUDA Build Rule"
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="EmuDebug|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="CUDA Build Rule"
+						/>
+					</FileConfiguration>
+				</File>
+				<File
 					RelativePath=".\utils.cuh"
 					>
+					<FileConfiguration
+						Name="Release|Win32"
+						ExcludedFromBuild="true"
+						>
+						<Tool
+							Name="CUDA Build Rule"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath=".\volume_construction.cu"

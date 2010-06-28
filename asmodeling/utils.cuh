@@ -2,6 +2,7 @@
 #define _ASMODELING_UTILS_CUH_
 
 #include <cuda_runtime.h>
+#include <cstdio>
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //
@@ -25,7 +26,7 @@ template<typename pixel_T, int dim>
 void bind_tex(cudaArray* data_array, texture<pixel_T, dim, cudaReadModeElementType>& tex)
 {
   // set texture parameters
-  tex.normalized = false;                      // access with normalized texture coordinates
+  tex.normalized = 0;                          // access with [0,N) coordinates
   tex.filterMode = cudaFilterModePoint;        // linear interpolation
   tex.addressMode[0] = cudaAddressModeWrap;    // wrap texture coordinates
   if (dim>=2);
@@ -38,6 +39,10 @@ void bind_tex(cudaArray* data_array, texture<pixel_T, dim, cudaReadModeElementTy
   // channel descriptor
   cudaChannelFormatDesc channelDesc;
   cutilSafeCall( cudaGetChannelDesc(&channelDesc, data_array) );
+
+  //frpintf(stderr, "\n\n\n\t\t\t\t TExture heRE....\n\n");
+  //fprintf(stderr, "normalized : %d \n  x y z w : %d %d %d %d\n", tex.normalized,
+  //  channelDesc.x, channelDesc.y, channelDesc.z, channelDesc.w);
 
   // bind array to 3D texture
   cutilSafeCall(cudaBindTextureToArray(tex, data_array, channelDesc));
@@ -79,6 +84,12 @@ __device__ inline uint float_to_uint8(float value)
 {
     return min(max(__float2int_rn((255 * value + 0.5f) / (1.0f + 1.0f/255.0f)), 0), 255);
 }
+
+__device__ inline float uint8_to_float(unsigned char value)
+{
+    return __saturatef(__uint2float_rn(value) / 255.0f);
+}
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 //

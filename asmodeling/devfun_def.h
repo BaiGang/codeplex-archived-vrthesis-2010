@@ -59,6 +59,8 @@ void change_image_layout_cuda (unsigned char * raw_image,
                                int iview );
 
 float calculate_f_cuda (int     level, 
+                        int     img_width,
+                        int     img_height,
                         int     i_view, 
                         int     n_view,
                         int     n_nonzero_items,
@@ -70,9 +72,11 @@ float calculate_f_cuda (int     level,
                         float*  sum_array );
 
 void calculate_g_cuda (int      level, 
+                       int      img_width,
+                       int      img_height,
                        int      i_view, 
                        int      n_view,
-                       int      n_nonzero_items,
+                       //int      n_nonzero_items,
                        int      interval,
                        uint16*  projected_centers, 
                        int*     vol_tag,
@@ -88,4 +92,11 @@ static inline int nearest_pow2(int a)
   return k;
 }
 
+
+////////////// 
+//  for testing
+void test__(int width, int height, int iview, float * h_data1, float * h_data2);
+void tst_g(int width, int height, int iview, float * h_data);
+void tst_pcenters(int level, int width, int height, int iview, int nview,
+                  unsigned short * pcenters, int * tag_vol, float * h_data);
 #endif //__CUDA_BRIDGE_H__

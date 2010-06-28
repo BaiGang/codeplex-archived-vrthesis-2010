@@ -325,7 +325,7 @@ namespace as_modeling
 #endif //__TEST_RENDER__
 
 
-#if 1
+#if 0
     float * data = rr_fbo_->ReadPixels();
     float * img = new float [3 * width_ * height_];
     for (int y = 0; y < height_; ++y)
@@ -338,20 +338,7 @@ namespace as_modeling
         }
       }
     }
-  /*  cuda_imageutil::BMPImageUtil tmpBmp;
-    tmpBmp.SetSizes(width_, height_);
-    for (int y = 0; y < height_; ++y)
-    {
-      for (int x = 0; x < width_; ++x)
-      {
-        tmpBmp.GetPixelAt(x,y)[0] = static_cast<unsigned char> (
-          254.0f * data[((height_-1-y)*width_+x)*4] );
-        tmpBmp.GetPixelAt(x,y)[1] = static_cast<unsigned char> (
-          254.0f * data[((height_-1-y)*width_+x)*4 + 1]);
-        tmpBmp.GetPixelAt(x,y)[2] = static_cast<unsigned char> (
-          254.0f * data[((height_-1-y)*width_+x)*4 + 2]);
-      }
-    }*/
+
     char path_buf[100];
     sprintf(path_buf, "../Data/Camera%02d/show%06d.pfm", i_view, counter);
     PFMImage * tmpimg = new PFMImage(width_, height_, 1, img);
@@ -359,8 +346,6 @@ namespace as_modeling
     delete [] img;
     delete tmpimg;
 
-    //sprintf(path_buf, "../Data/Camera%02d/show%06d.bmp", i_view, counter);
-    //tmpBmp.SaveImage(path_buf);
     ++counter;
 #endif
 
@@ -569,6 +554,33 @@ namespace as_modeling
     }
     pr_fbo_->EndDraw2FBO();
 #endif //__TEST_RENDER__
+
+#if 0
+    float * data = rr_fbo_->ReadPixels();
+    float * img = new float [3 * width_ * height_];
+    for (int y = 0; y < height_; ++y)
+    {
+      for (int x = 0; x < width_; ++x)
+      {
+        for (int c = 0; c < 3; ++c)
+        {
+          img[y * width_ * 3 + x * 3 + c] = data[y * width_ * 4 + x * 4 + c];
+        }
+      }
+    }
+
+    char path_buf[100];
+    sprintf(path_buf, "../Data/Camera%02d/grad%06d.pfm", i_view, counter);
+    PFMImage * tmpimg = new PFMImage(width_, height_, 1, img);
+    tmpimg->WriteImage(path_buf);
+    delete [] img;
+    delete tmpimg;
+
+    //sprintf(path_buf, "../Data/Camera%02d/show%06d.bmp", i_view, counter);
+    //tmpBmp.SaveImage(path_buf);
+    ++counter;
+#endif
+
 
   }
 

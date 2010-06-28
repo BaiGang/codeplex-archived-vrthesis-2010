@@ -100,9 +100,7 @@ namespace as_modeling
       cutilSafeCall( cudaGetLastError() );
     }
 
-#if 1
-    cutilSafeCall( cudaMemset3D(Instance()->d_full_vol_pptr, 10, Instance()->full_vol_extent) );
-
+#if 0
     //int len = 1 << Instance()->current_level_;
     int len = Instance()->full_vol_extent.depth;
     fprintf(stderr, "==len : %d\n", len);
@@ -173,8 +171,8 @@ namespace as_modeling
 
     fprintf(stderr, "--- === --- COPY to GPU used %lf secs.\n", tmer_2.stop());
     tmer_3.start();
-#if 0
 
+#if 0
     get_volume_cuda(
       ASModeling::MAX_VOL_LEVEL,
       Instance()->d_full_vol_pptr,
@@ -212,6 +210,11 @@ namespace as_modeling
 
     int length = 1 << Instance()->current_level_;
 
+#ifdef __DISPLAY_SHUTDOWN_GUARD__
+    char * dummy;
+    cutilSafeCall( cudaMalloc((void**)(&dummy), sizeof(char) * 1024) );
+#endif
+
     // calc f and g[]
     for (int i_view = 0; i_view < Instance()->num_views; ++i_view)
     {
@@ -231,9 +234,67 @@ namespace as_modeling
 
       cutilSafeCall( cudaMemset( Instance()->p_device_x, 0, powtwo_length * sizeof(float)));
 
+#if 0 // test projected centers
+      int piwidth = Instance()->p_asmodeling_->width_;
+      int piheight = Instance()->p_asmodeling_->height_;
+      float * pc = new float [piwidth * piheight];
+      
+      tst_pcenters(Instance()->current_level_, piwidth, piheight,
+        i_view, Instance()->num_views, Instance()->d_projected_centers,
+        Instance()->d_tag_volume, pc);
+      PFMImage * pcpfm = new PFMImage(piwidth, piheight, 0, pc);
+      char img_path[100];
+      sprintf(img_path, "../Data/Camera%02d/pcenters.pfm", i_view);
+      pcpfm->WriteImage(img_path);
+      delete pcpfm;
+
+      //////////////////////////////////////////////////////////////////
+
+      //unsigned short * hdata = new unsigned short[2*Instance()->num_views*n];
+      //cutilSafeCall( cudaMemcpy(hdata, Instance()->d_projected_centers,
+      //  sizeof(unsigned short)*2*Instance()->num_views*n, cudaMemcpyDeviceToHost) );
+
+      //int tttwidth = Instance()->p_asmodeling_->width_;
+      //int tttheight = Instance()->p_asmodeling_->height_;
+
+      //float * tttdata = new float [tttwidth * tttheight];
+      //memset(tttdata, 0, sizeof(float) * tttwidth * tttheight);
+
+      //for (int k = 0; k < length; ++k)
+      //{
+      //  for (int j = 0; j < length; ++j)
+      //  {
+      //    for (int i = 0; i < length; ++i)
+      //    {
+      //      int vol_index = Instance()->p_asmodeling_->index3(i, j, k, length);
+      //      //int arr_index = h_tag_volume[ vol_index ];
+      //      int arr_index = Instance()->h_tag_volume[ vol_index ];
+
+      //      uint16 u = hdata[2*Instance()->num_views*(arr_index-1)+2*i_view];
+      //      uint16 v = hdata[2*Instance()->num_views*(arr_index-1)+2*i_view+1];
+
+      //      if (u<tttwidth && v<tttheight)
+      //        tttdata[v*tttwidth+u] = 1.0f;
+      //      else
+      //        fprintf(stderr, "=+=+=+ =+=+=+ =+=+=+ =+=+=+ %d %d\n", u, v);
+      //    }
+      //  }
+      //}
+
+      //PFMImage * tmpfpmm = new PFMImage(tttwidth,
+      //  tttheight, 0, tttdata);
+      //char buf[100];
+      //sprintf(buf, "../Data/gcPcenter%02d.pfm", i_view);
+      //tmpfpmm -> WriteImage(buf);
+      //delete tmpfpmm;
+
+#endif
+
       // launch kernel
       float ff = calculate_f_cuda(
         Instance()->current_level_,
+        Instance()->p_asmodeling_->width_,
+        Instance()->p_asmodeling_->height_,
         i_view,
         Instance()->num_views,
         n,
@@ -246,6 +307,29 @@ namespace as_modeling
       fprintf(stderr, "++ ++ ++ F value of view %d is %f\n", i_view, ff);
       f += ff;
       //f += 1.0f;
+
+#if 0 // debug rr tex and gt tex
+      static int count = 0;
+      int rwidth = Instance()->p_asmodeling_->width_;
+      int rheight = Instance()->p_asmodeling_->height_;
+
+      float * rr =new float[ rwidth * rheight * sizeof(float)];
+      float * gt =new float[ rwidth * rheight * sizeof(float)];
+      //void test__(int width, int height, int iview, float * h_data1, float * h_data2);
+      test__(rwidth, rheight, i_view, rr, gt);
+
+      PFMImage * pfm1 = new PFMImage(rwidth, rheight, 0, rr);
+      PFMImage * pfm2 = new PFMImage(rwidth, rheight, 0, gt);
+
+      char path_buf[100];
+      sprintf(path_buf, "../Data/Camera%02d/getitfromdeviceGT%06d.pfm", i_view, count);
+      pfm2->WriteImage(path_buf);
+      sprintf(path_buf, "../Data/Camera%02d/getitfromdeviceRR%06d.pfm", i_view, count);
+      pfm1->WriteImage(path_buf);
+      delete pfm1;
+      delete pfm2;
+      ++ count;
+#endif
 
       // calc g[]
       for (int pt_slice = 0; pt_slice < length; ++pt_slice)
@@ -273,13 +357,33 @@ namespace as_modeling
             //// launch kernel
             calculate_g_cuda(
               Instance()->current_level_,
+              Instance()->p_asmodeling_->width_,
+              Instance()->p_asmodeling_->height_,
               i_view,
               Instance()->num_views,
-              n,
+              //n,
               Instance()->p_asmodeling_->render_interval_,
               Instance()->d_projected_centers,
               Instance()->d_tag_volume,
               Instance()->p_device_g );
+
+#if 0 // test perturbed restult tex
+
+            int prwidth = Instance()->p_asmodeling_->width_;
+            int prheight = Instance()->p_asmodeling_->height_;
+
+            float * pr =new float[ prwidth * prheight * sizeof(float)];
+            //void test__(int width, int height, int iview, float * h_data1, float * h_data2);
+            tst_g(prwidth, prheight, i_view, pr);
+
+            PFMImage * pfm3 = new PFMImage(rwidth, rheight, 0, pr);
+
+            char path_buf[100];
+            sprintf(path_buf, "../Data/Camera%02d/getitfromdevicePR.pfm", i_view);
+            pfm3->WriteImage(path_buf);
+            delete pfm3;
+
+#endif
 
             // unmap resource
             cutilSafeCall( cudaGraphicsUnmapResources(1, &(Instance()->resource_pr_)) );
@@ -291,6 +395,10 @@ namespace as_modeling
       // unmap resource
       cutilSafeCall( cudaGraphicsUnmapResources(1, &(Instance()->resource_rr_)) );
     } // for i_view
+
+#ifdef __DISPLAY_SHUTDOWN_GUARD__
+    cutilSafeCall( cudaFree( (void*)dummy ) );
+#endif
 
     fprintf(stderr, "==+++++=== F value : %f\n", f);
 
@@ -352,7 +460,7 @@ namespace as_modeling
       sizeof(float) * vol_size,
       cudaMemcpyDeviceToHost) );
 
-    // set
+    // set over
 
     return true;
   }
@@ -546,7 +654,7 @@ namespace as_modeling
     // set initial guess of x using ground truth image
     set_density_tags(level, h_tag_volume, guess_x, projected_centers_, true);
 
-#if 1
+#if 0
     float * img = new float [length * length * length * 3];
     memset(img, 0, length * length * length * 3 * sizeof(float));
     for (int k = 0; k < length; ++k)
@@ -589,6 +697,41 @@ namespace as_modeling
     fprintf(stderr, "  Max size : %d\n", 
       ASModeling::MAX_VOL_SIZE*ASModeling::MAX_VOL_SIZE*ASModeling::MAX_VOL_SIZE);
 
+#if 0 // test projecting centers...  very ok....
+    int tttwidth = Instance()->p_asmodeling_->width_;
+    int tttheight = Instance()->p_asmodeling_->height_;
+
+    for (int iview = 0; iview < Instance()->num_views; ++iview)
+    {
+      float * tttdata = new float [tttwidth * tttheight];
+      memset(tttdata, 0, sizeof(float) * tttwidth * tttheight);
+
+      for (int k = 0; k < length; ++k)
+      {
+        for (int j = 0; j < length; ++j)
+        {
+          for (int i = 0; i < length; ++i)
+          {
+            int vol_index = p_asmodeling_->index3(i, j, k, length);
+            int arr_index = h_tag_volume[ vol_index ];
+
+            uint16 u = h_projected_centers[2*Instance()->num_views*(arr_index-1)+2*iview];
+            uint16 v = h_projected_centers[2*Instance()->num_views*(arr_index-1)+2*iview+1];
+
+            if (u<tttwidth && v<tttheight)
+              tttdata[v*tttwidth+u] = 1.0f;
+          }
+        }
+      }
+
+      PFMImage * tmpfpmm = new PFMImage(tttwidth,
+        tttheight, 0, tttdata);
+      char buf[100];
+      sprintf(buf, "../Data/showPcenter%02d.pfm", iview);
+      tmpfpmm -> WriteImage(buf);
+      delete tmpfpmm;
+    } // for iview
+#endif
 
     cutilSafeCall( cudaMemcpy(
       d_projected_centers,
@@ -966,9 +1109,6 @@ namespace as_modeling
             int vol_index = p_asmodeling_->index3(i, j, k, length);
             tag_volume[vol_index] = tag_index;
 
-            if (is_init_density)
-              density.push_back( static_cast<float>(luminance_sum) / (255.0f*n_effective_pixels) );
-
             // calc the projected pixels of the current cell 
             for (int i_camera = 0; i_camera < p_asmodeling_->num_cameras_; ++i_camera)
             {
@@ -993,11 +1133,27 @@ namespace as_modeling
               debugBMP[i_camera].GetPixelAt(px,py)[1] = p_asmodeling_->ground_truth_image_.GetPixelAt(px, py + zbase)[0];
 #endif
 
-              centers.push_back(px);
-              centers.push_back(p_asmodeling_->height_ - py);
+#if 0
+              if (px >= p_asmodeling_->width_ || py >= p_asmodeling_->height_)
+              {
+                fprintf(stderr, "-=-=-=-=-=-=-= ERROR !  %d %d\n", px, py);
+              }
+#endif
+
+              if (px < p_asmodeling_->width_ && py < p_asmodeling_->height_)
+              {
+                // add current pixel to projected_centers
+                centers.push_back(px);
+                centers.push_back(p_asmodeling_->height_ - 1 - py);
+
+                // add current value to guess_x
+                if (is_init_density)
+                  density.push_back( static_cast<float>(luminance_sum) / (255.0f*n_effective_pixels) );
+              }
+
             } // for each camera
 
-          } // if (n_effective_pixels != 0)
+          } // is_effective
 
         } // for i
       } // for j
