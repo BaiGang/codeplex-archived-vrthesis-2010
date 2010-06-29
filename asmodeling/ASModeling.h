@@ -81,7 +81,7 @@ namespace as_modeling
     // consts
     ///////////////////////////////////////////////////
     static const int INITIAL_VOL_LEVEL   = 5;
-    static const int MAX_VOL_LEVEL       = 7;
+    static const int MAX_VOL_LEVEL       = 8;
     static const int INITIAL_VOL_SIZE    = 1 << INITIAL_VOL_LEVEL;
     static const int MAX_VOL_SIZE        = 1 << MAX_VOL_LEVEL;
 

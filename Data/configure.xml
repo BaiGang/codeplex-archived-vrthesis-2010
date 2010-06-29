@@ -12,10 +12,10 @@
     <CameraWidth value="696" />
     <CameraHeight value="520" />
     <RenderInterval>
-      <Level5 value="3" />
-      <Level6 value="3" />
-      <Level7 value="2" />
-      <Level8 value="2" />
+      <Level5 value="2" />
+      <Level6 value="1" />
+      <Level7 value="1" />
+      <Level8 value="1" />
     </RenderInterval>
     <RotAngle value="0" />
   </Render>
@@ -41,8 +41,8 @@
     <VolInterval>
       <Level5 value="4" />
       <Level6 value="4" />
-      <Level7 value="8" />
-      <Level8 value="8" />
+      <Level7 value="4" />
+      <Level8 value="4" />
     </VolInterval>
   </Volume>
   <LBFGSB>

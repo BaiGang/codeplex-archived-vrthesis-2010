@@ -41,11 +41,14 @@ __global__ void calc_g(
           uchar4 gt4 = tex3D(ground_truth, float(uu)+0.5, float(img_height-1-vv)+0.5, float(i_view)+0.5);
           float4 pr4 = tex2D(perturbed_result, float(uu)+0.5, float(vv)+0.5);
 
-          float fgt = uint8_to_float(gt4.x);
-          float frr = rr4.x;
-          float fpr = pr4.x;
+          //float fgt = uint8_to_float(gt4.x);
+          //float frr = rr4.x;
+          //float fpr = pr4.x;
 
-          gg += -2.0f * (fgt - frr) * (fpr - frr) / disturb_value;
+          //gg += -2.0f * (fgt - frr) * (fpr - frr) / disturb_value;
+          
+          gg += -2.0f * (uint8_to_float(gt4.x) - rr4.x) *(pr4.x - rr4.x)
+            / disturb_value;
         }
       }
       g_array[arr_index] = g_array[arr_index] + gg;

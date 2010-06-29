@@ -45,6 +45,7 @@ namespace as_modeling
     int n = x.gethighbound();
 
     fprintf(stderr, " %d variables to optimize...\n", n);
+    fprintf(stderr, " %d variables...\n", x.gethighbound()-x.getlowbound()+1);
 
     // alloc size
     size_t size = n * sizeof(float);
@@ -900,6 +901,7 @@ namespace as_modeling
       h_projected_centers[i] = *it;
     }
 
+    fprintf(stderr, "++++++++++++++++++++++++++++++ nonzero voxels size : %d\n", n_nonzero_items);
     fprintf(stderr, "++++++++++++++++++++++++++++++ projected centers size : %d\n", projected_centers_.size());
 
     cutilSafeCall( cudaMemcpy(
@@ -1120,11 +1122,11 @@ namespace as_modeling
             float x_min, x_max, y_min, y_max;
             tmpConvexHull.GetBoundingBox(x_min, x_max, y_min, y_max);
 
-            for (int vv = static_cast<int>(y_min+0.5f); vv < static_cast<int>(y_max+0.5f); ++vv)
+            for (int vv = static_cast<int>(y_min); vv <= static_cast<int>(y_max+0.5f); ++vv)
             {
               if (vv<0 || vv>=p_asmodeling_->height_)
                 continue;
-              for (int uu = static_cast<int>(x_min+0.5f); uu < static_cast<int>(x_max+0.5f); ++uu)
+              for (int uu = static_cast<int>(x_min); uu <= static_cast<int>(x_max+0.5f); ++uu)
               {
                 if (uu<0 || uu >= p_asmodeling_->width_)
                   continue;

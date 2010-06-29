@@ -125,7 +125,9 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
+				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
+				FavorSizeOrSpeed="1"
 				AdditionalIncludeDirectories="../CudaImageUtil;&quot;$(SolutionDir)\Inc&quot;;../TinyXML;../Utils;&quot;../L-BFGS-B&quot;"
 				PreprocessorDefinitions="WIN32;_CONSOLE"
 				RuntimeLibrary="0"

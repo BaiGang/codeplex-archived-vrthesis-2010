@@ -50,11 +50,12 @@ __global__ void calc_f(
           float4 rr4 = tex2D(render_result, float(uu)+0.5, float(vv)+0.5);
           uchar4 gt4 = tex3D(ground_truth, float(uu)+0.5, float(img_height-1-vv)+0.5, float(i_view)+0.5);
 
-          float frr = rr4.x;
+          //float frr = rr4.x;
           float fgt = uint8_to_float(gt4.x);
 
-          // USE ONLY R CHANNEL HERE...
-          f += (frr - fgt)*(frr - fgt);
+          //// USE ONLY R CHANNEL HERE...
+          //f += (frr - fgt)*(frr - fgt);
+          f += (rr4.x - fgt) * (rr4.x - fgt);
         }
       }
       f_array[ index_array ] = f;

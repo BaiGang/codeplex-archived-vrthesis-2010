@@ -555,7 +555,7 @@ namespace as_modeling
     pr_fbo_->EndDraw2FBO();
 #endif //__TEST_RENDER__
 
-#if 1
+#if 0
     float * data = rr_fbo_->ReadPixels();
     float * img = new float [3 * width_ * height_];
     for (int y = 0; y < height_; ++y)
