@@ -56,7 +56,7 @@ namespace as_modeling
     //tmpbmp.SaveImage("../Data/groundtruth.bmp");
     ////////////////////////////////////////////
 
-    int i_level = INITIAL_VOL_LEVEL;
+    int i_level = initial_vol_level_;
     std::vector<float> host_x;
 
     tmer.start();
@@ -113,10 +113,18 @@ namespace as_modeling
     //ASMGradCompute::Instance()->get_data(i_level, frame_volume_result_, lbfgsb_x_);
     //fprintf(stderr, "\n\n Reconstructed results saved...\n\n");
 
+    // get data
+    // copy the volume data to HOST
+    if (!ASMGradCompute::Instance()->get_data(i_level, frame_volume_result_, lbfgsb_x_))
+    {
+      fprintf( stderr, "===== Could not get volume data...\n" );
+      return false;
+    }
+
     ++ i_level;
 
     // progressively optimize finer volumes
-    while (i_level <= MAX_VOL_LEVEL)
+    while (i_level <= max_vol_level_)
     {
       fprintf(stderr, "===||||==== Optimizing level %d...\n", i_level);
 
@@ -160,16 +168,26 @@ namespace as_modeling
         );
       fprintf(stderr, "TIMING : call lbfgsbminimize of level %d, used %lf secs.\n", i_level, tmer.stop());
       printf("Level : %d\nreturned info code : %d\n\n", i_level, lbfgsb_info_code_);
+
+      // get data
+      // copy the volume data to HOST
+      if (!ASMGradCompute::Instance()->get_data(i_level, frame_volume_result_, lbfgsb_x_))
+      {
+        fprintf( stderr, "===== Could not get volume data...\n" );
+        return false;
+      }
+
       ++ i_level;
+
     }
 
-    // get data
-    // copy the volume data to HOST
-    if (!ASMGradCompute::Instance()->get_data(MAX_VOL_LEVEL, frame_volume_result_, lbfgsb_x_))
-    {
-      fprintf( stderr, "===== Could not get volume data...\n" );
-      return false;
-    }
+    //// get data
+    //// copy the volume data to HOST
+    //if (!ASMGradCompute::Instance()->get_data(max_vol_level_, frame_volume_result_, lbfgsb_x_))
+    //{
+    //  fprintf( stderr, "===== Could not get volume data...\n" );
+    //  return false;
+    //}
 
 
     return true;

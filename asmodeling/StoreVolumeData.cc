@@ -13,7 +13,7 @@ namespace as_modeling
 
     sprintf(path_buf, "../Data/Results/Frame%08d.pfm", i_frame);
 
-    PFMImage * res_img = new PFMImage(MAX_VOL_SIZE, MAX_VOL_SIZE*MAX_VOL_SIZE, 0, frame_volume_result_.get());
+    PFMImage * res_img = new PFMImage(max_vol_size_, max_vol_size_*max_vol_size_, 0, frame_volume_result_.get());
     res_img->WriteImage(path_buf);
 
     //// also, we should show the render result of the reconstructed volume

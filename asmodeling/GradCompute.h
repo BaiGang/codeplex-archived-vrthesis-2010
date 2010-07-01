@@ -100,7 +100,10 @@ namespace as_modeling{
     cudaGraphicsResource * resource_rr_;
     cudaGraphicsResource * resource_pr_;
 
-    cudaStream_t cuda_stream_;
+#ifdef __USE_TEX_MEMORY_CUDA__
+    cudaGraphicsResource * resource_tag_;      // tag volume
+    cudaGraphicsResource * resource_pcenters;  // projected centers
+#endif // __USE_TEX_MEMORY_CUDA__
 
     // pbo
     // for cuda access
@@ -132,8 +135,10 @@ namespace as_modeling{
 
     float * d_temp_f;
 
+#ifndef __USE_TEX_MEMORY_CUDA__
     uint16 * d_projected_centers;
     int * d_tag_volume;
+#endif // __USE_TEX_MEMORY_CUDA__
 
     cudaArray * vol_tex_cudaArray;
     cudaExtent  vol_cudaArray_extent;
@@ -142,6 +147,11 @@ namespace as_modeling{
     // 3d, z maps to different images
     cudaArray * gt_tex_cudaArray;
     cudaExtent  gt_cudaArray_extent;
+
+#ifdef __USE_TEX_MEMORY_CUDA__
+    cudaArray * tag_vol_cudaArray;
+    cudaArray * pcenters_cudaArray;
+#endif
 
     float * d_vol_bufferptr;
     size_t vol_buffer_num_bytes_;

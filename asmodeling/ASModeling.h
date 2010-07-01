@@ -77,14 +77,6 @@ namespace as_modeling
 
   private:
 
-    ///////////////////////////////////////////////////
-    // consts
-    ///////////////////////////////////////////////////
-    static const int INITIAL_VOL_LEVEL   = 5;
-    static const int MAX_VOL_LEVEL       = 8;
-    static const int INITIAL_VOL_SIZE    = 1 << INITIAL_VOL_LEVEL;
-    static const int MAX_VOL_SIZE        = 1 << MAX_VOL_LEVEL;
-
     ////////////////////////////////////////////////////
     //               helper routines
     ////////////////////////////////////////////////////
@@ -112,8 +104,6 @@ namespace as_modeling
     scoped_array<float> frame_volume_result_;
     scoped_array<float> frame_compressed_result_;
 
-    cuda_imageutil::BMPImageUtil result_data_;
-
     //////////////////////////////////////////////
     // ALL CONFIGURE PARAMETERS
     // LOAD FROM CONFIGURE.XML
@@ -132,8 +122,6 @@ namespace as_modeling
     int current_view_;   // deprecated
     int width_;
     int height_;
-    int camera_width_;
-    int camera_height_;
     int render_interval_array_[32];  // 1 to 32, we use 5, 6, 7, 8
     int rot_angles_;
 
@@ -150,19 +138,18 @@ namespace as_modeling
     //  volume parameters
     ////////////////////////////////////////////
     float box_size_;
-    int box_width_;
-    int box_height_;
-    int box_depth_;
     float trans_x_;
     float trans_y_;
     float trans_z_;
     int volume_interval_array_[32];
 
-    ////////////////////////////////////////////
-    //  octree parameters  -- deprecated
-    ////////////////////////////////////////////
-    int octree_level_;
-    int node_to_divide_;
+    ///////////////////////////////////////////////////
+    // sizes
+    ///////////////////////////////////////////////////
+    int initial_vol_level_;
+    int max_vol_level_;
+    int initial_vol_size_;
+    int max_vol_size_;
 
     ////////////////////////////////////////////
     //  L-BFGS_B parameters

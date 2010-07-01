@@ -104,15 +104,14 @@ namespace as_modeling
       float zn = 0.1f;
       float zf = 1000.0f;
       memset(proj, 0, sizeof(proj));
-      proj[0] = 2.0f*camera_intr_paras_[i](0,0)/camera_width_;
-      proj[5] = 2.0f*camera_intr_paras_[i](1,1)/camera_height_;
-      proj[8] = -2.0f*(camera_intr_paras_[i](0,2)-camera_width_*0.5f)/camera_width_;
-      proj[9] = 2.0f*(camera_intr_paras_[i](1,2)-camera_height_*0.5f)/camera_height_;
+      proj[0] = 2.0f*camera_intr_paras_[i](0,0)/width_;
+      proj[5] = 2.0f*camera_intr_paras_[i](1,1)/height_;
+      proj[8] = -2.0f*(camera_intr_paras_[i](0,2)-width_*0.5f)/width_;
+      proj[9] = 2.0f*(camera_intr_paras_[i](1,2)-height_*0.5f)/height_;
       proj[10] = -(zf+zn)/(zf-zn);
       proj[11] = -1.0f;
       proj[14] = -2.0f*(zf*zn)/(zf-zn);
       gl_projection_mats_[i].SetMatrix(proj);
-
 
     } // for i
 

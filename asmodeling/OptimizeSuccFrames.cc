@@ -20,7 +20,7 @@ namespace as_modeling
     std::vector<float> guess_x;
 
     // calc x using previous x and volume tag
-    ASMGradCompute::Instance()->succframe_init(MAX_VOL_LEVEL, guess_x, lbfgsb_x_);
+    ASMGradCompute::Instance()->succframe_init(max_vol_level_, guess_x, lbfgsb_x_);
 
     // x
     int n = guess_x.size();

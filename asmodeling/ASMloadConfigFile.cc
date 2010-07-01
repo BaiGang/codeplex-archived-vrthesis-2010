@@ -73,16 +73,6 @@ namespace as_modeling
       return false;
     TXIntValue(pElem, &height_ );
 
-    pElem = hRender->FirstChild("CameraWidth").Element();
-    if (!pElem)
-      return false;
-    TXIntValue(pElem, &camera_width_ );
-
-    pElem = hRender->FirstChild("CameraHeight").Element();
-    if (!pElem)
-      return false;
-    TXIntValue(pElem, &camera_height_ );
-
     TiXmlHandle* hRInterval = &(hRender->FirstChild("RenderInterval"));
     if (!hRInterval)
       return false;
@@ -150,20 +140,17 @@ namespace as_modeling
       return false;
     TXFloatValue(pElem, &box_size_);
 
-    pElem = hVolume->FirstChild("VolWidth").Element();
+    pElem = hVolume->FirstChild("VolumeInitialLevel").Element();
     if (!pElem)
       return false;
-    TXIntValue(pElem, &box_width_);
+    TXIntValue(pElem, &initial_vol_level_);
+    initial_vol_size_ = 1 << initial_vol_level_;
 
-    pElem = hVolume->FirstChild("VolHeight").Element();
+    pElem = hVolume->FirstChild("VolumeMaxLevel").Element();
     if (!pElem)
       return false;
-    TXIntValue(pElem, &box_height_);
-
-    pElem = hVolume->FirstChild("VolDepth").Element();
-    if (!pElem)
-      return false;
-    TXIntValue(pElem, &box_depth_);
+    TXIntValue(pElem, &max_vol_level_);
+    max_vol_size_ = 1 << max_vol_level_;
 
     pElem = hVolume->FirstChild("TransX").Element();
     if (!pElem)

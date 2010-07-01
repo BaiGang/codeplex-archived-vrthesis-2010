@@ -227,7 +227,6 @@ namespace as_modeling
       if ('X' == asml_->camera_orientations_[i_view])
       {
         for (int i = 0; i < length; ++i)
-        //int i = 31;
         {
           float tex_x_coord = (i+0.5) / static_cast<float>(length);
           float geo_x_coord = asml_->box_size_ * tex_x_coord + asml_->trans_x_ - half_size;
@@ -243,7 +242,6 @@ namespace as_modeling
       else if ('x' == asml_->camera_orientations_[i_view])
       {
         for (int i = length - 1; i >= 0; --i)
-        //int i = 31;
         {
           float tex_x_coord = (i+0.5) / static_cast<float>(length);
           float geo_x_coord = asml_->box_size_ * tex_x_coord + asml_->trans_x_ - half_size;
@@ -448,7 +446,6 @@ namespace as_modeling
       if ('X' == asml_->camera_orientations_[i_view])
       {
         for (int i = 0; i < length; ++i)
-        //int i =1;
         {
           float tex_x_coord = (i+0.5) / static_cast<float>(length);
           float geo_x_coord = asml_->box_size_ * tex_x_coord + asml_->trans_x_ - half_size;
@@ -466,7 +463,6 @@ namespace as_modeling
       else if ('x' == asml_->camera_orientations_[i_view])
       {
         for (int i = length - 1; i >= 0; --i)
-        //int i = 1;
         {
           float tex_x_coord = (i+0.5) / static_cast<float>(length);
           float geo_x_coord = asml_->box_size_ * tex_x_coord + asml_->trans_x_ - half_size;
@@ -580,7 +576,6 @@ namespace as_modeling
     //tmpBmp.SaveImage(path_buf);
     ++counter;
 #endif
-
 
   }
 

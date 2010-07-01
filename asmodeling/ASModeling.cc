@@ -93,9 +93,6 @@ namespace as_modeling
       return false;
     }
 
-    // result storage and i/o
-    result_data_.SetSizes(MAX_VOL_SIZE, MAX_VOL_SIZE*MAX_VOL_SIZE);
-
     return true;
   }
 

@@ -45,7 +45,6 @@ namespace as_modeling
     int n = x.gethighbound();
 
     fprintf(stderr, " %d variables to optimize...\n", n);
-    fprintf(stderr, " %d variables...\n", x.gethighbound()-x.getlowbound()+1);
 
     // alloc size
     size_t size = n * sizeof(float);
@@ -69,7 +68,7 @@ namespace as_modeling
 
     // we need to upsample the low-resolution volume
     // to full resolution for rendering
-    if (Instance()->current_level_ != ASModeling::MAX_VOL_LEVEL)
+    if (Instance()->current_level_ != Instance()->p_asmodeling_->max_vol_level_)
     {
       // construct volume using x[] and voxel tags
       construct_volume_cuda(
@@ -82,7 +81,7 @@ namespace as_modeling
       // upsampling
       upsample_volume_cuda(
         Instance()->current_level_,
-        ASModeling::MAX_VOL_LEVEL,
+        Instance()->p_asmodeling_->max_vol_level_,
         &(Instance()->d_vol_pitchedptr),
         &(Instance()->d_full_vol_pptr)
         );
@@ -175,7 +174,7 @@ namespace as_modeling
 
 #if 0
     get_volume_cuda(
-      ASModeling::MAX_VOL_LEVEL,
+      ASModeling::max_vol_level_,
       Instance()->d_full_vol_pptr,
       /*Instance()->d_tag_volume,*/
       Instance()->p_device_x );
@@ -239,7 +238,7 @@ namespace as_modeling
       int piwidth = Instance()->p_asmodeling_->width_;
       int piheight = Instance()->p_asmodeling_->height_;
       float * pc = new float [piwidth * piheight];
-      
+
       tst_pcenters(Instance()->current_level_, piwidth, piheight,
         i_view, Instance()->num_views, Instance()->d_projected_centers,
         Instance()->d_tag_volume, pc);
@@ -444,7 +443,7 @@ namespace as_modeling
       cudaMemcpyDeviceToHost) );
 
     // show render result
-    if (Instance()->current_level_ != ASModeling::MAX_VOL_LEVEL)
+    if (Instance()->current_level_ != Instance()->p_asmodeling_->max_vol_level_)
     {
       // construct volume using x[] and voxel tags
       construct_volume_cuda(
@@ -457,7 +456,7 @@ namespace as_modeling
       // upsampling
       upsample_volume_cuda(
         Instance()->current_level_,
-        ASModeling::MAX_VOL_LEVEL,
+        Instance()->p_asmodeling_->max_vol_level_,
         &(Instance()->d_vol_pitchedptr),
         &(Instance()->d_full_vol_pptr)
         );
@@ -499,7 +498,7 @@ namespace as_modeling
     {
       renderer_->render_unperturbed(i_view, vol_tex_, 1 << current_level_);
       char path_buf[100];
-      sprintf(path_buf, "../Data/Results/Frame%08d_View%02d.PFM", 0, i_view);
+      sprintf(path_buf, "../Data/Results/Frame%08d_View%02d_Level%d.PFM", 0, i_view, level);
       float * data = renderer_->rr_fbo_->ReadPixels();
       float * img = new float [p_asmodeling_->width_*p_asmodeling_->height_];
       for (int y = 0; y < p_asmodeling_->height_; ++y)
@@ -514,6 +513,13 @@ namespace as_modeling
         0, img);
       sndipfm->WriteImage(path_buf);
     }
+
+    float * imgdata = new float [length * length*length];
+    PFMImage * pfmhaha = new PFMImage(length, length*length, 0, imgdata);
+    char pathbuf [100];
+    sprintf(pathbuf, "../Data/Results/Result_Level%d.PFM", level);
+    pfmhaha->WriteImage(pathbuf);
+    delete pfmhaha;
     // set over
 
     return true;
@@ -540,8 +546,8 @@ namespace as_modeling
 
   bool ASMGradCompute::init(void)
   {
-    current_level_ = ASModeling::INITIAL_VOL_LEVEL;
-    int max_length = ASModeling::MAX_VOL_SIZE;
+    current_level_ = Instance()->p_asmodeling_->initial_vol_level_;
+    int max_length = Instance()->p_asmodeling_->max_vol_size_;
     int max_size = max_length * max_length * max_length;
     int tex_buffer_size = max_size * sizeof(float);
 
@@ -748,8 +754,6 @@ namespace as_modeling
     }
 
     fprintf(stderr, "\n\n, sizeof projected_centers_ : %d\n", projected_centers_.size());
-    fprintf(stderr, "  Max size : %d\n", 
-      ASModeling::MAX_VOL_SIZE*ASModeling::MAX_VOL_SIZE*ASModeling::MAX_VOL_SIZE);
 
 #if 0 // test projecting centers...  very ok....
     int tttwidth = Instance()->p_asmodeling_->width_;
@@ -902,7 +906,6 @@ namespace as_modeling
     }
 
     fprintf(stderr, "++++++++++++++++++++++++++++++ nonzero voxels size : %d\n", n_nonzero_items);
-    fprintf(stderr, "++++++++++++++++++++++++++++++ projected centers size : %d\n", projected_centers_.size());
 
     cutilSafeCall( cudaMemcpy(
       d_projected_centers,
@@ -941,7 +944,6 @@ namespace as_modeling
       sizeof(float)*(1+n_nonzero_items),
       cudaMemcpyDeviceToHost) );
 
-    guess_x.push_back(0.0f);
     for (int i = 1; i <= n_nonzero_items; ++i)
     {
       guess_x.push_back( Instance()->p_host_x[i] );
@@ -1074,6 +1076,7 @@ namespace as_modeling
           // sum of the values of all non-zero pixels
           unsigned int luminance_sum = 0;
 
+          std::list<uint16> tmp_pcenters;
           // for each camera
           for (int i_camera = 0; i_camera < p_asmodeling_->num_cameras_; ++i_camera)
           {
@@ -1107,12 +1110,14 @@ namespace as_modeling
 
               // Projection
               Point2D tmpPt;
-              tmpPt.x = (0.5f + 
-                p_asmodeling_->camera_intr_paras_[i_camera](0,0) * ec.x + p_asmodeling_->camera_intr_paras_[i_camera](0,2));
-              tmpPt.y = (0.5f +
-                p_asmodeling_->camera_intr_paras_[i_camera](1,1) * ec.y + p_asmodeling_->camera_intr_paras_[i_camera](1,2));
-              
-              if (tmpPt.x < p_asmodeling_->width_*1.0f && tmpPt.y < p_asmodeling_->height_*1.0f)
+              tmpPt.x = static_cast<int>(p_asmodeling_->camera_intr_paras_[i_camera](0,0) * ec.x
+                + p_asmodeling_->camera_intr_paras_[i_camera](0,2) + 0.5f);
+              tmpPt.y = static_cast<int>(p_asmodeling_->camera_intr_paras_[i_camera](1,1) * ec.y
+                + p_asmodeling_->camera_intr_paras_[i_camera](1,2) + 0.5f);
+
+              if (tmpPt.x > -1e-4 && tmpPt.y > -1e-4 &&
+                tmpPt.x < p_asmodeling_->width_*1.0f && 
+                tmpPt.y < p_asmodeling_->height_*1.0f)
                 pts.push_back(tmpPt);
             }
 
@@ -1122,13 +1127,14 @@ namespace as_modeling
             float x_min, x_max, y_min, y_max;
             tmpConvexHull.GetBoundingBox(x_min, x_max, y_min, y_max);
 
-            for (int vv = static_cast<int>(y_min); vv <= static_cast<int>(y_max+0.5f); ++vv)
+            // calc the projected area
+            for (int vv = static_cast<int>(y_min); vv - y_max < 0.001f; ++vv)
             {
-              if (vv<0 || vv>=p_asmodeling_->height_)
+              if (vv < 0 || vv >= p_asmodeling_->height_)
                 continue;
-              for (int uu = static_cast<int>(x_min); uu <= static_cast<int>(x_max+0.5f); ++uu)
+              for (int uu = static_cast<int>(x_min); uu - x_max < 0.001f; ++uu)
               {
-                if (uu<0 || uu >= p_asmodeling_->width_)
+                if (uu < 0 || uu >= p_asmodeling_->width_)
                   continue;
 
                 if (!tmpConvexHull.IfInConvexHull(uu*1.0f, vv*1.0f))
@@ -1143,6 +1149,30 @@ namespace as_modeling
                 }
               }
             }
+
+            // calc the projected center
+            Vector4 cwc;
+            cwc.x = wc_x[8];
+            cwc.y = wc_y[8];
+            cwc.z = wc_z[8];
+            cwc.w = 1.0;
+            Vector4 cec;
+            cec = p_asmodeling_->camera_extr_paras_[i_camera] * cwc;
+            cec.x /= cec.z;
+            cec.y /= cec.z;
+            cec.z /= cec.z;
+            int px = static_cast<int>( 0.5+
+              p_asmodeling_->camera_intr_paras_[i_camera](0,0) * cec.x + p_asmodeling_->camera_intr_paras_[i_camera](0,2) );
+            int py = static_cast<int>( 0.5+
+              p_asmodeling_->camera_intr_paras_[i_camera](1,1) * cec.y + p_asmodeling_->camera_intr_paras_[i_camera](1,2) );
+
+            if (px < 0 || px >= p_asmodeling_->width_ || py < 0 || py >= p_asmodeling_->height_)
+            {
+              ep_count_per_image[i_camera] = 0;
+            }
+            tmp_pcenters.push_back(px);
+            tmp_pcenters.push_back(p_asmodeling_->height_ - 1 - py);
+
           } // for i_camera
 
           n_effective_pixels = 0;
@@ -1165,51 +1195,15 @@ namespace as_modeling
             int vol_index = p_asmodeling_->index3(i, j, k, length);
             tag_volume[vol_index] = tag_index;
 
-            // calc the projected pixels of the current cell 
-            for (int i_camera = 0; i_camera < p_asmodeling_->num_cameras_; ++i_camera)
+            if (is_init_density)
+              density.push_back( static_cast<float>(luminance_sum) / (255.0f*n_effective_pixels) );
+
+            // add pcenters
+            for (std::list<uint16>::const_iterator it = tmp_pcenters.begin();
+              it != tmp_pcenters.end(); ++it)
             {
-              int zbase = i_camera*p_asmodeling_->height_;
-              Vector4 cwc;
-              cwc.x = wc_x[8];
-              cwc.y = wc_y[8];
-              cwc.z = wc_z[8];
-              cwc.w = 1.0;
-              Vector4 cec;
-              cec = p_asmodeling_->camera_extr_paras_[i_camera] * cwc;
-              cec.x /= cec.z;
-              cec.y /= cec.z;
-              cec.z /= cec.z;
-              int px = static_cast<int>( 0.5+
-                p_asmodeling_->camera_intr_paras_[i_camera](0,0) * cec.x + p_asmodeling_->camera_intr_paras_[i_camera](0,2) );
-              int py = static_cast<int>( 0.5+
-                p_asmodeling_->camera_intr_paras_[i_camera](1,1) * cec.y + p_asmodeling_->camera_intr_paras_[i_camera](1,2) );
-
-#ifdef __DEBUG_IMAGE_
-              debugBMP[i_camera].GetPixelAt(px,py)[0] = 255;
-              debugBMP[i_camera].GetPixelAt(px,py)[1] = p_asmodeling_->ground_truth_image_.GetPixelAt(px, py + zbase)[0];
-#endif
-
-#if 0
-              if (px >= p_asmodeling_->width_ || py >= p_asmodeling_->height_)
-              {
-                fprintf(stderr, "-=-=-=-=-=-=-= ERROR !  %d %d\n", px, py);
-              }
-#endif
-
-              if (px < p_asmodeling_->width_ && py < p_asmodeling_->height_)
-              {
-                // add current pixel to projected_centers
-                centers.push_back(px);
-                centers.push_back(p_asmodeling_->height_ - 1 - py);
-
-                //fprintf(stderr, " pushed... count... %d\n", centers.size());;
-
-                // add current value to guess_x
-                if (is_init_density)
-                  density.push_back( static_cast<float>(luminance_sum) / (255.0f*n_effective_pixels) );
-              }
-
-            } // for each camera
+              centers.push_back(*it);
+            }
 
           } // is_effective
 

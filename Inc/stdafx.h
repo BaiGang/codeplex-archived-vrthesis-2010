@@ -7,4 +7,8 @@ typedef unsigned int   uint32;
 
 //#define __DISPLAY_SHUTDOWN_GUARD__
 
+//#define __USE_TEX_MEMORY_CUDA__
+
+#define __SHOW_RESULTS_EVERY_LEVEL__
+
 #endif //__ASMODELING_STD_AFX_H_

@@ -9,11 +9,9 @@
     <CurrentView value="0" />
     <width value="696" />
     <height value="520" />
-    <CameraWidth value="696" />
-    <CameraHeight value="520" />
     <RenderInterval>
-      <Level5 value="2" />
-      <Level6 value="1" />
+      <Level5 value="4" />
+      <Level6 value="2" />
       <Level7 value="1" />
       <Level8 value="1" />
     </RenderInterval>
@@ -35,9 +33,8 @@
     <TransY value="-12.0" />
     <TransZ value="2.0" />
     <!-- the resolution of the volume data -->
-    <VolWidth value="256" />
-    <VolHeight value="256" />
-    <VolDepth value="256" />
+    <VolumeInitialLevel value="5"/>
+    <VolumeMaxLevel value="8"/>
     <VolInterval>
       <Level5 value="4" />
       <Level6 value="4" />

@@ -218,7 +218,6 @@ void calculate_g_cuda( int      level,
                       int      img_height,
                       int      i_view, 
                       int      n_view,
-                      //int      n_nonzero_items,
                       int      interval,
                       uint16*  projected_centers, 
                       int*     vol_tag,
@@ -234,7 +233,6 @@ void calculate_g_cuda( int      level,
     img_height,
     i_view,
     n_view,
-    //n_nonzero_items,
     interval,
     projected_centers,
     vol_tag,
@@ -252,7 +250,6 @@ void calculate_g_cuda( int      level,
 ////////////////////////////////////////
 void get_volume_cuda( int level,
                      cudaPitchedPtr vol_pptr,
-                     //int * tag_vol,
                      float * den_vol )
 {
   int length = 1 << level;

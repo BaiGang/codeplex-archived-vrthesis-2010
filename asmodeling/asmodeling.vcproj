@@ -67,6 +67,7 @@
 				Name="VCLinkerTool"
 				AdditionalDependencies="TinyXML.lib CudaImageUtil.lib L-BFGS-B.lib Utils.lib glut32.lib glew32.lib cudart.lib cUtil32.lib"
 				ShowProgress="2"
+				OutputFile="$(OutDir)\$(ProjectName)-d.exe"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="$(SolutionDir)\Lib"
 				DelayLoadDLLs=""
