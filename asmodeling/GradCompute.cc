@@ -66,6 +66,14 @@ namespace as_modeling
     // set g[] to zero
     cutilSafeCall( cudaMemset(Instance()->p_device_g, 0, size) );
 
+    //////////////////////
+    // time profiling
+    //////////////////////
+    float timer_cstrvolume;
+    cudaEventCreate(&Instance()->event_start);
+    cudaEventCreate(&Instance()->event_stop);
+    cudaEventRecord(Instance()->event_start, 0);
+
     // we need to upsample the low-resolution volume
     // to full resolution for rendering
     if (Instance()->current_level_ != Instance()->p_asmodeling_->max_vol_level_)
@@ -99,6 +107,13 @@ namespace as_modeling
         );
       cutilSafeCall( cudaGetLastError() );
     }
+
+    /// ending of the timer
+    cudaEventSynchronize( Instance()->event_stop );
+    cudaEventElapsedTime(&timer_cstrvolume, Instance()->event_start, Instance()->event_stop);
+    fprintf(stderr, "<TIMING> constructing volume on GPU used %f secs.\n", 0.001f*timer_cstrvolume);
+    cudaEventDestroy(Instance()->event_start);
+    cudaEventDestroy(Instance()->event_stop);
 
 #if 0
     //int len = 1 << Instance()->current_level_;
@@ -345,6 +360,8 @@ namespace as_modeling
               i_view,
               Instance()->num_views,
               Instance()->p_asmodeling_->render_interval_array_[ Instance()->current_level_ ],
+              Instance()->p_asmodeling_->camera_orientations_[i_view],
+              pt_slice,
               Instance()->d_projected_centers,
               Instance()->d_tag_volume,
               Instance()->p_device_g );

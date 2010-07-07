@@ -79,6 +79,8 @@ void calculate_g_cuda (int      level,
                        int      i_view, 
                        int      n_view,
                        int      interval,
+                       char     facing,
+                       int      slice,
                        uint16*  projected_centers, 
                        int*     vol_tag,
                        float*   g_array );

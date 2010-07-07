@@ -150,7 +150,6 @@ namespace as_modeling{
 
 #ifdef __USE_TEX_MEMORY_CUDA__
     cudaArray * tag_vol_cudaArray;
-    cudaArray * pcenters_cudaArray;
 #endif
 
     float * d_vol_bufferptr;
@@ -162,6 +161,12 @@ namespace as_modeling{
 
     /////////////////////////////
     int num_views;
+
+    ////////////////////////
+    // for time profiling
+    ////////////////////////
+    cudaEvent_t event_start;
+    cudaEvent_t event_stop;
   };
 
   //ASMGradCompute::instance_ = NULL;
