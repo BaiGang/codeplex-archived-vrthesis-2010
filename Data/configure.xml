@@ -12,8 +12,8 @@
     <RenderInterval>
       <Level5 value="2" />
       <Level6 value="1" />
-      <Level7 value="0" />
-      <Level8 value="0" />
+      <Level7 value="1" />
+      <Level8 value="1" />
     </RenderInterval>
     <RotAngle value="0" />
   </Render>
@@ -70,4 +70,6 @@
   </LBFGSB>
   <CUDA>
   </CUDA>
+  <Cameras>
+  </Cameras>
 </Parameters>

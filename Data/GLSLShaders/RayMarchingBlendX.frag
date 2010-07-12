@@ -44,6 +44,9 @@ void main()
   //获取密度
   float density = texture3D(volumeTex, gl_TexCoord[0].stp).r;
 
+  if(density < disturb)
+    discard;
+
   int u = int(gl_TexCoord[0].t*fwidth);
   int v = int(gl_TexCoord[0].p*fwidth);	
   u = int(mod(float(u), float(disturbPara.x)));
@@ -54,8 +57,7 @@ void main()
     density += disturb;
   }
 
-  if(density < 0.000001)
-    discard;
+
 
   //计算该片元的不透明度
   float extinction = absorptionCoefficient;

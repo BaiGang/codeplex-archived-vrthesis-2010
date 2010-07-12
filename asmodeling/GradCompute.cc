@@ -34,9 +34,9 @@ namespace as_modeling
   void ASMGradCompute::grad_compute(const ap::real_1d_array& x, double &f, ap::real_1d_array &g)
   {
     fprintf(stderr, "=== == === == Grad Computing ....\n");
+
     Timer tmer_1, tmer_2, tmer_3;
     tmer_1.start();
-
     tmer_2.start();
 
     f = 0.0;
@@ -64,15 +64,7 @@ namespace as_modeling
       cudaMemcpyHostToDevice) );
 
     // set g[] to zero
-    cutilSafeCall( cudaMemset(Instance()->p_device_g, 0, size) );
-
-    //////////////////////
-    // time profiling
-    //////////////////////
-    float timer_cstrvolume;
-    cudaEventCreate(&Instance()->event_start);
-    cudaEventCreate(&Instance()->event_stop);
-    cudaEventRecord(Instance()->event_start, 0);
+    cutilSafeCall( cudaMemset(Instance()->p_device_g, 0, size+sizeof(float)) );
 
     // we need to upsample the low-resolution volume
     // to full resolution for rendering
@@ -94,7 +86,6 @@ namespace as_modeling
         &(Instance()->d_full_vol_pptr)
         );
       cutilSafeCall( cudaGetLastError() );
-
     }
     else
     {
@@ -107,13 +98,6 @@ namespace as_modeling
         );
       cutilSafeCall( cudaGetLastError() );
     }
-
-    /// ending of the timer
-    cudaEventSynchronize( Instance()->event_stop );
-    cudaEventElapsedTime(&timer_cstrvolume, Instance()->event_start, Instance()->event_stop);
-    fprintf(stderr, "<TIMING> constructing volume on GPU used %f secs.\n", 0.001f*timer_cstrvolume);
-    cudaEventDestroy(Instance()->event_start);
-    cudaEventDestroy(Instance()->event_stop);
 
 #if 0
     //int len = 1 << Instance()->current_level_;
@@ -193,7 +177,6 @@ namespace as_modeling
       Instance()->d_full_vol_pptr,
       /*Instance()->d_tag_volume,*/
       Instance()->p_device_x );
-    cutilSafeCall( cudaThreadSynchronize() );
     int mxsize = 128*128*128;
     float * data = new float [mxsize];
     float * img = new float[mxsize * 3];
@@ -337,8 +320,12 @@ namespace as_modeling
         {
           for (int pu = 0; pu < mm; ++pu)
           {
-            Instance()->renderer_->render_perturbed(i_view, Instance()->vol_tex_, length,
-              mm, pt_slice, pu, pv);
+            Instance()->renderer_->render_perturbed(
+              i_view,                  // view
+              Instance()->vol_tex_,    // volume texture 
+              length,                  // resolution of the delegate box
+              mm,                      // perturb group size (interval between perturbed pixel)
+              pt_slice, pu, pv);       // specify perturbed group
 
             // accumulate g[]
             cutilSafeCall( cudaGraphicsMapResources(1, &(Instance()->resource_pr_)) );
@@ -360,14 +347,17 @@ namespace as_modeling
               i_view,
               Instance()->num_views,
               Instance()->p_asmodeling_->render_interval_array_[ Instance()->current_level_ ],
+              mm,
+              pu,
+              pv,
               Instance()->p_asmodeling_->camera_orientations_[i_view],
               pt_slice,
               Instance()->d_projected_centers,
               Instance()->d_tag_volume,
-              Instance()->p_device_g );
+              Instance()->p_device_g
+              );
 
 #if 0 // test perturbed restult tex
-
             int prwidth = Instance()->p_asmodeling_->width_;
             int prheight = Instance()->p_asmodeling_->height_;
 
@@ -381,7 +371,6 @@ namespace as_modeling
             sprintf(path_buf, "../Data/Camera%02d/getitfromdevicePR.pfm", i_view);
             pfm3->WriteImage(path_buf);
             delete pfm3;
-
 #endif
 
             // unmap resource
@@ -395,9 +384,6 @@ namespace as_modeling
       cutilSafeCall( cudaGraphicsUnmapResources(1, &(Instance()->resource_rr_)) );
     } // for i_view
 
-#ifdef __DISPLAY_SHUTDOWN_GUARD__
-    cutilSafeCall( cudaFree( (void*)dummy ) );
-#endif
 
     fprintf(stderr, "==+++++=== F value : %f\n", f);
 
@@ -407,14 +393,21 @@ namespace as_modeling
     cutilSafeCall( cudaMemcpy(
       Instance()->p_host_g, 
       Instance()->p_device_g,
-      n*sizeof(float),
+      (n+1)*sizeof(float),
       cudaMemcpyDeviceToHost) );
 
     // set g[]
-    for (int i = 0; i < n; ++i)
+    for (int i = 1; i <= n; ++i)
     {
-      g(i+1) = Instance()->p_host_g[i];
+      g(i) = Instance()->p_host_g[i];
     }
+
+    fprintf(stderr, "\nG values:\n");
+    for (int i = 1; i <= 7; ++i)
+    {
+      fprintf(stderr, "%lf ", g(i));
+    }
+    fprintf(stderr, "\n");
 
     fprintf(stderr, "=== == === == Grad Computing Used %lf secs.\n", tmer_1.stop());
 

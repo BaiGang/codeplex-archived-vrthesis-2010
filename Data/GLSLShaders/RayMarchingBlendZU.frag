@@ -40,7 +40,7 @@ void main()
   //获取密度
   float density = texture3D(volumeTex, gl_TexCoord[0].stp).r;
 
-  if(density < 0.000001)
+  if(density < 0.00001)
     discard;
 
   //计算该片元的不透明度

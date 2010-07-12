@@ -45,7 +45,7 @@ namespace as_modeling
           ground_truth_image_.GetPixelAt(x,zbase+y)[1] = tmpBMP.GetPixelAt(x,y)[1];
           ground_truth_image_.GetPixelAt(x,zbase+y)[2] = tmpBMP.GetPixelAt(x,y)[2];
 #endif
-          ground_truth_image_.GetPixelAt(x,zbase+y)[3] = 1.0f;
+          ground_truth_image_.GetPixelAt(x,zbase+y)[3] = 255;
         }
       }
     } // for each camera
@@ -68,15 +68,15 @@ namespace as_modeling
         for (int x = 0; x < width_; ++x)
         {
 #if 1
-          ground_truth_image_.GetPixelAt(x,zbase+height_-y)[0] = __max(255.0, __min(0, 255.0*tmpPFM.GetPixel(x, zbase+y).r) );
-          ground_truth_image_.GetPixelAt(x,zbase+height_-y)[1] = __max(255.0, __min(0, 255.0*tmpPFM.GetPixel(x, zbase+y).g) );
-          ground_truth_image_.GetPixelAt(x,zbase+height_-y)[2] = __max(255.0, __min(0, 255.0*tmpPFM.GetPixel(x, zbase+y).b) );
+          ground_truth_image_.GetPixelAt(x,zbase+height_-y)[0] = __min(255.0, __max(0.0, 255.0*tmpPFM.GetPixel(x, y).r) );
+          ground_truth_image_.GetPixelAt(x,zbase+height_-y)[1] = __min(255.0, __max(0.0, 255.0*tmpPFM.GetPixel(x, y).g) );
+          ground_truth_image_.GetPixelAt(x,zbase+height_-y)[2] = __min(255.0, __max(0.0, 255.0*tmpPFM.GetPixel(x, y).b) );
 #else
-          ground_truth_image_.GetPixelAt(x,zbase+y)[0] = __max(255.0, __min(0, 255.0*tmpPFM.GetPixel(x, zbase+y).r) );
-          ground_truth_image_.GetPixelAt(x,zbase+y)[1] = __max(255.0, __min(0, 255.0*tmpPFM.GetPixel(x, zbase+y).g) );
-          ground_truth_image_.GetPixelAt(x,zbase+y)[2] = __max(255.0, __min(0, 255.0*tmpPFM.GetPixel(x, zbase+y).b) );
+          ground_truth_image_.GetPixelAt(x,zbase+y)[0] = __min(255.0, __max(0.0, 255.0*tmpPFM.GetPixel(x, y).r) );
+          ground_truth_image_.GetPixelAt(x,zbase+y)[1] = __min(255.0, __max(0.0, 255.0*tmpPFM.GetPixel(x, y).g) );
+          ground_truth_image_.GetPixelAt(x,zbase+y)[2] = __min(255.0, __max(0.0, 255.0*tmpPFM.GetPixel(x, y).b) );
 #endif
-          ground_truth_image_.GetPixelAt(x,zbase+y)[3] = 1.0f;
+          ground_truth_image_.GetPixelAt(x,zbase+y)[3] = 255;
         }
       }
 

@@ -73,17 +73,20 @@ float calculate_f_cuda (int     level,
                         float*  sum_array/*,
                         float * data*/);
 
-void calculate_g_cuda (int      level, 
-                       int      img_width,
-                       int      img_height,
-                       int      i_view, 
-                       int      n_view,
-                       int      interval,
-                       char     facing,
-                       int      slice,
-                       uint16*  projected_centers, 
-                       int*     vol_tag,
-                       float*   g_array );
+void calculate_g_cuda(int      level,
+                      int      img_width,
+                      int      img_height,
+                      int      i_view, 
+                      int      n_view,
+                      int      interval,    //
+                      int      pt_tilesize,
+                      int      pt_u,
+                      int      pt_v,
+                      char     facing,
+                      int      slice,
+                      uint16*  projected_centers, 
+                      int*     vol_tag,
+                      float*   g_array );
 
 static inline int nearest_pow2(int a)
 {

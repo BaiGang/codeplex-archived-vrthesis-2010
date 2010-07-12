@@ -9,7 +9,7 @@ int main( )
 {
 
   // to output logs
-  freopen("../Data/log.txt", "w", stderr);
+  freopen("../Data/log1.txt", "w", stderr);
 
   as_modeling::ASModeling modeler;
 

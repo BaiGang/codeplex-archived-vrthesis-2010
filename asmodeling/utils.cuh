@@ -82,14 +82,26 @@ void unbind_gt_tex_cuda()
 }
 
 
+//__host__ __device__ float __float_max(float a, float b)
+//{
+//  return (a > b)? a : b;
+//}
+//
+//__host__ __device__  float __float_min(float a, float b)
+//{
+//  return (a < b)? a: b;
+//}
+
 __device__ inline uint float_to_uint8(float value)
 {
-    return min(max(__float2int_rn((255 * value + 0.5f) / (1.0f + 1.0f/255.0f)), 0), 255);
+    //return min(max(__float2int_rn((255 * value + 0.5f) / (1.0f + 1.0f/255.0f)), 0), 255);
+  return __min(__max(0, 255 * value + 0.5), 255);
 }
 
 __device__ inline float uint8_to_float(unsigned char value)
 {
-    return __saturatef(__uint2float_rn(value) / 255.0f);
+    //return __saturatef(__uint2float_rn(value) / 255.0f);
+  return min(max(value / 255.0f, 0.0f), 1.0f);
 }
 
 

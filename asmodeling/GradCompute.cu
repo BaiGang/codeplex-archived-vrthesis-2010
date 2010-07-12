@@ -15,7 +15,8 @@
 // for testing
 #include "Test.cu"
 
-void construct_volume_cuda (float * device_x,
+void construct_volume_cuda (
+                            float * device_x,
                             cudaPitchedPtr * density_vol,
                             cudaExtent extent,
                             int *   tag_vol )
@@ -36,7 +37,8 @@ void construct_volume_cuda (float * device_x,
   cutilCheckMsg("Kernel execution failed");
 }
 
-void construct_volume_linm_cuda (int length,
+void construct_volume_linm_cuda (
+                                 int length,
                                  float *devic_x,
                                  float *density_vol,
                                  int * tag_vol )
@@ -49,12 +51,10 @@ void construct_volume_linm_cuda (int length,
     devic_x,
     tag_vol );
   cutilSafeCall( cudaGetLastError() );
-  // check if kernel execution generated an error
-  cutilCheckMsg("Kernel execution failed");
-
 }
 
-void upsample_volume_cuda (int level,
+void upsample_volume_cuda (
+                           int level,
                            int max_level,
                            cudaPitchedPtr * lower_lev,
                            cudaPitchedPtr * upper_lev
@@ -78,8 +78,7 @@ void upsample_volume_cuda (int level,
     *upper_lev,
     scale );
   cutilSafeCall( cudaGetLastError() );
-  // check if kernel execution generated an error
-  cutilCheckMsg("Kernel execution failed");
+
 }
 
 void construct_volume_from_previous_cuda (
@@ -99,7 +98,6 @@ void construct_volume_from_previous_cuda (
     );
   cutilSafeCall( cudaGetLastError() );
 
-  cutilCheckMsg("Kernel execution failed");
 }
 
 void cull_empty_cells_cuda (cudaPitchedPtr * density_vol,
@@ -114,7 +112,6 @@ void cull_empty_cells_cuda (cudaPitchedPtr * density_vol,
     *density_vol,
     tag_vol );
   cutilSafeCall( cudaGetLastError() );
-  cutilCheckMsg("Kernel execution failed");
 }
 
 void get_guess_x_cuda (float * guess_x,
@@ -130,8 +127,6 @@ void get_guess_x_cuda (float * guess_x,
     *density_vol,
     tag_vol,
     guess_x );
-
-  cutilCheckMsg("Kernel execution failed");
   cutilSafeCall( cudaGetLastError() );
 }
 
@@ -169,15 +164,17 @@ float calculate_f_cuda (int      level,
   dim3 grid_dim(size, size, 1);
   dim3 block_dim(size, 1, 1);
 
+  //// timer
+  /////////////////////////////////////////////////////////////////////////////////////////////////////
+  //clock_t * h_timer1 = new clock_t[2*size * size];
+  //clock_t * d_timer1;
+  //cutilSafeCall( cudaMalloc((void**)&d_timer1, 2*size*size*sizeof(clock_t)) );
 
+  //clock_t * h_timer2 = new clock_t[2*size * size];
+  //clock_t * d_timer2;
+  //cutilSafeCall( cudaMalloc((void**)&d_timer2, 2*size*size*sizeof(clock_t)) );
+  /////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
-  // timer
-  ///////////////////////////////////////////////////////////////////////////////////////////////////
-  clock_t * h_timer = new clock_t[2*size * size];
-  clock_t * d_timer;
-  cutilSafeCall( cudaMalloc((void**)&d_timer, 2*size*size*sizeof(clock_t)) );
-  ///////////////////////////////////////////////////////////////////////////////////////////////////
   cutilSafeCall( cudaGetLastError() );
   calc_f<<< grid_dim, block_dim >>>(
     img_width,
@@ -187,41 +184,49 @@ float calculate_f_cuda (int      level,
     interval,
     projected_centers,
     vol_tag,
-    f_array,
-    d_timer);
+    f_array/*,
+    d_timer1,
+    d_timer2*/
+    );
   cutilSafeCall( cudaGetLastError() );
-  ///////////////////////////////////////////////////////////////////////////////////////////////////
-  cutilSafeCall(cudaMemcpy(h_timer, d_timer, 2*size * size *sizeof(clock_t), cudaMemcpyDeviceToHost));
-  clock_t min_begin = h_timer[0];
-  clock_t max_end   = h_timer[size*size];
-  for (int iitimer = 1; iitimer < size * size - 1; ++iitimer)
-  {
-    if (min_begin > h_timer[iitimer])
-      min_begin = h_timer[iitimer];
-    if (max_end < h_timer[size*size + iitimer])
-      max_end = h_timer[size*size + iitimer];
-  }
-  fprintf(stderr, "<TIMING> F calculation used %d clocks.\n", max_end - min_begin);
-  delete [] h_timer;
-  cutilSafeCall( cudaFree(d_timer) );
-  ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-  // check if kernel execution generated an error
-  cutilCheckMsg("Kernel execution failed");
-  cutilSafeCall( cudaGetLastError() );
+  /////////////////////////////////////////////////////////////////////////////////////////////////////
+  //cutilSafeCall(cudaMemcpy(h_timer1, d_timer1, 2*size * size *sizeof(clock_t), cudaMemcpyDeviceToHost));
+  //clock_t min_begin = h_timer1[0];
+  //clock_t max_end   = h_timer1[size*size];
+  //for (int iitimer = 1; iitimer < size * size - 1; ++iitimer)
+  //{
+  //  if (min_begin > h_timer1[iitimer])
+  //    min_begin = h_timer1[iitimer];
+  //  if (max_end < h_timer1[size*size + iitimer])
+  //    max_end = h_timer1[size*size + iitimer];
+  //}
+  //fprintf(stderr, "<TIMING> F calculation - fetching global memory - used %d clocks.\n", max_end - min_begin);
+  //delete [] h_timer1;
+  //cutilSafeCall( cudaFree(d_timer1) );
+
+  //cutilSafeCall(cudaMemcpy(h_timer2, d_timer2, 2*size * size *sizeof(clock_t), cudaMemcpyDeviceToHost));
+  //min_begin = h_timer2[0];
+  //max_end   = h_timer2[size*size];
+  //for (int iitimer = 1; iitimer < size * size - 1; ++iitimer)
+  //{
+  //  if (min_begin > h_timer2[iitimer])
+  //    min_begin = h_timer2[iitimer];
+  //  if (max_end < h_timer2[size*size + iitimer])
+  //    max_end = h_timer2[size*size + iitimer];
+  //}
+  //fprintf(stderr, "<TIMING> F calculation - computation - used %d clocks.\n", max_end - min_begin);
+  //delete [] h_timer1;
+  //cutilSafeCall( cudaFree(d_timer1) );
+
+  /////////////////////////////////////////////////////////////////////////////////////////////////////
+
 
   // copy to sum_array for sum
   reduceSinglePass(n_nonzero_items, 256,
     (n_nonzero_items/256)+((n_nonzero_items%256)?1:0), 
     f_array, sum_array);
 
-
-  // check if kernel execution generated an error
-  cutilCheckMsg("Kernel execution failed");
-
-  cutilSafeCall( cudaThreadSynchronize() );
-
-  cutilSafeCall( cudaGetLastError() );
   // copy and return result
   float result = 0.0f;
   cutilSafeCall( cudaMemcpy(
@@ -229,8 +234,6 @@ float calculate_f_cuda (int      level,
     sum_array,
     sizeof(float),
     cudaMemcpyDeviceToHost ));
-
-  cutilSafeCall( cudaGetLastError() );
 
   return result;
 }
@@ -241,7 +244,10 @@ void calculate_g_cuda(int      level,
                       int      img_height,
                       int      i_view, 
                       int      n_view,
-                      int      interval,
+                      int      interval,    //
+                      int      pt_tilesize,
+                      int      pt_u,
+                      int      pt_v,
                       char     facing,
                       int      slice,
                       uint16*  projected_centers, 
@@ -250,62 +256,95 @@ void calculate_g_cuda(int      level,
 {
   int length = 1 << level;
 
-  dim3 dim_grid(length, 1, 1);
-  dim3 dim_block(length, 1, 1);
+  int num_tiles = length / pt_tilesize;
 
-  // timer
-  ///////////////////////////////////////////////////////////////////////////////////////////////////
-  clock_t * h_timer = new clock_t[2*length];
-  clock_t * d_timer;
-  cutilSafeCall( cudaMalloc((void**)&d_timer, 2*length*sizeof(clock_t)) );
-  ///////////////////////////////////////////////////////////////////////////////////////////////////
+  dim3 dim_grid(num_tiles, 1, 1);
+  dim3 dim_block(num_tiles, 1, 1);
+
+  //// timer
+  /////////////////////////////////////////////////////////////////////////////////////////////////////
+  //clock_t * h_timer = new clock_t[2*length];
+  //clock_t * d_timer;
+  //cutilSafeCall( cudaMalloc((void**)&d_timer, 2*length*sizeof(clock_t)) );
+  /////////////////////////////////////////////////////////////////////////////////////////////////////
+
   cutilSafeCall( cudaGetLastError() );
-
   //
   // Lauch Kernels....
   //
   if (facing == 'X' || facing == 'x')
   {
     calc_g_x<<<dim_grid, dim_block>>> (
-      img_width, img_height,
-      i_view, n_view, interval, slice,
-      projected_centers, vol_tag, g_array, d_timer);
+      img_width,
+      img_height,
+      i_view,
+      n_view,
+      interval,
+      slice,
+      pt_tilesize,
+      pt_u,
+      pt_v,
+      projected_centers,
+      vol_tag,
+      g_array
+      //d_timer
+      );
   }
   else if (facing == 'Y' || facing == 'y')
   {
     calc_g_y<<<dim_grid, dim_block>>> (
-      img_width, img_height,
-      i_view, n_view, interval, slice,
-      projected_centers, vol_tag, g_array, d_timer);
+      img_width,
+      img_height,
+      i_view,
+      n_view,
+      interval,
+      slice,
+      pt_tilesize,
+      pt_u,
+      pt_v,
+      projected_centers,
+      vol_tag,
+      g_array
+      //d_timer
+      );
   }
   else // facing Z axis
   {
     calc_g_z<<<dim_grid, dim_block>>> (
-      img_width, img_height,
-      i_view, n_view, interval, slice,
-      projected_centers, vol_tag, g_array, d_timer);
+      img_width,
+      img_height,
+      i_view,
+      n_view,
+      interval,
+      slice,
+      pt_tilesize,
+      pt_u,
+      pt_v,
+      projected_centers,
+      vol_tag,
+      g_array
+      //d_timer
+      );
   }
   // check if kernel execution generated an error
-  cutilCheckMsg("Kernel execution failed");
   cutilSafeCall( cudaGetLastError() );
 
 
-  ///////////////////////////////////////////////////////////////////////////////////////////////////
-  cutilSafeCall(cudaMemcpy(h_timer, d_timer, 2*length*sizeof(clock_t), cudaMemcpyDeviceToHost));
-  clock_t min_begin = h_timer[0];
-  clock_t max_end   = h_timer[length];
-  for (int iitimer = 1; iitimer < length - 1; ++iitimer)
-  {
-    if (min_begin > h_timer[iitimer])
-      min_begin = h_timer[iitimer];
-    if (max_end < h_timer[length + iitimer])
-      max_end = h_timer[length + iitimer];
-  }
-  fprintf(stderr, "<TIMING> G calculation used %d clocks.\n", max_end - min_begin);
-  delete [] h_timer;
-  cutilSafeCall( cudaFree(d_timer) );
-  ///////////////////////////////////////////////////////////////////////////////////////////////////
-
+  /////////////////////////////////////////////////////////////////////////////////////////////////////
+  //cutilSafeCall(cudaMemcpy(h_timer, d_timer, 2*length*sizeof(clock_t), cudaMemcpyDeviceToHost));
+  //clock_t min_begin = h_timer[0];
+  //clock_t max_end   = h_timer[length];
+  //for (int iitimer = 1; iitimer < length - 1; ++iitimer)
+  //{
+  //  if (min_begin > h_timer[iitimer])
+  //    min_begin = h_timer[iitimer];
+  //  if (max_end < h_timer[length + iitimer])
+  //    max_end = h_timer[length + iitimer];
+  //}
+  //fprintf(stderr, "<TIMING> G calculation used %d clocks.\n", max_end - min_begin);
+  //delete [] h_timer;
+  //cutilSafeCall( cudaFree(d_timer) );
+  /////////////////////////////////////////////////////////////////////////////////////////////////////
 
 }
 
@@ -327,12 +366,9 @@ void get_volume_cuda( int level,
     //tag_vol,
     den_vol
     );
-  // check if kernel execution generated an error
-  cutilCheckMsg("Kernel execution failed");
   cutilSafeCall( cudaGetLastError() );
 
   fprintf(stderr, "..Finished kernel call of \"get_volume\"\n");
-
 }
 
 /////////////////////////////
@@ -407,8 +443,6 @@ void tst_pcenters(int level, int width, int height, int iview, int nview,
     (width, height, iview, nview,
     pcenters, tag_vol, d_data);
   cutilSafeCall( cudaGetLastError() );
-
-  cutilSafeCall( cudaThreadSynchronize() );
 
   cutilSafeCall( cudaMemcpy(h_data, d_data, width*height* sizeof(float),
     cudaMemcpyDeviceToHost ) );
