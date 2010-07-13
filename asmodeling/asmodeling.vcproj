@@ -667,6 +667,10 @@
 			Name="shaders"
 			>
 			<File
+				RelativePath="..\Data\GLSLShaders\RayMarchingBlend.vert"
+				>
+			</File>
+			<File
 				RelativePath="..\Data\GLSLShaders\RayMarchingBlendX.frag"
 				>
 			</File>

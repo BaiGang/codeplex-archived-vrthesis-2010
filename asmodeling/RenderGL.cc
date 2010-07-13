@@ -323,7 +323,7 @@ namespace as_modeling
 #endif //__TEST_RENDER__
 
 
-#if 0
+#if 1
     float * data = rr_fbo_->ReadPixels();
     float * img = new float [3 * width_ * height_];
     for (int y = 0; y < height_; ++y)
