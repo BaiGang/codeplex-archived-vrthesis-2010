@@ -583,79 +583,79 @@ namespace as_modeling
     glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameterf(GL_TEXTURE_3D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    //glTexImage3D(GL_TEXTURE_3D, 0, GL_LUMINANCE32F_ARB, max_length, max_length, max_length, 0, GL_LUMINANCE, GL_FLOAT, NULL);
-    //CUT_CHECK_ERROR_GL2();
+    glTexImage3D(GL_TEXTURE_3D, 0, GL_LUMINANCE32F_ARB, max_length, max_length, max_length, 0, GL_LUMINANCE, GL_FLOAT, NULL);
+    CUT_CHECK_ERROR_GL2();
 
-    //// register 3D volume texture with CUDA
-    //cutilSafeCall( cudaGraphicsGLRegisterImage(
-    //  &resource_vol_,
-    //  vol_tex_,
-    //  GL_TEXTURE_3D,
-    //  cudaGraphicsMapFlagsWriteDiscard) );
+    // register 3D volume texture with CUDA
+    cutilSafeCall( cudaGraphicsGLRegisterImage(
+      &resource_vol_,
+      vol_tex_,
+      GL_TEXTURE_3D,
+      cudaGraphicsMapFlagsWriteDiscard) );
 
-    //vol_cudaArray_extent = make_cudaExtent(max_length, max_length, max_length);
+    vol_cudaArray_extent = make_cudaExtent(max_length, max_length, max_length);
 
-    //// register render target textures with CUDA
-    //cutilSafeCall( cudaGraphicsGLRegisterImage(
-    //  &resource_rr_,
-    //  renderer_->get_render_result_tex(),
-    //  GL_TEXTURE_2D,
-    //  cudaGraphicsMapFlagsReadOnly) );
+    // register render target textures with CUDA
+    cutilSafeCall( cudaGraphicsGLRegisterImage(
+      &resource_rr_,
+      renderer_->get_render_result_tex(),
+      GL_TEXTURE_2D,
+      cudaGraphicsMapFlagsReadOnly) );
 
-    //cutilSafeCall( cudaGraphicsGLRegisterImage(
-    //  &resource_pr_,
-    //  renderer_->get_perturb_result_tex(),
-    //  GL_TEXTURE_2D,
-    //  cudaGraphicsMapFlagsReadOnly) );
+    cutilSafeCall( cudaGraphicsGLRegisterImage(
+      &resource_pr_,
+      renderer_->get_perturb_result_tex(),
+      GL_TEXTURE_2D,
+      cudaGraphicsMapFlagsReadOnly) );
 
-    ////////////////////////////////////////////////////////////
-    //// alloc memory on CUDA
-    ////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////
+    // alloc memory on CUDA
+    //////////////////////////////////////////////////////////
 
-    //// NOTE: due to pitching issues, 
-    ////  shall be allocated for distinct levels
-    //size_t vol_size = 1 << current_level_;
-    //vol_extent = make_cudaExtent(vol_size*sizeof(float), vol_size, vol_size);
-    //cutilSafeCall( cudaMalloc3D(&d_vol_pitchedptr, vol_extent) );
+    // NOTE: due to pitching issues, 
+    //  shall be allocated for distinct levels
+    size_t vol_size = 1 << current_level_;
+    vol_extent = make_cudaExtent(vol_size*sizeof(float), vol_size, vol_size);
+    cutilSafeCall( cudaMalloc3D(&d_vol_pitchedptr, vol_extent) );
 
-    //// full resolution can be allocated once,
-    //// thanks to its fixed size...
-    //full_vol_extent = make_cudaExtent(max_length*sizeof(float), max_length, max_length);
-    //cutilSafeCall( cudaMalloc3D(&d_full_vol_pptr, full_vol_extent) );
+    // full resolution can be allocated once,
+    // thanks to its fixed size...
+    full_vol_extent = make_cudaExtent(max_length*sizeof(float), max_length, max_length);
+    cutilSafeCall( cudaMalloc3D(&d_full_vol_pptr, full_vol_extent) );
 
-    //fprintf(stderr, "d_projected_centers size : %d\n", 2 * p_asmodeling_->num_cameras_ * max_size);
+    fprintf(stderr, "d_projected_centers size : %d\n", 2 * p_asmodeling_->num_cameras_ * max_size);
 
-    ////cutilSafeCall( cudaMalloc<uint16>(&d_projected_centers, 2 * p_asmodeling_->num_cameras_ * max_size) );
-    //cutilSafeCall( cudaMalloc((void**)(&d_projected_centers), 0.4* 2 * p_asmodeling_->num_cameras_ * max_size * sizeof(uint16)) );
+    //cutilSafeCall( cudaMalloc<uint16>(&d_projected_centers, 2 * p_asmodeling_->num_cameras_ * max_size) );
+    cutilSafeCall( cudaMalloc((void**)(&d_projected_centers), 0.4* 2 * p_asmodeling_->num_cameras_ * max_size * sizeof(uint16)) );
 
-    ////cutilSafeCall( cudaMalloc<int>(&d_tag_volume, max_size) );
-    //cutilSafeCall( cudaMalloc((void**)(&d_tag_volume), max_size * sizeof(int)) );
+    //cutilSafeCall( cudaMalloc<int>(&d_tag_volume, max_size) );
+    cutilSafeCall( cudaMalloc((void**)(&d_tag_volume), max_size * sizeof(int)) );
 
-    ////cutilSafeCall( cudaMalloc<float>(&p_device_x, max_size) );
-    //cutilSafeCall( cudaMalloc((void**)(&p_device_x), max_size*sizeof(float)) );
+    //cutilSafeCall( cudaMalloc<float>(&p_device_x, max_size) );
+    cutilSafeCall( cudaMalloc((void**)(&p_device_x), max_size*sizeof(float)) );
 
-    ////cutilSafeCall( cudaMalloc<float>(&p_device_g, max_size) );
-    //cutilSafeCall( cudaMalloc((void**)(&p_device_g), max_size * sizeof(float)) );
+    //cutilSafeCall( cudaMalloc<float>(&p_device_g, max_size) );
+    cutilSafeCall( cudaMalloc((void**)(&p_device_g), max_size * sizeof(float)) );
 
-    ////cutilSafeCall( cudaMalloc<float>(&d_temp_f,   max_size) );
-    //cutilSafeCall( cudaMalloc((void**)(&d_temp_f), max_size * sizeof(float)) );
+    //cutilSafeCall( cudaMalloc<float>(&d_temp_f,   max_size) );
+    cutilSafeCall( cudaMalloc((void**)(&d_temp_f), max_size * sizeof(float)) );
 
-    //// alloc array for ground truth image
-    //cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc<uchar4>();
-    //gt_cudaArray_extent = make_cudaExtent(p_asmodeling_->width_, p_asmodeling_->height_, num_views);
-    //cutilSafeCall( cudaMalloc3DArray(&gt_tex_cudaArray, &channelDesc, gt_cudaArray_extent) );
+    // alloc array for ground truth image
+    cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc<uchar4>();
+    gt_cudaArray_extent = make_cudaExtent(p_asmodeling_->width_, p_asmodeling_->height_, num_views);
+    cutilSafeCall( cudaMalloc3DArray(&gt_tex_cudaArray, &channelDesc, gt_cudaArray_extent) );
 
-    ////////////////////////////////////////////////////////////
-    //// alloc memory on HOST
-    ////////////////////////////////////////////////////////////
-    //h_vol_data = new float [max_size];
-    //h_projected_centers = new uint16 [2 * p_asmodeling_->num_cameras_ * max_size];
-    //h_tag_volume = new int [ max_size ];
+    //////////////////////////////////////////////////////////
+    // alloc memory on HOST
+    //////////////////////////////////////////////////////////
+    h_vol_data = new float [max_size];
+    h_projected_centers = new uint16 [2 * p_asmodeling_->num_cameras_ * max_size];
+    h_tag_volume = new int [ max_size ];
 
-    //p_host_g = new float [max_size];
-    //p_host_x = new float [max_size];
+    p_host_g = new float [max_size];
+    p_host_x = new float [max_size];
 
-#if 1
+#if 0
     // test render here
     glBindTexture(GL_TEXTURE_3D, vol_tex_);
     float *tmp = new float[max_size];
@@ -1049,6 +1049,8 @@ namespace as_modeling
       {
         for (int i = 0; i < length; ++i)
         {
+          bool is_outside = false;
+
           // calc the world coordinates of the 8 corners of the current cell
           // NOTE : NO ROTATION
           int wc_index = 0;
@@ -1065,6 +1067,7 @@ namespace as_modeling
                   * p_asmodeling_->box_size_ + p_asmodeling_->trans_y_;
                 wc_z[wc_index] = (static_cast<float>(k+kk)/static_cast<float>(length) - 0.5f)
                   * p_asmodeling_->box_size_ + p_asmodeling_->trans_z_;
+
 
                 wc_x[8] += wc_x[wc_index];
                 wc_y[8] += wc_y[wc_index];
@@ -1129,7 +1132,12 @@ namespace as_modeling
                 tmpPt.x < p_asmodeling_->width_*1.0f && 
                 tmpPt.y < p_asmodeling_->height_*1.0f)
                 pts.push_back(tmpPt);
+              else
+                is_outside = true;
             }
+
+            if (is_outside)
+              break;
 
             // Calc the effective pixels
             // construct the convex hull

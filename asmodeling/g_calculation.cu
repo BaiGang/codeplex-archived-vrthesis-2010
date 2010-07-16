@@ -101,14 +101,14 @@ __global__ void calc_g_x(
                          int pt_v,
                          uint16 * proj_centers,   // 
                          int * tag_vol,
-                         float* g_array
-                         //clock_t * timer
+                         float* g_array,
+                         clock_t * timer
                          )
 {
-  //if (threadIdx.x == 0)
-  //{
-  //  timer[blockIdx.x * blockDim.x + threadIdx.x] = clock();
-  //}
+  if (threadIdx.x == 0)
+  {
+    timer[blockIdx.x * blockDim.x + threadIdx.x] = clock();
+  }
 
   int vol_index = index3(
     pt_slice,
@@ -143,11 +143,11 @@ __global__ void calc_g_x(
 
   } // arr_index != 0
 
-  //__syncthreads();
-  //if (threadIdx.x == 0)
-  //{
-  //  timer[blockDim.x * gridDim.x + blockIdx.x * blockDim.x + threadIdx.x] = clock();
-  //}
+  __syncthreads();
+  if (threadIdx.x == 0)
+  {
+    timer[blockDim.x * gridDim.x + blockIdx.x * blockDim.x + threadIdx.x] = clock();
+  }
 }
 
 // the perturbed slice is perpendicular to Y axis
@@ -169,14 +169,14 @@ __global__ void calc_g_y(
                          int pt_v,
                          uint16 * proj_centers,   // 
                          int * tag_vol,
-                         float* g_array
-                         //clock_t * timer
+                         float* g_array,
+                         clock_t * timer
                          )
 {
-  //if (threadIdx.x == 0)
-  //{
-  //  timer[blockIdx.x * blockDim.x + threadIdx.x] = clock();
-  //}
+  if (threadIdx.x == 0)
+  {
+    timer[blockIdx.x * blockDim.x + threadIdx.x] = clock();
+  }
 
   int vol_index = index3(
     threadIdx.x * pt_tilesize + pt_u,
@@ -211,11 +211,11 @@ __global__ void calc_g_y(
 
   } // arr_index != 0
 
-  //__syncthreads();
-  //if (threadIdx.x == 0)
-  //{
-  //  timer[blockDim.x * gridDim.x + blockIdx.x * blockDim.x + threadIdx.x] = clock();
-  //}
+  __syncthreads();
+  if (threadIdx.x == 0)
+  {
+    timer[blockDim.x * gridDim.x + blockIdx.x * blockDim.x + threadIdx.x] = clock();
+  }
 }
 
 // the perturbed slice is perpendicular to Z axis
@@ -237,14 +237,14 @@ __global__ void calc_g_z(
                          int pt_v,
                          uint16 * proj_centers,   // 
                          int * tag_vol,
-                         float* g_array
-                         //clock_t * timer
+                         float* g_array,
+                         clock_t * timer
                          )
 {
-  //if (threadIdx.x == 0)
-  //{
-  //  timer[blockIdx.x * blockDim.x + threadIdx.x] = clock();
-  //}
+  if (threadIdx.x == 0)
+  {
+    timer[blockIdx.x * blockDim.x + threadIdx.x] = clock();
+  }
 
   int vol_index = index3(
     threadIdx.x * pt_tilesize + pt_u,
@@ -278,11 +278,11 @@ __global__ void calc_g_z(
 
   } // arr_index != 0
 
-  //__syncthreads();
-  //if (threadIdx.x == 0)
-  //{
-  //  timer[blockDim.x * gridDim.x + blockIdx.x * blockDim.x + threadIdx.x] = clock();
-  //}
+  __syncthreads();
+  if (threadIdx.x == 0)
+  {
+    timer[blockDim.x * gridDim.x + blockIdx.x * blockDim.x + threadIdx.x] = clock();
+  }
 }
 
 #endif //_G_CALCULATION_CU_

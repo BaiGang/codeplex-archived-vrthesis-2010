@@ -11,6 +11,6 @@ typedef unsigned int   uint32;
 
 #define __SHOW_RESULTS_EVERY_LEVEL__
 
-#define __USE_PFM_IMAGE__
+//#define __USE_PFM_IMAGE__
 
 #endif //__ASMODELING_STD_AFX_H_

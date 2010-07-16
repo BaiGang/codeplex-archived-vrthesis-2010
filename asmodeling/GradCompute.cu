@@ -164,16 +164,16 @@ float calculate_f_cuda (int      level,
   dim3 grid_dim(size, size, 1);
   dim3 block_dim(size, 1, 1);
 
-  //// timer
-  /////////////////////////////////////////////////////////////////////////////////////////////////////
-  //clock_t * h_timer1 = new clock_t[2*size * size];
-  //clock_t * d_timer1;
-  //cutilSafeCall( cudaMalloc((void**)&d_timer1, 2*size*size*sizeof(clock_t)) );
+  // timer
+  ///////////////////////////////////////////////////////////////////////////////////////////////////
+  clock_t * h_timer1 = new clock_t[2*size * size];
+  clock_t * d_timer1;
+  cutilSafeCall( cudaMalloc((void**)&d_timer1, 2*size*size*sizeof(clock_t)) );
 
-  //clock_t * h_timer2 = new clock_t[2*size * size];
-  //clock_t * d_timer2;
-  //cutilSafeCall( cudaMalloc((void**)&d_timer2, 2*size*size*sizeof(clock_t)) );
-  /////////////////////////////////////////////////////////////////////////////////////////////////////
+  clock_t * h_timer2 = new clock_t[2*size * size];
+  clock_t * d_timer2;
+  cutilSafeCall( cudaMalloc((void**)&d_timer2, 2*size*size*sizeof(clock_t)) );
+  ///////////////////////////////////////////////////////////////////////////////////////////////////
 
   cutilSafeCall( cudaGetLastError() );
   calc_f<<< grid_dim, block_dim >>>(
@@ -184,44 +184,45 @@ float calculate_f_cuda (int      level,
     interval,
     projected_centers,
     vol_tag,
-    f_array/*,
+    f_array,
     d_timer1,
-    d_timer2*/
+    d_timer2
     );
   cutilSafeCall( cudaGetLastError() );
 
-  /////////////////////////////////////////////////////////////////////////////////////////////////////
-  //cutilSafeCall(cudaMemcpy(h_timer1, d_timer1, 2*size * size *sizeof(clock_t), cudaMemcpyDeviceToHost));
-  //clock_t min_begin = h_timer1[0];
-  //clock_t max_end   = h_timer1[size*size];
-  //for (int iitimer = 1; iitimer < size * size - 1; ++iitimer)
-  //{
-  //  if (min_begin > h_timer1[iitimer])
-  //    min_begin = h_timer1[iitimer];
-  //  if (max_end < h_timer1[size*size + iitimer])
-  //    max_end = h_timer1[size*size + iitimer];
-  //}
-  //fprintf(stderr, "<TIMING> F calculation - fetching global memory - used %d clocks.\n", max_end - min_begin);
-  //delete [] h_timer1;
-  //cutilSafeCall( cudaFree(d_timer1) );
+  ///////////////////////////////////////////////////////////////////////////////////////////////////
+  cutilSafeCall(cudaMemcpy(h_timer1, d_timer1, 2*size * size *sizeof(clock_t), cudaMemcpyDeviceToHost));
+  clock_t min_begin = h_timer1[0];
+  clock_t max_end   = h_timer1[size*size];
+  for (int iitimer = 1; iitimer < size * size - 1; ++iitimer)
+  {
+    if (min_begin > h_timer1[iitimer])
+      min_begin = h_timer1[iitimer];
+    if (max_end < h_timer1[size*size + iitimer])
+      max_end = h_timer1[size*size + iitimer];
+  }
+  fprintf(stderr, "<TIMING> F calculation - fetching global memory - used %d clocks.\n", max_end - min_begin);
+  delete [] h_timer1;
+  cutilSafeCall( cudaFree((void*)d_timer1) );
 
-  //cutilSafeCall(cudaMemcpy(h_timer2, d_timer2, 2*size * size *sizeof(clock_t), cudaMemcpyDeviceToHost));
-  //min_begin = h_timer2[0];
-  //max_end   = h_timer2[size*size];
-  //for (int iitimer = 1; iitimer < size * size - 1; ++iitimer)
-  //{
-  //  if (min_begin > h_timer2[iitimer])
-  //    min_begin = h_timer2[iitimer];
-  //  if (max_end < h_timer2[size*size + iitimer])
-  //    max_end = h_timer2[size*size + iitimer];
-  //}
-  //fprintf(stderr, "<TIMING> F calculation - computation - used %d clocks.\n", max_end - min_begin);
-  //delete [] h_timer1;
-  //cutilSafeCall( cudaFree(d_timer1) );
+  cutilSafeCall(cudaMemcpy(h_timer2, d_timer2, 2*size * size *sizeof(clock_t), cudaMemcpyDeviceToHost));
+  cutilSafeCall( cudaFree((void*)d_timer2) );
+  min_begin = h_timer2[0];
+  max_end   = h_timer2[size*size];
+  for (int iitimer = 1; iitimer < size * size - 1; ++iitimer)
+  {
+    if (min_begin > h_timer2[iitimer])
+      min_begin = h_timer2[iitimer];
+    if (max_end < h_timer2[size*size + iitimer])
+      max_end = h_timer2[size*size + iitimer];
+  }
+  fprintf(stderr, "<TIMING> F calculation - computation - used %d clocks.\n", max_end - min_begin);
+  delete [] h_timer2;
+  
 
-  /////////////////////////////////////////////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-
+  
   // copy to sum_array for sum
   reduceSinglePass(n_nonzero_items, 256,
     (n_nonzero_items/256)+((n_nonzero_items%256)?1:0), 
@@ -261,12 +262,12 @@ void calculate_g_cuda(int      level,
   dim3 dim_grid(num_tiles, 1, 1);
   dim3 dim_block(num_tiles, 1, 1);
 
-  //// timer
-  /////////////////////////////////////////////////////////////////////////////////////////////////////
-  //clock_t * h_timer = new clock_t[2*length];
-  //clock_t * d_timer;
-  //cutilSafeCall( cudaMalloc((void**)&d_timer, 2*length*sizeof(clock_t)) );
-  /////////////////////////////////////////////////////////////////////////////////////////////////////
+  // timer
+  ///////////////////////////////////////////////////////////////////////////////////////////////////
+  clock_t * h_timer = new clock_t[2*num_tiles];
+  clock_t * d_timer;
+  cutilSafeCall( cudaMalloc((void**)&d_timer, 2*num_tiles*sizeof(clock_t)) );
+  ///////////////////////////////////////////////////////////////////////////////////////////////////
 
   cutilSafeCall( cudaGetLastError() );
   //
@@ -286,8 +287,8 @@ void calculate_g_cuda(int      level,
       pt_v,
       projected_centers,
       vol_tag,
-      g_array
-      //d_timer
+      g_array,
+      d_timer
       );
   }
   else if (facing == 'Y' || facing == 'y')
@@ -304,8 +305,8 @@ void calculate_g_cuda(int      level,
       pt_v,
       projected_centers,
       vol_tag,
-      g_array
-      //d_timer
+      g_array,
+      d_timer
       );
   }
   else // facing Z axis
@@ -322,29 +323,29 @@ void calculate_g_cuda(int      level,
       pt_v,
       projected_centers,
       vol_tag,
-      g_array
-      //d_timer
+      g_array,
+      d_timer
       );
   }
   // check if kernel execution generated an error
   cutilSafeCall( cudaGetLastError() );
 
 
-  /////////////////////////////////////////////////////////////////////////////////////////////////////
-  //cutilSafeCall(cudaMemcpy(h_timer, d_timer, 2*length*sizeof(clock_t), cudaMemcpyDeviceToHost));
-  //clock_t min_begin = h_timer[0];
-  //clock_t max_end   = h_timer[length];
-  //for (int iitimer = 1; iitimer < length - 1; ++iitimer)
-  //{
-  //  if (min_begin > h_timer[iitimer])
-  //    min_begin = h_timer[iitimer];
-  //  if (max_end < h_timer[length + iitimer])
-  //    max_end = h_timer[length + iitimer];
-  //}
-  //fprintf(stderr, "<TIMING> G calculation used %d clocks.\n", max_end - min_begin);
-  //delete [] h_timer;
-  //cutilSafeCall( cudaFree(d_timer) );
-  /////////////////////////////////////////////////////////////////////////////////////////////////////
+  ///////////////////////////////////////////////////////////////////////////////////////////////////
+  cutilSafeCall(cudaMemcpy(h_timer, d_timer, 2*num_tiles*sizeof(clock_t), cudaMemcpyDeviceToHost));
+  clock_t min_begin = h_timer[0];
+  clock_t max_end   = h_timer[num_tiles];
+  for (int iitimer = 1; iitimer < num_tiles - 1; ++iitimer)
+  {
+    if (min_begin > h_timer[iitimer])
+      min_begin = h_timer[iitimer];
+    if (max_end < h_timer[num_tiles + iitimer])
+      max_end = h_timer[num_tiles + iitimer];
+  }
+  fprintf(stderr, "<TIMING> G calculation used %d clocks.\n", max_end - min_begin);
+  delete [] h_timer;
+  cutilSafeCall( cudaFree((void*)d_timer) );
+  ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 }
 

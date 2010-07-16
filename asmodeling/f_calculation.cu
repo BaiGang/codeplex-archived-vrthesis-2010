@@ -18,18 +18,18 @@ __global__ void calc_f(
                        int interval,         // the occupycation radius of projection
                        uint16 * proj_centers,   // 
                        int * tag_vol,
-                       float * f_array/*,
+                       float * f_array,
                        clock_t * timer1,
-                       clock_t * timer2*/
+                       clock_t * timer2
                        //clock_t * timer3
                        )
 {
 
-  //// time profiling for fetching global mem
-  //if (threadIdx.x == 0)
-  //{
-  //  timer1[blockIdx.x * gridDim.y + blockIdx.y] = clock();
-  //}
+  // time profiling for fetching global mem
+  if (threadIdx.x == 0)
+  {
+    timer1[blockIdx.x * gridDim.y + blockIdx.y] = clock();
+  }
 
   // the index of the volume cell
   int index_vol   = index3(threadIdx.x, blockIdx.y, blockIdx.x, blockDim.x);
@@ -37,20 +37,20 @@ __global__ void calc_f(
   // the index of the correspoing item in the array
   int index_array = tag_vol[index_vol];
 
-  //// time profiling for fetching global mem
-  //__syncthreads();
-  //if (threadIdx.x == 0)
-  //{
-  //  timer1[blockIdx.x * gridDim.y + blockIdx.y + gridDim.x * gridDim.y] = clock();
-  //}
+  // time profiling for fetching global mem
+  __syncthreads();
+  if (threadIdx.x == 0)
+  {
+    timer1[blockIdx.x * gridDim.y + blockIdx.y + gridDim.x * gridDim.y] = clock();
+  }
 
 
 
-  //__syncthreads();
-  //if (threadIdx.x == 0)
-  //{
-  //  timer2[blockIdx.x * gridDim.y + blockIdx.y] = clock();
-  //}
+  __syncthreads();
+  if (threadIdx.x == 0)
+  {
+    timer2[blockIdx.x * gridDim.y + blockIdx.y] = clock();
+  }
 
 
   if (index_array != 0)
@@ -89,11 +89,11 @@ __global__ void calc_f(
 
 
 
-  //__syncthreads();
-  //if (threadIdx.x == 0)
-  //{
-  //  timer2[blockIdx.x * gridDim.y + blockIdx.y + gridDim.x * gridDim.y] = clock();
-  //}
+  __syncthreads();
+  if (threadIdx.x == 0)
+  {
+    timer2[blockIdx.x * gridDim.y + blockIdx.y + gridDim.x * gridDim.y] = clock();
+  }
 }
 
 
