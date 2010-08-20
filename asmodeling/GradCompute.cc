@@ -74,8 +74,7 @@ namespace as_modeling
       construct_volume_cuda(
         Instance()->p_device_x,
         &(Instance()->d_vol_pitchedptr),
-        Instance()->vol_extent,
-        Instance()->d_tag_volume
+        Instance()->vol_extent
         );
 
       // upsampling
@@ -93,60 +92,10 @@ namespace as_modeling
       construct_volume_cuda(
         Instance()->p_device_x,
         &(Instance()->d_full_vol_pptr),
-        Instance()->full_vol_extent,
-        Instance()->d_tag_volume
+        Instance()->full_vol_extent
         );
       cutilSafeCall( cudaGetLastError() );
     }
-
-#if 0
-    //int len = 1 << Instance()->current_level_;
-    int len = Instance()->full_vol_extent.depth;
-    fprintf(stderr, "==len : %d\n", len);
-    float * xx = new float [len * len * len + 10];
-    get_volume_cuda(7, Instance()->d_full_vol_pptr,
-      /*Instance()->d_tag_volume,*/ Instance()->d_temp_f );
-    cutilSafeCall( cudaGetLastError() );
-    cutilSafeCall( cudaMemcpy(
-      xx, Instance()->d_temp_f, len*len*len*sizeof(float), cudaMemcpyDeviceToHost) );
-    cutilSafeCall( cudaGetLastError() );
-    PFMImage * tp = new PFMImage(len, len*len, 0, xx);
-    tp->WriteImage("../Data/vol_ful222.pfm");
-    delete tp;
-#endif
-
-#if 0
-    cutilSafeCall( cudaGetLastError() );
-    int llen = 1 << Instance()->current_level_;
-    fprintf(stderr, "--len : %d\n", llen);
-    float * ixx = new float [llen * llen * llen];
-    get_volume_cuda( Instance()->current_level_,
-      Instance()->d_vol_pitchedptr,
-      /*Instance()->d_tag_volume,*/
-      Instance()->d_temp_f );
-    cutilSafeCall( cudaMemcpy(
-      ixx, Instance()->d_temp_f,
-      llen*llen*llen*sizeof(float),
-      cudaMemcpyDeviceToHost) );
-    PFMImage * ttp = new PFMImage(llen, llen*llen, 0, ixx);
-    ttp->WriteImage("../Data/show_vol_1.pfm");
-    delete ttp;
-#endif
-
-#if 0
-    int lenl = 1<<Instance()->current_level_;
-    float * xv = new float[len * len * len];
-    construct_volume_linm_cuda(
-      lenl,
-      Instance()->p_device_x,
-      Instance()->d_temp_f,
-      Instance()->d_tag_volume );
-    cutilSafeCall( cudaMemcpy(
-      xv, Instance()->d_temp_f, lenl*lenl*lenl*sizeof(float),cudaMemcpyDeviceToHost) );
-    PFMImage * t1p = new PFMImage(lenl, lenl*lenl, 0, xv);
-    t1p->WriteImage("../Data/vol_111.pfm");
-    delete t1p;
-#endif
 
     // map gl graphics resource
     cutilSafeCall( cudaGraphicsMapResources(1, &(Instance()->resource_vol_)) );
@@ -171,52 +120,24 @@ namespace as_modeling
     fprintf(stderr, "--- === --- COPY to GPU used %lf secs.\n", tmer_2.stop());
     tmer_3.start();
 
-#if 0
-    get_volume_cuda(
-      ASModeling::max_vol_level_,
-      Instance()->d_full_vol_pptr,
-      /*Instance()->d_tag_volume,*/
-      Instance()->p_device_x );
-    int mxsize = 128*128*128;
-    float * data = new float [mxsize];
-    float * img = new float[mxsize * 3];
-
-    cutilSafeCall( cudaMemcpy(
-      data, Instance()->p_device_x, sizeof(float)* mxsize, cudaMemcpyDeviceToHost) );
-
-    for (int y = 0; y < 128*128; ++y)
-    {
-      for (int x = 0; x < 128; ++x)
-      {
-        img[(y * 128 + x)*3 + 0] = data[y * 128 + x];
-        img[(y * 128 + x)*3 + 1] = data[y * 128 + x];
-        img[(y * 128 + x)*3 + 2] = data[y * 128 + x];
-      }
-    }
-
-    PFMImage * tmpfpm = new PFMImage(128, 128*128,
-      1, img);
-    tmpfpm->WriteImage("../Data/TestVol.pfm");
-    delete[] data;
-    delete tmpfpm;
-
-#endif
 
     // reset the array for f[],
     // this is due to reduction only works for sizes that are power of 2
-    int powtwo_length = nearest_pow2( n );
+    int powtwo_length = nearest_pow2( n+1 );
 
     int length = 1 << Instance()->current_level_;
 
-#ifdef __DISPLAY_SHUTDOWN_GUARD__
-    char * dummy;
-    cutilSafeCall( cudaMalloc((void**)(&dummy), sizeof(char) * 1024) );
-#endif
+    cutilSafeCall( cudaMemset( Instance()->p_device_x, 0, powtwo_length * sizeof(float)));
+
+
+    // perturbed tile size
+    int mm = Instance()->p_asmodeling_->volume_interval_array_[Instance()->current_level_];
+    int p_range = Instance()->p_asmodeling_->render_interval_array_[Instance()->current_level_];
 
     // calc f and g[]
     for (int i_view = 0; i_view < Instance()->num_views; ++i_view)
     {
-      // render to image 1
+      // render to image 
       Instance()->renderer_->render_unperturbed(i_view, Instance()->vol_tex_, length);
 
       cutilSafeCall( cudaGraphicsMapResources(1, &(Instance()->resource_rr_)) );
@@ -230,92 +151,25 @@ namespace as_modeling
       // bind array to cuda tex
       bind_rrtex_cuda(Instance()->rr_tex_cudaArray);
 
-      cutilSafeCall( cudaMemset( Instance()->p_device_x, 0, powtwo_length * sizeof(float)));
 
-#if 0 // test projected centers
-      int piwidth = Instance()->p_asmodeling_->width_;
-      int piheight = Instance()->p_asmodeling_->height_;
-      float * pc = new float [piwidth * piheight];
-
-      tst_pcenters(Instance()->current_level_, piwidth, piheight,
-        i_view, Instance()->num_views, Instance()->d_projected_centers,
-        Instance()->d_tag_volume, pc);
-      PFMImage * pcpfm = new PFMImage(piwidth, piheight, 0, pc);
-      char img_path[100];
-      sprintf(img_path, "../Data/Camera%02d/pcenters.pfm", i_view);
-      pcpfm->WriteImage(img_path);
-      delete pcpfm;
-#endif
-
-      //float * h_testdata = new float [Instance()->p_asmodeling_->width_*Instance()->p_asmodeling_->height_];
-      //float * d_testdata;
-      //cutilSafeCall( cudaMalloc((void**)&d_testdata, 
-      //  sizeof(float)*Instance()->p_asmodeling_->width_*Instance()->p_asmodeling_->height_) );
-
-      //cutilSafeCall( cudaMemset((void*)d_testdata, 0,
-      //  sizeof(float)*Instance()->p_asmodeling_->width_*Instance()->p_asmodeling_->height_) );
-
-      // launch kernel
-      float ff = calculate_f_cuda(
-        Instance()->current_level_,
-        Instance()->p_asmodeling_->width_,
-        Instance()->p_asmodeling_->height_,
+      // Lauch kernel
+      float ff = calculate_f_compact_cuda(
         i_view,
-        Instance()->num_views,
-        n,
-        powtwo_length,
-        Instance()->p_asmodeling_->render_interval_array_[Instance()->current_level_],
-        Instance()->d_projected_centers,
-        Instance()->d_tag_volume,
+        Instance()->p_asmodeling_->height_,
+        p_range,
+        n + 1,
         Instance()->p_device_x,
         Instance()->d_temp_f
-        /*d_testdata*/);
+        );
 
-      //cutilSafeCall( cudaMemcpy(h_testdata, d_testdata,
-      //  sizeof(float)*Instance()->p_asmodeling_->width_*Instance()->p_asmodeling_->height_,
-      //  cudaMemcpyDeviceToHost) );
-
-      //char tmpbuf[100];
-      //sprintf(tmpbuf, "../Data/Camera%02d/testF.pfm", i_view);
-      //PFMImage * testFpfmimg = new PFMImage(Instance()->p_asmodeling_->width_,
-      //  Instance()->p_asmodeling_->height_, 0, h_testdata);
-      //testFpfmimg -> WriteImage(tmpbuf);
-      //delete testFpfmimg;
 
       fprintf(stderr, "++ ++ ++ F value of view %d is %f\n", i_view, ff);
       f += ff;
       //f += 1.0f;
 
-#if 0 // debug rr tex and gt tex
-      static int count = 0;
-      int rwidth = Instance()->p_asmodeling_->width_;
-      int rheight = Instance()->p_asmodeling_->height_;
-
-      float * rr =new float[ rwidth * rheight * sizeof(float)];
-      float * gt =new float[ rwidth * rheight * sizeof(float)];
-      //void test__(int width, int height, int iview, float * h_data1, float * h_data2);
-      test__(rwidth, rheight, i_view, rr, gt);
-
-      PFMImage * pfm1 = new PFMImage(rwidth, rheight, 0, rr);
-      PFMImage * pfm2 = new PFMImage(rwidth, rheight, 0, gt);
-
-      char path_buf[100];
-      sprintf(path_buf, "../Data/Camera%02d/getitfromdeviceGT%06d.pfm", i_view, count);
-      pfm2->WriteImage(path_buf);
-      sprintf(path_buf, "../Data/Camera%02d/getitfromdeviceRR%06d.pfm", i_view, count);
-      pfm1->WriteImage(path_buf);
-      delete pfm1;
-      delete pfm2;
-      ++ count;
-#endif
-
       // calc g[]
       for (int pt_slice = 0; pt_slice < length; ++pt_slice)
       {
-        //fprintf(stderr, " --- --- perturbing slice %d...\n", pt_slice);
-
-        int mm = Instance()->p_asmodeling_->volume_interval_array_[Instance()->current_level_];
-
         for (int pv = 0; pv < mm; ++pv)
         {
           for (int pu = 0; pu < mm; ++pu)
@@ -339,39 +193,21 @@ namespace as_modeling
             // bind 2 cuda tex
             bind_prtex_cuda(Instance()->pr_tex_cudaArray);
 
-            //// launch kernel
+            Timer a;
+            a.start();
             calculate_g_cuda(
               Instance()->current_level_,
-              Instance()->p_asmodeling_->width_,
               Instance()->p_asmodeling_->height_,
               i_view,
-              Instance()->num_views,
-              Instance()->p_asmodeling_->render_interval_array_[ Instance()->current_level_ ],
+              p_range,
               mm,
               pu,
               pv,
               Instance()->p_asmodeling_->camera_orientations_[i_view],
               pt_slice,
-              Instance()->d_projected_centers,
-              Instance()->d_tag_volume,
               Instance()->p_device_g
               );
-
-#if 0 // test perturbed restult tex
-            int prwidth = Instance()->p_asmodeling_->width_;
-            int prheight = Instance()->p_asmodeling_->height_;
-
-            float * pr =new float[ prwidth * prheight * sizeof(float)];
-            //void test__(int width, int height, int iview, float * h_data1, float * h_data2);
-            tst_g(prwidth, prheight, i_view, pr);
-
-            PFMImage * pfm3 = new PFMImage(rwidth, rheight, 0, pr);
-
-            char path_buf[100];
-            sprintf(path_buf, "../Data/Camera%02d/getitfromdevicePR.pfm", i_view);
-            pfm3->WriteImage(path_buf);
-            delete pfm3;
-#endif
+            fprintf(stderr, "\t\tCalcG\t%d\t%d\t%d\t%lf\n", pt_slice, pu, pv, a.stop());
 
             // unmap resource
             cutilSafeCall( cudaGraphicsUnmapResources(1, &(Instance()->resource_pr_)) );
@@ -401,13 +237,6 @@ namespace as_modeling
     {
       g(i) = Instance()->p_host_g[i];
     }
-
-    fprintf(stderr, "\nG values:\n");
-    for (int i = 1; i <= 7; ++i)
-    {
-      fprintf(stderr, "%lf ", g(i));
-    }
-    fprintf(stderr, "\n");
 
     fprintf(stderr, "=== == === == Grad Computing Used %lf secs.\n", tmer_1.stop());
 
@@ -443,7 +272,7 @@ namespace as_modeling
       cudaMemcpyHostToDevice) );
 
     // construct on cuda
-    construct_volume_linm_cuda(length, Instance()->p_device_x, Instance()->d_temp_f, Instance()->d_tag_volume);
+    construct_volume_linm_cuda(length, Instance()->p_device_x, Instance()->d_temp_f);
 
     // copy back to HOST
     cutilSafeCall( cudaMemcpy(
@@ -459,8 +288,7 @@ namespace as_modeling
       construct_volume_cuda(
         Instance()->p_device_x,
         &(Instance()->d_vol_pitchedptr),
-        Instance()->vol_extent,
-        Instance()->d_tag_volume
+        Instance()->vol_extent
         );
 
       // upsampling
@@ -479,8 +307,7 @@ namespace as_modeling
       construct_volume_cuda(
         Instance()->p_device_x,
         &(Instance()->d_full_vol_pptr),
-        Instance()->full_vol_extent,
-        Instance()->d_tag_volume
+        Instance()->full_vol_extent
         );
       cutilSafeCall( cudaGetLastError() );
     }
@@ -559,6 +386,10 @@ namespace as_modeling
     current_level_ = Instance()->p_asmodeling_->initial_vol_level_;
     int max_length = Instance()->p_asmodeling_->max_vol_size_;
     int max_size = max_length * max_length * max_length;
+
+    // sub size means, the non-empty voxels are typically a proportion of the whole volume
+    int sub_size = 0.4 * max_size;
+
     int tex_buffer_size = max_size * sizeof(float);
 
     // OpenGL and renderer initiation in RenderGL...
@@ -623,22 +454,14 @@ namespace as_modeling
     full_vol_extent = make_cudaExtent(max_length*sizeof(float), max_length, max_length);
     cutilSafeCall( cudaMalloc3D(&d_full_vol_pptr, full_vol_extent) );
 
-    fprintf(stderr, "d_projected_centers size : %d\n", 2 * p_asmodeling_->num_cameras_ * max_size);
 
-    //cutilSafeCall( cudaMalloc<uint16>(&d_projected_centers, 2 * p_asmodeling_->num_cameras_ * max_size) );
-    cutilSafeCall( cudaMalloc((void**)(&d_projected_centers), 0.4* 2 * p_asmodeling_->num_cameras_ * max_size * sizeof(uint16)) );
-
-    //cutilSafeCall( cudaMalloc<int>(&d_tag_volume, max_size) );
     cutilSafeCall( cudaMalloc((void**)(&d_tag_volume), max_size * sizeof(int)) );
 
-    //cutilSafeCall( cudaMalloc<float>(&p_device_x, max_size) );
-    cutilSafeCall( cudaMalloc((void**)(&p_device_x), max_size*sizeof(float)) );
+    cutilSafeCall( cudaMalloc((void**)(&p_device_x), sub_size*sizeof(float)) );
 
-    //cutilSafeCall( cudaMalloc<float>(&p_device_g, max_size) );
-    cutilSafeCall( cudaMalloc((void**)(&p_device_g), max_size * sizeof(float)) );
+    cutilSafeCall( cudaMalloc((void**)(&p_device_g), sub_size * sizeof(float)) );
 
-    //cutilSafeCall( cudaMalloc<float>(&d_temp_f,   max_size) );
-    cutilSafeCall( cudaMalloc((void**)(&d_temp_f), max_size * sizeof(float)) );
+    cutilSafeCall( cudaMalloc((void**)(&d_temp_f), sub_size * sizeof(float)) );
 
     // alloc array for ground truth image
     cudaChannelFormatDesc channelDesc = cudaCreateChannelDesc<uchar4>();
@@ -648,30 +471,11 @@ namespace as_modeling
     //////////////////////////////////////////////////////////
     // alloc memory on HOST
     //////////////////////////////////////////////////////////
-    h_vol_data = new float [max_size];
-    h_projected_centers = new uint16 [2 * p_asmodeling_->num_cameras_ * max_size];
+    h_projected_centers = new uint16 [2 * p_asmodeling_->num_cameras_ * sub_size];
     h_tag_volume = new int [ max_size ];
 
-    p_host_g = new float [max_size];
-    p_host_x = new float [max_size];
-
-#if 0
-    // test render here
-    glBindTexture(GL_TEXTURE_3D, vol_tex_);
-    float *tmp = new float[max_size];
-    for (int i = 0; i < max_size; ++i)
-    {
-      tmp[i] = 0.5f;
-    }
-    glTexImage3D(GL_TEXTURE_3D, 0, GL_LUMINANCE32F_ARB, max_length, max_length, max_length, 0, GL_LUMINANCE, GL_FLOAT, tmp);
-    CUT_CHECK_ERROR_GL2();
-
-    for (int i = 0; i < p_asmodeling_->num_cameras_; ++i)
-    {
-      renderer_->render_unperturbed(i, vol_tex_, 256);
-    }
-
-#endif
+    p_host_g = new float [sub_size];
+    p_host_x = new float [sub_size];
 
     return true;
   }
@@ -680,9 +484,10 @@ namespace as_modeling
   {
     fprintf(stderr, " <========>  Releasing ASMGradCompute..\n");
 
+    cutilSafeCall( cudaThreadExit() );
+
     cutilSafeCall( cudaGraphicsUnregisterResource(resource_vol_));
 
-    cutilSafeCall( cudaFree( d_projected_centers ) );
     cutilSafeCall( cudaFree( d_tag_volume ) );
 
     cutilSafeCall( cudaFree( d_full_vol_pptr.ptr) );
@@ -694,7 +499,10 @@ namespace as_modeling
 
     cutilSafeCall( cudaFreeArray(gt_tex_cudaArray) );
 
-    cutilSafeCall( cudaThreadExit() );
+    cutilSafeCall( cudaFreeArray(pos_tag_cudaArray) );
+
+    cutilSafeCall( cudaFreeArray(pcenters_cudaArray) );
+
 
     glDeleteTextures(1, &vol_tex_);
 
@@ -702,7 +510,6 @@ namespace as_modeling
 
     delete [] h_projected_centers;
     delete [] h_tag_volume;
-    delete [] h_vol_data;
 
     delete [] p_host_g;
     delete [] p_host_x;
@@ -724,88 +531,78 @@ namespace as_modeling
     // set initial guess of x using ground truth image
     set_density_tags(level, h_tag_volume, guess_x, projected_centers_, true);
 
-#if 0
-    float * img = new float [length * length * length * 3];
-    memset(img, 0, length * length * length * 3 * sizeof(float));
-    for (int k = 0; k < length; ++k)
+    int num_items = projected_centers_.size() / (2 * num_views) + 1;
+
+    //
+    // allocate space for the cudaArray 
+    //
+    cudaChannelFormatDesc desc = cudaCreateChannelDesc<int>();
+    pos_tag_extent = make_cudaExtent(length, length, length);
+    cudaMalloc3DArray( &pos_tag_cudaArray, &desc, pos_tag_extent);
+
+    cudaChannelFormatDesc desc2 = cudaCreateChannelDesc<ushort2>();
+    pcenters_extent = make_cudaExtent(512, num_items / 512 + ((num_items%512)?1:0), num_views);
+    cudaMalloc3DArray( &pcenters_cudaArray, &desc2, pcenters_extent);
+
+    //
+    // set projected center tex
+    //
+    for (int i_camera = 0; i_camera < num_views; ++i_camera)
     {
-      for (int j = 0; j < length; ++j)
+      h_projected_centers[0] = 0;
+      h_projected_centers[1] = 0;
+      for (int i_item = 1; i_item < num_items; ++i_item)
       {
-        for (int i = 0; i < length; ++i)
-        {
-          int vol_ind = p_asmodeling_->index3(i, j, k, length);
-          int arr_ind = h_tag_volume[vol_ind];
-          float val;
-          if (0 == arr_ind)
-            val = 0.0f;
-          else
-            val = guess_x[arr_ind-1];
-
-          img[vol_ind*3 + 0] = val;
-          img[vol_ind*3 + 1] = val;
-          img[vol_ind*3 + 2] = val;
-        }
-      }
-    }
-
-    PFMImage * test = new PFMImage(length, length*length, 1, img);
-
-    test->WriteImage("../Data/ShowInit.pfm");
-    delete test;
-#endif
-
-    // copy data to CUDA
-    int i = 0;
-    for (std::list<uint16>::const_iterator it = projected_centers_.begin();
-      it != projected_centers_.end();
-      ++i, ++it)
-    {
-      h_projected_centers[i] = *it;
-    }
-
-    fprintf(stderr, "\n\n, sizeof projected_centers_ : %d\n", projected_centers_.size());
-
-#if 0 // test projecting centers...  very ok....
-    int tttwidth = Instance()->p_asmodeling_->width_;
-    int tttheight = Instance()->p_asmodeling_->height_;
-
-    for (int iview = 0; iview < Instance()->num_views; ++iview)
-    {
-      float * tttdata = new float [tttwidth * tttheight];
-      memset(tttdata, 0, sizeof(float) * tttwidth * tttheight);
-
-      for (int k = 0; k < length; ++k)
-      {
-        for (int j = 0; j < length; ++j)
-        {
-          for (int i = 0; i < length; ++i)
-          {
-            int vol_index = p_asmodeling_->index3(i, j, k, length);
-            int arr_index = h_tag_volume[ vol_index ];
-
-            uint16 u = h_projected_centers[2*Instance()->num_views*(arr_index-1)+2*iview];
-            uint16 v = h_projected_centers[2*Instance()->num_views*(arr_index-1)+2*iview+1];
-
-            if (u<tttwidth && v<tttheight)
-              tttdata[v*tttwidth+u] = 1.0f;
-          }
-        }
+        h_projected_centers[i_item*2] = projected_centers_[(i_item-1)*2*num_views + i_camera*2];
+        h_projected_centers[i_item*2+1] = projected_centers_[(i_item-1)*2*num_views + i_camera*2+1];
       }
 
-      PFMImage * tmpfpmm = new PFMImage(tttwidth,
-        tttheight, 0, tttdata);
-      char buf[100];
-      sprintf(buf, "../Data/showPcenter%02d.pfm", iview);
-      tmpfpmm -> WriteImage(buf);
-      delete tmpfpmm;
-    } // for iview
-#endif
+      /////////////////////////////////////////////////////////////////////////////////////////////////
+      //float * data = new float [p_asmodeling_->width_ * p_asmodeling_->height_];
+      //memset(data, 0, sizeof(float)*p_asmodeling_->width_ * p_asmodeling_->height_);
+      //for (int i = 0; i < num_items; ++i)
+      //{
+      //  int u = h_projected_centers[i*2];
+      //  int v = h_projected_centers[i*2+1];
+      //  data[v * p_asmodeling_->width_ + u] = 1.0f;
+      //}
+      //PFMImage * fm1 = new PFMImage(p_asmodeling_->width_, p_asmodeling_->height_, 0, data);
+      //char path_buf[100];
+      //sprintf(path_buf, "../Data/View%d.pfm", i_camera);
+      //fm1->WriteImage(path_buf);
+      //delete fm1;
+      //////////////////////////////////////////////////////////////////////////////////////////////////
 
-    cutilSafeCall( cudaMemcpy(
-      d_projected_centers,
-      h_projected_centers,
-      sizeof(uint16)*projected_centers_.size(),
-      cudaMemcpyHostToDevice));
+      cutilSafeCall( cudaGetLastError());
+
+      cudaMemcpy3DParms param = {0};
+      param.dstArray = pcenters_cudaArray;
+      param.dstPos = make_cudaPos(0, 0, i_camera);
+      param.srcPtr = make_cudaPitchedPtr( (void*)h_projected_centers, 512 * sizeof(ushort2), 512, num_items/512+((num_items%512)?1:0));
+      param.extent = make_cudaExtent(pcenters_extent.width, pcenters_extent.height, 1);
+      param.kind = cudaMemcpyHostToDevice;
+
+      cutilSafeCall( cudaMemcpy3D(&param) );
+    }
+
+
+    // 
+    // set position tag volume tex
+    //
+    cudaMemcpy3DParms param = {0};
+    param.dstArray = pos_tag_cudaArray;
+    param.extent = pos_tag_extent;
+    param.srcPtr = make_cudaPitchedPtr( (void*)h_tag_volume, length * sizeof(int), length, length);
+    param.kind = cudaMemcpyHostToDevice;
+
+    cutilSafeCall( cudaMemcpy3D( &param) );
+
+
+    //
+    // Bind texture reference
+    //
+    bind_pcenters_cuda(pcenters_cudaArray);
+    bind_postags_cuda(pos_tag_cudaArray);
 
     cutilSafeCall( cudaMemcpy(
       d_tag_volume, 
@@ -829,29 +626,57 @@ namespace as_modeling
 
     set_density_tags(level, h_tag_volume, dummy_list, projected_centers_, false);
 
+    int num_items = projected_centers_.size() / (2 * num_views) + 1;
+
     // allocate space for volume data on device
     size_t vol_size = 1 << current_level_;
     vol_extent = make_cudaExtent(vol_size*sizeof(float), vol_size, vol_size);
     cutilSafeCall( cudaMalloc3D(&d_vol_pitchedptr, vol_extent) );
 
-    // copy data to CUDA
-    int i = 0;
-    for (std::list<uint16>::const_iterator  it = projected_centers_.begin();
-      it != projected_centers_.end();
-      ++it, ++i)
+    //
+    // set projected center tex
+    //
+    for (int i_camera = 0; i_camera < num_views; ++i_camera)
     {
-      h_projected_centers[i] = *it;
+      h_projected_centers[0] = 0;
+      h_projected_centers[1] = 0;
+      for (int i_item = 1; i_item < num_items; ++i_item)
+      {
+        h_projected_centers[i_item*2] = projected_centers_[(i_item-1)*2*num_views + i_camera*2];
+        h_projected_centers[i_item*2+1] = projected_centers_[(i_item-1)*2*num_views + i_camera*2+1];
+      }
+
+      cudaMemcpy3DParms param = {0};
+      param.dstArray = pcenters_cudaArray;
+      param.dstPos = make_cudaPos(0, 0, i_camera);
+      param.srcPtr = make_cudaPitchedPtr( (void*)h_projected_centers, 512 * sizeof(ushort2), 512, num_items/512+((num_items%512)?1:0));
+      param.extent = make_cudaExtent(pcenters_extent.width, pcenters_extent.height, 1);
+      param.kind = cudaMemcpyHostToDevice;
+
+      cutilSafeCall( cudaMemcpy3D(&param) );
     }
 
+    // 
+    // set position tag volume tex
+    //
+    cudaMemcpy3DParms param = {0};
+    param.dstArray = pos_tag_cudaArray;
+    param.extent = pos_tag_extent;
+    param.srcPtr = make_cudaPitchedPtr( (void*)h_tag_volume, length * sizeof(int), length, length);
+    param.kind = cudaMemcpyHostToDevice;
+
+    cutilSafeCall( cudaMemcpy3D( &param) );
+
+    //
+    // Bind texture reference
+    //
+    bind_pcenters_cuda(pcenters_cudaArray);
+    bind_postags_cuda(pos_tag_cudaArray);
+
     cutilSafeCall( cudaMemcpy(
-      d_projected_centers,
-      h_projected_centers,
-      sizeof(uint16)*projected_centers_.size(),
-      cudaMemcpyHostToDevice) );
-    cutilSafeCall( cudaMemcpy(
-      d_tag_volume,
-      h_tag_volume,
-      sizeof(int)*size,
+      d_tag_volume, 
+      h_tag_volume, 
+      sizeof(int)*size, 
       cudaMemcpyHostToDevice) );
 
     return true;
@@ -894,8 +719,7 @@ namespace as_modeling
     construct_volume_from_previous_cuda(
       Instance()->p_device_x,
       &(Instance()->d_vol_pitchedptr),
-      Instance()->vol_extent,
-      Instance()->d_tag_volume );
+      Instance()->vol_extent );
 
     cutilSafeCall( cudaGetLastError() );
 
@@ -903,39 +727,74 @@ namespace as_modeling
     std::vector<float> dummy_list;
     set_density_tags(level, h_tag_volume, dummy_list, projected_centers_, false);
 
-    // cull the empty cells 
-    int n_nonzero_items = projected_centers_.size() / (2*num_views);
+    int num_items = projected_centers_.size() / (2 * num_views) + 1;
 
-    // copy data to CUDA
-    int i = 0;
-    for (std::list<uint16>::const_iterator it = projected_centers_.begin();
-      it != projected_centers_.end();
-      ++i, ++it)
+    //
+    // re-allocate space for density tag and projected centers
+    //
+    cutilSafeCall( cudaFreeArray( pcenters_cudaArray ) );
+    cutilSafeCall( cudaFreeArray( pos_tag_cudaArray ) );
+
+    cudaChannelFormatDesc desc = cudaCreateChannelDesc<int>();
+    pos_tag_extent = make_cudaExtent(length, length, length);
+    cudaMalloc3DArray( &pos_tag_cudaArray, &desc, pos_tag_extent);
+
+    cudaChannelFormatDesc desc2 = cudaCreateChannelDesc<ushort2>();
+    pcenters_extent = make_cudaExtent(512, num_items / 512 + ((num_items%512)?1:0), num_views);
+    cudaMalloc3DArray( &pcenters_cudaArray, &desc2, pcenters_extent);
+
+    //
+    // set projected center tex
+    //
+    for (int i_camera = 0; i_camera < num_views; ++i_camera)
     {
-      h_projected_centers[i] = *it;
+      h_projected_centers[0] = 0;
+      h_projected_centers[1] = 0;
+      for (int i_item = 1; i_item < num_items; ++i_item)
+      {
+        h_projected_centers[i_item*2] = projected_centers_[(i_item-1)*2*num_views + i_camera*2];
+        h_projected_centers[i_item*2+1] = projected_centers_[(i_item-1)*2*num_views + i_camera*2+1];
+      }
+
+      cudaMemcpy3DParms param = {0};
+      param.dstArray = pcenters_cudaArray;
+      param.dstPos = make_cudaPos(0, 0, i_camera);
+      param.srcPtr = make_cudaPitchedPtr( (void*)h_projected_centers, 512 * sizeof(ushort2), 512, num_items/512+((num_items%512)?1:0));
+      param.extent = make_cudaExtent(pcenters_extent.width, pcenters_extent.height, 1);
+      param.kind = cudaMemcpyHostToDevice;
+
+      cutilSafeCall( cudaMemcpy3D(&param) );
     }
 
-    fprintf(stderr, "++++++++++++++++++++++++++++++ nonzero voxels size : %d\n", n_nonzero_items);
+
+    // 
+    // set position tag volume tex
+    //
+    cudaMemcpy3DParms param = {0};
+    param.dstArray = pos_tag_cudaArray;
+    param.extent = pos_tag_extent;
+    param.srcPtr = make_cudaPitchedPtr( (void*)h_tag_volume, length * sizeof(int), length, length);
+    param.kind = cudaMemcpyHostToDevice;
+
+    cutilSafeCall( cudaMemcpy3D( &param) );
+
+    //
+    // Bind texture reference
+    //
+    bind_pcenters_cuda(pcenters_cudaArray);
+    bind_postags_cuda(pos_tag_cudaArray);
 
     cutilSafeCall( cudaMemcpy(
-      d_projected_centers,
-      h_projected_centers,
-      sizeof(uint16)*projected_centers_.size(),
-      cudaMemcpyHostToDevice));
-
-    cutilSafeCall( cudaMemcpy(
-      d_tag_volume,
-      h_tag_volume,
-      sizeof(int)*size,
+      d_tag_volume, 
+      h_tag_volume, 
+      sizeof(int)*size, 
       cudaMemcpyHostToDevice) );
 
     cull_empty_cells_cuda(
       &(Instance()->d_vol_pitchedptr),
-      Instance()->vol_extent,
-      Instance()->d_tag_volume );
+      Instance()->vol_extent );
 
     cutilSafeCall( cudaGetLastError() );
-
 
     // copy back to initiate guess_x
     guess_x.clear();
@@ -943,18 +802,17 @@ namespace as_modeling
     get_guess_x_cuda(
       Instance()->p_device_x,
       &(Instance()->d_vol_pitchedptr),
-      Instance()->vol_extent,
-      Instance()->d_tag_volume );
+      Instance()->vol_extent );
 
     cutilSafeCall( cudaGetLastError() );
 
     cutilSafeCall( cudaMemcpy(
       Instance()->p_host_x,
       Instance()->p_device_x,
-      sizeof(float)*(1+n_nonzero_items),
+      sizeof(float)*num_items,
       cudaMemcpyDeviceToHost) );
 
-    for (int i = 1; i <= n_nonzero_items; ++i)
+    for (int i = 1; i < num_items; ++i)
     {
       guess_x.push_back( Instance()->p_host_x[i] );
     }
@@ -968,60 +826,9 @@ namespace as_modeling
     int level,
     int *tag_volume,
     std::vector<float> &density,
-    std::list<uint16> &centers,
+    std::vector<uint16> &centers,
     bool is_init_density)
   {
-
-#ifdef __DEBUG_IMAGE_
-    cuda_imageutil::BMPImageUtil * debugBMP = new cuda_imageutil::BMPImageUtil[8];
-    for (int img=0; img<8;++img)
-    {
-      debugBMP[img].SetSizes(p_asmodeling_->width_, p_asmodeling_->height_);
-      debugBMP[img].ClearImage();
-    }
-#endif
-
-#if 0
-    /////////////////////
-    int tlength = 32;
-    for (int i_view = 0; i_view<num_views; ++i_view)
-    {
-      for (int kk = -tlength; kk <= tlength; ++kk)
-      {
-        for (int jj = -tlength; jj <= tlength; ++jj)
-        {
-          for (int ii = -tlength; ii <= tlength; ++ii)
-          {
-            float x = p_asmodeling_->trans_x_ + ii*0.5/tlength*p_asmodeling_->box_size_;
-            float y = p_asmodeling_->trans_y_ + jj*0.5/tlength*p_asmodeling_->box_size_;
-            float z = p_asmodeling_->trans_z_ + kk*0.5/tlength*p_asmodeling_->box_size_;
-
-            Vector4 cwc(x,y,z);
-            Vector4  cec = p_asmodeling_->camera_extr_paras_[i_view] * cwc;
-
-            cec.x /= cec.z;
-            cec.y /= cec.z;
-            cec.z /= cec.z;
-
-            int pu = static_cast<int>( 0.5+
-              p_asmodeling_->camera_intr_paras_[i_view](0,0)* cec.x + p_asmodeling_->camera_intr_paras_[i_view](0,2) );
-            int pv = static_cast<int>( 0.5+
-              p_asmodeling_->camera_intr_paras_[i_view](1,1)* cec.y + p_asmodeling_->camera_intr_paras_[i_view](1,2) );
-
-            debugBMP[i_view].GetPixelAt(pu,pv)[0] = 255;
-            debugBMP[i_view].GetPixelAt(pu,pv)[1] = 255;
-            debugBMP[i_view].GetPixelAt(pu,pv)[2] = 255;
-
-          }
-        }
-      }
-      char tm[200];
-      sprintf_s(tm,"../Data/Camera%02d/Projected.BMP", i_view);
-      debugBMP[i_view].SaveImage(tm);
-      debugBMP[i_view].ClearImage();
-    }
-    /////////////////////
-#endif
 
     int length = (1<<level);
 
@@ -1031,7 +838,6 @@ namespace as_modeling
 
     PT2DVEC pts;
     pts.reserve(32);
-
 
     if (is_init_density)
     {
@@ -1049,8 +855,6 @@ namespace as_modeling
       {
         for (int i = 0; i < length; ++i)
         {
-          bool is_outside = false;
-
           // calc the world coordinates of the 8 corners of the current cell
           // NOTE : NO ROTATION
           int wc_index = 0;
@@ -1067,7 +871,6 @@ namespace as_modeling
                   * p_asmodeling_->box_size_ + p_asmodeling_->trans_y_;
                 wc_z[wc_index] = (static_cast<float>(k+kk)/static_cast<float>(length) - 0.5f)
                   * p_asmodeling_->box_size_ + p_asmodeling_->trans_z_;
-
 
                 wc_x[8] += wc_x[wc_index];
                 wc_y[8] += wc_y[wc_index];
@@ -1132,12 +935,7 @@ namespace as_modeling
                 tmpPt.x < p_asmodeling_->width_*1.0f && 
                 tmpPt.y < p_asmodeling_->height_*1.0f)
                 pts.push_back(tmpPt);
-              else
-                is_outside = true;
             }
-
-            if (is_outside)
-              break;
 
             // Calc the effective pixels
             // construct the convex hull
@@ -1213,6 +1011,7 @@ namespace as_modeling
             int vol_index = p_asmodeling_->index3(i, j, k, length);
             tag_volume[vol_index] = tag_index;
 
+            // set density
             if (is_init_density)
               density.push_back( static_cast<float>(luminance_sum) / (255.0f*n_effective_pixels) );
 
@@ -1229,51 +1028,6 @@ namespace as_modeling
       } // for j
     } // for k
 
-#ifdef __DEBUG_IMAGE_
-    // calc the projected pixels of the current cell 
-    int cn_ind = 0;
-    for (int k = -1; k < 2; k+=2)
-    {
-      for (int j = -1; j < 2; j+=2)
-      {
-        for (int i = -1; i < 2; i+=2)
-        {
-          for (int i_camera = 0; i_camera < p_asmodeling_->num_cameras_; ++i_camera)
-          {
-            Vector4 cwc;
-            cwc.x = i*0.5*p_asmodeling_->box_size_ + p_asmodeling_->trans_x_;
-            cwc.y = j*0.5*p_asmodeling_->box_size_ + p_asmodeling_->trans_y_;
-            cwc.z = k*0.5*p_asmodeling_->box_size_ + p_asmodeling_->trans_z_;
-            cwc.w = 1.0;
-            Vector4 cec;
-            cec = p_asmodeling_->camera_extr_paras_[i_camera] * cwc;
-            cec.x /= cec.z;
-            cec.y /= cec.z;
-            cec.z /= cec.z;
-            int px = static_cast<int>( 0.5+
-              p_asmodeling_->camera_intr_paras_[i_camera](0,0) * cec.x + p_asmodeling_->camera_intr_paras_[i_camera](0,2) );
-            int py = static_cast<int>( 0.5+
-              p_asmodeling_->camera_intr_paras_[i_camera](1,1) * cec.y + p_asmodeling_->camera_intr_paras_[i_camera](1,2) );
-
-            debugBMP[i_camera].GetPixelAt(px,py)[0] = 254 * (i+1)/2;
-            debugBMP[i_camera].GetPixelAt(px,py)[1] = 254 * (j+1)/2;
-            debugBMP[i_camera].GetPixelAt(px,py)[2] = 254 * (k+1)/2;
-
-          } // for each camera
-
-          ++ cn_ind;
-        }
-      }
-    }
-
-    for (int img=0; img<8;++img)
-    {
-      char path_buf[50];
-      sprintf_s(path_buf, 50, "../Data/Camera%02d/test%02d.bmp", img, img);
-      debugBMP[img].SaveImage(path_buf);
-    }
-#endif
-
   }
 
   bool ASMGradCompute::set_asmodeling(ASModeling *p)
@@ -1285,6 +1039,13 @@ namespace as_modeling
     return true;
   }
 
+  ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+  void set_projected_centers_alongX(int level, int * tag_volume,
+    std::vector<float> &density, std::vector<unsigned short> &pcenters, bool is_init_density)
+  {
+
+  }
 
 } // namespace as_modeling
 

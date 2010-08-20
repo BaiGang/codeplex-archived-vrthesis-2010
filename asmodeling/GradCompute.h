@@ -3,7 +3,7 @@
 #include <stdafx.h>
 #include <cstdlib>
 #include <cstdio>
-#include <list>
+#include <vector>
 
 #include "RenderGL.h"  // glew.h must be loaded befor gl.h
 
@@ -69,8 +69,16 @@ namespace as_modeling{
     //  is_init_density : if true, the density will be set,
     //                    else, just set the tag_volume
     void set_density_tags(int level, int *tag_volume, std::vector<float> &density, 
-      std::list<uint16> &centers, bool is_init_density);
+      std::vector<uint16> &centers, bool is_init_density);
 
+    void set_projected_centers_alongX(int level, int * tag_volume,
+      std::vector<float> &density, std::vector<unsigned short> &pcenters, bool is_init_density);
+
+    void set_projected_centers_alongY(int level, int * tag_volume,
+      std::vector<float> &density, std::vector<unsigned short> &pcenters, bool is_init_density);
+
+    void set_projected_centers_alongZ(int level, int * tag_volume,
+      std::vector<float> &density, std::vector<unsigned short> &pcenters, bool is_init_density);
 
   public:
     // must feed with an ASModeling 
@@ -105,9 +113,6 @@ namespace as_modeling{
     cudaGraphicsResource * resource_pcenters;  // projected centers
 #endif // __USE_TEX_MEMORY_CUDA__
 
-    // pbo
-    // for cuda access
-    GLuint pbo_;
 
     // volume texture id
     GLuint vol_tex_;
@@ -116,11 +121,11 @@ namespace as_modeling{
     int current_level_;
 
     // CUDA host memory
-    float * h_vol_data;       // 
     int * h_tag_volume;       // 
+    int * d_tag_volume;
     uint16 * h_projected_centers;
 
-    std::list<uint16> projected_centers_;
+    std::vector<uint16> projected_centers_;
 
     // for lbfgsb routine
     float * p_host_x;   // x, 
@@ -135,11 +140,6 @@ namespace as_modeling{
 
     float * d_temp_f;
 
-#ifndef __USE_TEX_MEMORY_CUDA__
-    uint16 * d_projected_centers;
-    int * d_tag_volume;
-#endif // __USE_TEX_MEMORY_CUDA__
-
     cudaArray * vol_tex_cudaArray;
     cudaExtent  vol_cudaArray_extent;
     cudaArray * rr_tex_cudaArray;
@@ -148,9 +148,11 @@ namespace as_modeling{
     cudaArray * gt_tex_cudaArray;
     cudaExtent  gt_cudaArray_extent;
 
-#ifdef __USE_TEX_MEMORY_CUDA__
-    cudaArray * tag_vol_cudaArray;
-#endif
+    cudaArray * pos_tag_cudaArray;
+    cudaExtent  pos_tag_extent;
+
+    cudaArray * pcenters_cudaArray;
+    cudaExtent   pcenters_extent;
 
     float * d_vol_bufferptr;
     size_t vol_buffer_num_bytes_;

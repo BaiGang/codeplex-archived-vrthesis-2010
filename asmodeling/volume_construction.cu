@@ -7,16 +7,20 @@
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 __global__ void construct_volume(
                                  cudaPitchedPtr vol_pptr, 
-                                 float * device_x, 
-                                 int * tag_vol
+                                 float * device_x
                                  )
 {
-  int index = index3(threadIdx.x, blockIdx.y, blockIdx.x, blockDim.x);
+  int tag_ind =  tex3D(
+    position_tag,
+    __int2float_rn(threadIdx.x),
+    __int2float_rn(blockIdx.y),
+    __int2float_rn(blockIdx.x)
+    );
 
   char * slice = (char *)vol_pptr.ptr + blockIdx.x * vol_pptr.pitch * blockDim.x;
   float *  row = (float*)(slice + blockIdx.y * vol_pptr.pitch);
 
-  row[threadIdx.x] = device_x[ tag_vol[index] ];
+  row[threadIdx.x] = device_x[ tag_ind ];
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -27,13 +31,19 @@ __global__ void construct_volume(
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 __global__ void construct_volume_linm(
                                       float * density_vol,
-                                      float * device_x,
-                                      int   * tag_vol
+                                      float * device_x
                                       )
 {
   int index = index3(threadIdx.x, blockIdx.y, blockIdx.x, blockDim.x);
 
-  density_vol[index] = device_x[ tag_vol[index] ];
+  int tag_ind =  tex3D(
+    position_tag,
+    __int2float_rn(threadIdx.x),
+    __int2float_rn(blockIdx.y),
+    __int2float_rn(blockIdx.x)
+    );
+
+  density_vol[index] = device_x[ tag_ind ];
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -41,15 +51,11 @@ __global__ void construct_volume_linm(
 //    Get volume data from the pitched ptr
 //
 /////////////////////////////////////////////////////////////////////////////////////////////////////
-__global__ void get_volume(cudaPitchedPtr vol_pptr,
-                           //int   * tag_vol,
-                           float * den_vol)
+__global__ void get_volume(
+                           cudaPitchedPtr vol_pptr,
+                           float * den_vol
+                           )
 {
-  //unsigned int i = threadIdx.x;
-  //unsigned int j = blockIdx.y;
-  //unsigned int k = blockIdx.x;
-  //unsigned int size = blockDim.x;
-
   int vol_index = index3(threadIdx.x, blockIdx.y, blockIdx.x, blockDim.x);
   //int arr_index = tag_vol[ vol_index ];
 
@@ -97,33 +103,32 @@ __global__ void upsample_volume(
 /////////////////////////////////////////////////////////////////////////////////////////////////////
 __global__ void construct_volume_from_prev(
   cudaPitchedPtr vol_pptr,
-  float * device_x,
-  int * tag_vol )
+  float * device_x
+  )
 {
-  unsigned int i = threadIdx.x / 2;
-  unsigned int j = blockIdx.y / 2;
-  unsigned int k = blockIdx.x / 2;
-  unsigned int size = blockDim.x / 2;
-
-  int index = index3(i, j, k, size);
-
   char * slice = (char *)vol_pptr.ptr + blockIdx.x * vol_pptr.pitch * blockDim.x;
 
+  int tag_ind =  tex3D(
+    position_tag,
+    __int2float_rn(threadIdx.x),
+    __int2float_rn(blockIdx.y),
+    __int2float_rn(blockIdx.x)
+    );
+
   *((float*)(slice+blockIdx.y*vol_pptr.pitch) + threadIdx.x)
-    = device_x[ tag_vol[index] ];
+    = device_x[ tag_ind ];
 }
 
-__global__ void cull_empty_cells (cudaPitchedPtr vol_pptr,
-                                  int * tag_vol)
+__global__ void cull_empty_cells (cudaPitchedPtr vol_pptr)
 {
-  unsigned int i = threadIdx.x;
-  unsigned int j = blockIdx.y;
-  unsigned int k = blockIdx.x;
-  unsigned int size = blockDim.x;
+  int tag_ind =  tex3D(
+    position_tag,
+    __int2float_rn(threadIdx.x),
+    __int2float_rn(blockIdx.y),
+    __int2float_rn(blockIdx.x)
+    );
 
-  int index = index3(i, j, k, size);
-
-  if (tag_vol[index] == 0)
+  if (tag_ind == 0)
   {
     char * slice = (char*)vol_pptr.ptr + blockIdx.x * vol_pptr.pitch * blockDim.x;
     *((float*)(slice + blockIdx.y*vol_pptr.pitch) + threadIdx.x) = 0.0f;
@@ -131,23 +136,21 @@ __global__ void cull_empty_cells (cudaPitchedPtr vol_pptr,
 }
 
 __global__ void get_guess_x (cudaPitchedPtr vol_pptr,
-                             int *tag_vol,
                              float * guess_x)
 {
-  unsigned int i = threadIdx.x;
-  unsigned int j = blockIdx.y;
-  unsigned int k = blockIdx.x;
-  unsigned int size = blockDim.x;
+  int tag_ind =  tex3D(
+    position_tag,
+    __int2float_rn(threadIdx.x),
+    __int2float_rn(blockIdx.y),
+    __int2float_rn(blockIdx.x)
+    );
 
-  int index = index3(i, j, k, size);
-  int ind_array = tag_vol[ index ];
-
-  if (ind_array != 0)
+  if (tag_ind != 0)
   {
     char * slice = (char*)vol_pptr.ptr + blockIdx.x * vol_pptr.pitch * blockDim.x;
     float value = *((float*)(slice + blockIdx.y*vol_pptr.pitch) + threadIdx.x);
 
-    guess_x[ind_array] = value;
+    guess_x[tag_ind] = value;
   }
 }
 

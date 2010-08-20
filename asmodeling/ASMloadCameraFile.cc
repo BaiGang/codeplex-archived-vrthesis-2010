@@ -80,13 +80,6 @@ namespace as_modeling
         } // col
       } // row
 
-
-      //if (fscanf(fp, "%f%f%f", &camera_positions_[i].x, &camera_positions_[i].y, &camera_positions_[i].z) == 3)
-      //{
-      //  camera_positions_[i].w = 1.0;
-      //}
-      //ELSE_FAILURE;
-
       // calc camera position
       Matrix4 camera_mat(camera_extr_paras_[i]);
       camera_mat.Inverse();

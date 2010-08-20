@@ -38,8 +38,8 @@
     <VolInterval>
       <Level5 value="4" />
       <Level6 value="4" />
-      <Level7 value="4" />
-      <Level8 value="4" />
+      <Level7 value="8" />
+      <Level8 value="8" />
     </VolInterval>
   </Volume>
   <LBFGSB>

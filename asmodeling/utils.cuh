@@ -13,7 +13,11 @@ typedef unsigned short uint16;
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 texture<float4, 2, cudaReadModeElementType> render_result;
 texture<float4, 2, cudaReadModeElementType> perturbed_result;
-texture<uchar4, 3, cudaReadModeElementType> ground_truth;
+//texture<uchar4, 3, cudaReadModeElementType> ground_truth;
+texture<uchar4, 3, cudaReadModeNormalizedFloat> ground_truth;
+texture<int, 3, cudaReadModeElementType> position_tag;
+
+texture<ushort2, 3, cudaReadModeElementType> pcenters;
 
 __constant__ float disturb_value = 0.00001;
 
@@ -24,8 +28,8 @@ __constant__ float disturb_value = 0.00001;
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // bind cudaArray to texture reference
-template<typename pixel_T, int dim>
-void bind_tex(cudaArray* data_array, texture<pixel_T, dim, cudaReadModeElementType>& tex)
+template<typename pixel_T, int dim, cudaTextureReadMode rMode>
+void bind_tex(cudaArray* data_array, texture<pixel_T, dim, rMode>& tex)
 {
   // set texture parameters
   tex.normalized = 0;                          // access with [0,N) coordinates
@@ -50,22 +54,34 @@ void bind_tex(cudaArray* data_array, texture<pixel_T, dim, cudaReadModeElementTy
   cutilSafeCall(cudaBindTextureToArray(tex, data_array, channelDesc));
 }
 
+// bind input array to projected center tex ref
+void bind_pcenters_cuda(cudaArray* data_array)
+{
+  bind_tex<ushort2, 3, cudaReadModeElementType>(data_array, pcenters);
+}
+
+// bind input array to position tag volume tex ref
+void bind_postags_cuda(cudaArray* data_array)
+{
+  bind_tex<int, 3, cudaReadModeElementType>(data_array, position_tag);
+}
+
 // bind input array to render result tex ref
 void bind_rrtex_cuda(cudaArray* data_array)
 {
-  bind_tex<float4,2>(data_array, render_result);
+  bind_tex<float4,2, cudaReadModeElementType>(data_array, render_result);
 }
 
 // bind input array to perturbed result tex ref
 void bind_prtex_cuda(cudaArray* data_array)
 {
-  bind_tex<float4,2>(data_array, perturbed_result);
+  bind_tex<float4,2, cudaReadModeElementType>(data_array, perturbed_result);
 }
 
 // bind input array to ground truth tex ref
 void bind_gttex_cuda(cudaArray* data_array)
 {
-  bind_tex<uchar4,3>(data_array, ground_truth);
+  bind_tex<uchar4,3, cudaReadModeNormalizedFloat>(data_array, ground_truth);
 }
 
 void unbind_rrtex_cuda()
@@ -79,6 +95,15 @@ void unbind_prtex_cuda()
 void unbind_gt_tex_cuda()
 {
   cutilSafeCall( cudaUnbindTexture(&ground_truth));
+}
+
+void unbind_pcenter_tex_cuda()
+{
+  cudaUnbindTexture(&pcenters);
+}
+void unbind_postag_tex_cuda()
+{
+  cudaUnbindTexture(&position_tag);
 }
 
 
@@ -113,7 +138,8 @@ __device__ inline float uint8_to_float(unsigned char value)
 // map (i,j,k) to 1D array index
 __device__ int index3(int i, int j, int k, int length)
 {
-  return i + length * ( j + k * length );
+  //return i + length * ( j + k * length );
+  return i + __umul24(length, j + __umul24(k, length));
 }
 
 #endif //_ASMODELING_UTILS_CUH_

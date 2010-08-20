@@ -181,6 +181,15 @@ namespace as_modeling
 
     }
 
+    //// get data
+    //// copy the volume data to HOST
+    //if (!ASMGradCompute::Instance()->get_data(max_vol_level_, frame_volume_result_, lbfgsb_x_))
+    //{
+    //  fprintf( stderr, "===== Could not get volume data...\n" );
+    //  return false;
+    //}
+
+
     return true;
   }
 

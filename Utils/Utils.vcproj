@@ -204,10 +204,14 @@
 				>
 			</File>
 		</Filter>
-		<File
-			RelativePath=".\CPUTimer.h"
+		<Filter
+			Name="timer"
 			>
-		</File>
+			<File
+				RelativePath=".\Timer\CPUTimer.h"
+				>
+			</File>
+		</Filter>
 	</Files>
 	<Globals>
 	</Globals>
