@@ -10,7 +10,7 @@
 varying vec4 vertexPosEye;  // 视坐标系下的顶点坐标 
 
 //uniform vec3      boxTrans;
-uniform ivec4     disturbPara;//M,KU,KV， isPurt： M体素间隔，KU，KV扰动序号, 是否扰动
+uniform ivec4     disturbPara;//M,KU,KV,PtSlice： M体素间隔，KU，KV扰动序号,扰动切片号
 uniform float     fwidth;  //体素分辨率
 uniform float     disturb;  // 扰动差分， delta x
 uniform vec3      lightIntensity; // 光强度
@@ -49,10 +49,11 @@ void main()
 
   int u = int(gl_TexCoord[0].t*fwidth);
   int v = int(gl_TexCoord[0].p*fwidth);	
+  int w = int(gl_TexCoord[0].s*fwidth);
   u = int(mod(float(u), float(disturbPara.x)));
   v = int(mod(float(v), float(disturbPara.x)));
-  //u%M==K && v%M==k
-  if(1 == disturbPara.w && u== disturbPara.y && v == disturbPara.z)
+  // on the slie and u%M==K && v%M==k
+  if(w == disturbPara.w && u== disturbPara.y && v == disturbPara.z)
   {
     density += disturb;
   }
