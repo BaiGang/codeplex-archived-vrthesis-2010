@@ -18,7 +18,8 @@ namespace as_modeling
     bool init();
     bool release();
 
-    void render(int i); // dummy
+    bool level_init(int level);
+
     void render_unperturbed(int i_view, GLuint vol_tex, int length);
     void render_perturbed(int i_view, GLuint vol_tex, int length, int interval, int slice, int pu, int pv);
 
@@ -50,6 +51,10 @@ namespace as_modeling
     scoped_ptr<GLSLShader> shader_x_pertuerbed_; // along x axis, perturbed
     scoped_ptr<GLSLShader> shader_y_pertuerbed_; // along y axis, ..
     scoped_ptr<GLSLShader> shader_z_pertuerbed_; // along z axis, ..
+
+    // order: X, x, Y, y, Z, z
+    GLuint vbo_ids_[6]; 
+
   public:
     scoped_ptr<CGLFBO> rr_fbo_;     // render result fbo, for calc f
     scoped_ptr<CGLFBO> pr_fbo_;     // perturbed result fbo, for calc g
