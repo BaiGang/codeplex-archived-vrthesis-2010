@@ -40,11 +40,11 @@ namespace as_modeling
     tmpshader = new GLSLShader();
     shader_z_render_.reset(tmpshader);
     tmpshader = new GLSLShader();
-    shader_x_pertuerbed_.reset(tmpshader);
+    shader_x_perturbed_.reset(tmpshader);
     tmpshader = new GLSLShader();
-    shader_y_pertuerbed_.reset(tmpshader);
+    shader_y_perturbed_.reset(tmpshader);
     tmpshader = new GLSLShader();
-    shader_z_pertuerbed_.reset(tmpshader);
+    shader_z_perturbed_.reset(tmpshader);
 
     shader_x_render_->InitShaders(
       "../Data/GLSLShaders/RayMarchingBlend.vert",
@@ -59,15 +59,15 @@ namespace as_modeling
       "../Data/GLSLShaders/RayMarchingBlendZU.frag"
       );
 
-    shader_x_pertuerbed_->InitShaders(
+    shader_x_perturbed_->InitShaders(
       "../Data/GLSLShaders/RayMarchingBlend.vert",
       "../Data/GLSLShaders/RayMarchingBlendX.frag"
       );
-    shader_y_pertuerbed_->InitShaders(
+    shader_y_perturbed_->InitShaders(
       "../Data/GLSLShaders/RayMarchingBlend.vert",
       "../Data/GLSLShaders/RayMarchingBlendY.frag"
       );
-    shader_z_pertuerbed_->InitShaders(
+    shader_z_perturbed_->InitShaders(
       "../Data/GLSLShaders/RayMarchingBlend.vert",
       "../Data/GLSLShaders/RayMarchingBlendZ.frag"
       );
@@ -82,6 +82,8 @@ namespace as_modeling
     pr_fbo_->Init(width_, height_);
     pr_fbo_->CheckFBOErr();
 
+    // six orientations
+    display_list_index_ = glGenLists(6);
 
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glDisable(GL_DEPTH_TEST);
@@ -94,336 +96,348 @@ namespace as_modeling
   bool RenderGL::release( )
   {
     // reallocate the resource
-    glDeleteBuffers(6, vbo_ids_);
+
+    glDeleteLists( display_list_index_, 6 );
     return true;
   }
 
 
-  bool RenderGL::level_init(int level)
+  bool RenderGL::level_init(int level, GLuint vol_tex)
   {
     int length = 1 << level;
     float half_size =  0.5 * asml_->box_size_;
 
-    int size_vertices = 3 * 4 * length;
-    int size_texcoord = 3 * 4 * length;
-    float *vertices_ptr = new float[size_vertices];
-    float *texcoord_ptr = new float[size_texcoord];
-    int ind_vert = 0;
-    int ind_txcd = 0;
-
-    if (level > asml_->initial_vol_level_)
-    {
-      glDeleteBuffers(6, vbo_ids_);
-    }
-    glGenBuffers(6, vbo_ids_);
-
-    // X
-    ind_vert = 0;
-    ind_txcd = 0;
+    // XXXXXXXXXXXXXXXXXXXXXXXXXXX
+    glNewList(display_list_index_, GL_COMPILE);
     for (int i = 0; i < length; ++i)
     {
       float tex_x_coord = (i+0.5) / static_cast<float>(length);
       float geo_x_coord = asml_->box_size_ * tex_x_coord + asml_->trans_x_ - half_size;
 
-      // corner 1
-      vertices_ptr[ind_vert++] = geo_x_coord;
-      vertices_ptr[ind_vert++] = asml_->trans_y_ - half_size;
-      vertices_ptr[ind_vert++] = asml_->trans_z_ - half_size;
-
-      texcoord_ptr[ind_txcd++] = tex_x_coord;
-      texcoord_ptr[ind_txcd++] = 0.0f;
-      texcoord_ptr[ind_txcd++] = 0.0f;
-
-      // corner 2
-      vertices_ptr[ind_vert++] = geo_x_coord;
-      vertices_ptr[ind_vert++] = asml_->trans_y_ + half_size;
-      vertices_ptr[ind_vert++] = asml_->trans_z_ - half_size;
-
-      texcoord_ptr[ind_txcd++] = tex_x_coord;
-      texcoord_ptr[ind_txcd++] = 1.0f;
-      texcoord_ptr[ind_txcd++] = 0.0f;
-
-      // corner 3
-      vertices_ptr[ind_vert++] = geo_x_coord;
-      vertices_ptr[ind_vert++] = asml_->trans_y_ + half_size;
-      vertices_ptr[ind_vert++] = asml_->trans_z_ + half_size;
-
-      texcoord_ptr[ind_txcd++] = tex_x_coord;
-      texcoord_ptr[ind_txcd++] = 1.0f;
-      texcoord_ptr[ind_txcd++] = 1.0f;
-
-      // corner 4
-      vertices_ptr[ind_vert++] = geo_x_coord;
-      vertices_ptr[ind_vert++] = asml_->trans_y_ - half_size;
-      vertices_ptr[ind_vert++] = asml_->trans_z_ + half_size;
-
-      texcoord_ptr[ind_txcd++] = tex_x_coord;
-      texcoord_ptr[ind_txcd++] = 0.0f;
-      texcoord_ptr[ind_txcd++] = 1.0f;
+      glBegin(GL_QUADS);
+      glTexCoord3f(tex_x_coord, 0.0f, 0.0f); glVertex3f(geo_x_coord, asml_->trans_y_ - half_size, asml_->trans_z_ - half_size);
+      glTexCoord3f(tex_x_coord, 1.0f, 0.0f); glVertex3f(geo_x_coord, asml_->trans_y_ + half_size, asml_->trans_z_ - half_size);
+      glTexCoord3f(tex_x_coord, 1.0f, 1.0f); glVertex3f(geo_x_coord, asml_->trans_y_ + half_size, asml_->trans_z_ + half_size);
+      glTexCoord3f(tex_x_coord, 0.0f, 1.0f); glVertex3f(geo_x_coord, asml_->trans_y_ - half_size, asml_->trans_z_ + half_size);
+      glEnd();
     } // for i
+    glEndList();
 
-    glBindBuffer(GL_ARRAY_BUFFER, vbo_ids_[0]);
-    glBufferData(GL_ARRAY_BUFFER, size_vertices + size_texcoord, 0, GL_STATIC_DRAW);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, size_vertices, vertices_ptr);
-    glBufferSubData(GL_ARRAY_BUFFER, size_vertices, size_texcoord, texcoord_ptr);
-
-    // x
-    ind_vert = 0;
-    ind_txcd = 0;
+    // xxxxxxxxxxxxxxxxxxxxxxxxxxx
+    glNewList(display_list_index_ + 1, GL_COMPILE);
     for (int i = length - 1; i >= 0; --i)
     {
       float tex_x_coord = (i+0.5) / static_cast<float>(length);
       float geo_x_coord = asml_->box_size_ * tex_x_coord + asml_->trans_x_ - half_size;
 
-      // corner 1
-      vertices_ptr[ind_vert++] = geo_x_coord;
-      vertices_ptr[ind_vert++] = asml_->trans_y_ - half_size;
-      vertices_ptr[ind_vert++] = asml_->trans_z_ - half_size;
-
-      texcoord_ptr[ind_txcd++] = tex_x_coord;
-      texcoord_ptr[ind_txcd++] = 0.0f;
-      texcoord_ptr[ind_txcd++] = 0.0f;
-
-      // corner 2
-      vertices_ptr[ind_vert++] = geo_x_coord;
-      vertices_ptr[ind_vert++] = asml_->trans_y_ + half_size;
-      vertices_ptr[ind_vert++] = asml_->trans_z_ - half_size;
-
-      texcoord_ptr[ind_txcd++] = tex_x_coord;
-      texcoord_ptr[ind_txcd++] = 1.0f;
-      texcoord_ptr[ind_txcd++] = 0.0f;
-
-      // corner 3
-      vertices_ptr[ind_vert++] = geo_x_coord;
-      vertices_ptr[ind_vert++] = asml_->trans_y_ + half_size;
-      vertices_ptr[ind_vert++] = asml_->trans_z_ + half_size;
-
-      texcoord_ptr[ind_txcd++] = tex_x_coord;
-      texcoord_ptr[ind_txcd++] = 1.0f;
-      texcoord_ptr[ind_txcd++] = 1.0f;
-
-      // corner 4
-      vertices_ptr[ind_vert++] = geo_x_coord;
-      vertices_ptr[ind_vert++] = asml_->trans_y_ - half_size;
-      vertices_ptr[ind_vert++] = asml_->trans_z_ + half_size;
-
-      texcoord_ptr[ind_txcd++] = tex_x_coord;
-      texcoord_ptr[ind_txcd++] = 0.0f;
-      texcoord_ptr[ind_txcd++] = 1.0f;
+      glBegin(GL_QUADS);
+      glTexCoord3f(tex_x_coord, 0.0f, 0.0f); glVertex3f(geo_x_coord, asml_->trans_y_ - half_size, asml_->trans_z_ - half_size);
+      glTexCoord3f(tex_x_coord, 1.0f, 0.0f); glVertex3f(geo_x_coord, asml_->trans_y_ + half_size, asml_->trans_z_ - half_size);
+      glTexCoord3f(tex_x_coord, 1.0f, 1.0f); glVertex3f(geo_x_coord, asml_->trans_y_ + half_size, asml_->trans_z_ + half_size);
+      glTexCoord3f(tex_x_coord, 0.0f, 1.0f); glVertex3f(geo_x_coord, asml_->trans_y_ - half_size, asml_->trans_z_ + half_size);
+      glEnd();
     } // for i
+    glEndList();
 
-    glBindBuffer(GL_ARRAY_BUFFER, vbo_ids_[1]);
-    glBufferData(GL_ARRAY_BUFFER, size_vertices + size_texcoord, 0, GL_STATIC_DRAW);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, size_vertices, vertices_ptr);
-    glBufferSubData(GL_ARRAY_BUFFER, size_vertices, size_texcoord, texcoord_ptr);
-
-    // Y
-    ind_vert = 0;
-    ind_txcd = 0;
+    // YYYYYYYYYYYYYYYYYYYYYYYYYYY
+    glNewList(display_list_index_ + 2, GL_COMPILE);
     for (int j = 0; j < length; ++j)
     {
       float tex_y_coord = (j+0.5) / static_cast<float>(length);
       float geo_y_coord = tex_y_coord * asml_->box_size_ + asml_->trans_y_ - half_size;
 
-      // corner 1
-      vertices_ptr[ind_vert++] = asml_->trans_x_ - half_size;
-      vertices_ptr[ind_vert++] = geo_y_coord;
-      vertices_ptr[ind_vert++] = asml_->trans_z_ - half_size;
-
-      texcoord_ptr[ind_txcd++] = 0.0f;
-      texcoord_ptr[ind_txcd++] = tex_y_coord;
-      texcoord_ptr[ind_txcd++] = 0.0f;
-
-      // corner 2
-      vertices_ptr[ind_vert++] = asml_->trans_x_ + half_size;
-      vertices_ptr[ind_vert++] = geo_y_coord;
-      vertices_ptr[ind_vert++] = asml_->trans_z_ - half_size;
-
-      texcoord_ptr[ind_txcd++] = 1.0f;
-      texcoord_ptr[ind_txcd++] = tex_y_coord;
-      texcoord_ptr[ind_txcd++] = 0.0f;
-
-      // corner 3
-      vertices_ptr[ind_vert++] = asml_->trans_x_ + half_size;
-      vertices_ptr[ind_vert++] = geo_y_coord;
-      vertices_ptr[ind_vert++] = asml_->trans_z_ + half_size;
-
-      texcoord_ptr[ind_txcd++] = 1.0f;
-      texcoord_ptr[ind_txcd++] = tex_y_coord;
-      texcoord_ptr[ind_txcd++] = 1.0f;
-
-      // corner 4
-      vertices_ptr[ind_vert++] = asml_->trans_x_ - half_size;
-      vertices_ptr[ind_vert++] = geo_y_coord;
-      vertices_ptr[ind_vert++] = asml_->trans_z_ + half_size;
-
-      texcoord_ptr[ind_txcd++] = 0.0f;
-      texcoord_ptr[ind_txcd++] = tex_y_coord;
-      texcoord_ptr[ind_txcd++] = 1.0f;
-
+      glBegin(GL_QUADS);
+      glTexCoord3f(0.0f, tex_y_coord, 0.0f); glVertex3f(asml_->trans_x_ - half_size, geo_y_coord, asml_->trans_z_ - half_size);
+      glTexCoord3f(1.0f, tex_y_coord, 0.0f); glVertex3f(asml_->trans_x_ + half_size, geo_y_coord, asml_->trans_z_ - half_size);
+      glTexCoord3f(1.0f, tex_y_coord, 1.0f); glVertex3f(asml_->trans_x_ + half_size, geo_y_coord, asml_->trans_z_ + half_size);
+      glTexCoord3f(0.0f, tex_y_coord, 1.0f); glVertex3f(asml_->trans_x_ - half_size, geo_y_coord, asml_->trans_z_ + half_size);
+      glEnd();
     } // for j
-    glBindBuffer(GL_ARRAY_BUFFER, vbo_ids_[2]);
-    glBufferData(GL_ARRAY_BUFFER, size_vertices + size_texcoord, 0, GL_STATIC_DRAW);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, size_vertices, vertices_ptr);
-    glBufferSubData(GL_ARRAY_BUFFER, size_vertices, size_texcoord, texcoord_ptr);
+    glEndList();
 
-    // y
-    ind_vert = 0;
-    ind_txcd = 0;
+
+    // yyyyyyyyyyyyyyyyyyyyyyyyyyy
+    glNewList(display_list_index_ + 3, GL_COMPILE);
     for (int j = length-1; j >= 0; --j)
     {
       float tex_y_coord = (j+0.5) / static_cast<float>(length);
       float geo_y_coord = tex_y_coord * asml_->box_size_ + asml_->trans_y_ - half_size;
 
-      // corner 1
-      vertices_ptr[ind_vert++] = asml_->trans_x_ - half_size;
-      vertices_ptr[ind_vert++] = geo_y_coord;
-      vertices_ptr[ind_vert++] = asml_->trans_z_ - half_size;
-
-      texcoord_ptr[ind_txcd++] = 0.0f;
-      texcoord_ptr[ind_txcd++] = tex_y_coord;
-      texcoord_ptr[ind_txcd++] = 0.0f;
-
-      // corner 2
-      vertices_ptr[ind_vert++] = asml_->trans_x_ + half_size;
-      vertices_ptr[ind_vert++] = geo_y_coord;
-      vertices_ptr[ind_vert++] = asml_->trans_z_ - half_size;
-
-      texcoord_ptr[ind_txcd++] = 1.0f;
-      texcoord_ptr[ind_txcd++] = tex_y_coord;
-      texcoord_ptr[ind_txcd++] = 0.0f;
-
-      // corner 3
-      vertices_ptr[ind_vert++] = asml_->trans_x_ + half_size;
-      vertices_ptr[ind_vert++] = geo_y_coord;
-      vertices_ptr[ind_vert++] = asml_->trans_z_ + half_size;
-
-      texcoord_ptr[ind_txcd++] = 1.0f;
-      texcoord_ptr[ind_txcd++] = tex_y_coord;
-      texcoord_ptr[ind_txcd++] = 1.0f;
-
-      // corner 4
-      vertices_ptr[ind_vert++] = asml_->trans_x_ - half_size;
-      vertices_ptr[ind_vert++] = geo_y_coord;
-      vertices_ptr[ind_vert++] = asml_->trans_z_ + half_size;
-
-      texcoord_ptr[ind_txcd++] = 0.0f;
-      texcoord_ptr[ind_txcd++] = tex_y_coord;
-      texcoord_ptr[ind_txcd++] = 1.0f;
-
+      glBegin(GL_QUADS);
+      glTexCoord3f(0.0f, tex_y_coord, 0.0f); glVertex3f(asml_->trans_x_ - half_size, geo_y_coord, asml_->trans_z_ - half_size);
+      glTexCoord3f(1.0f, tex_y_coord, 0.0f); glVertex3f(asml_->trans_x_ + half_size, geo_y_coord, asml_->trans_z_ - half_size);
+      glTexCoord3f(1.0f, tex_y_coord, 1.0f); glVertex3f(asml_->trans_x_ + half_size, geo_y_coord, asml_->trans_z_ + half_size);
+      glTexCoord3f(0.0f, tex_y_coord, 1.0f); glVertex3f(asml_->trans_x_ - half_size, geo_y_coord, asml_->trans_z_ + half_size);
+      glEnd();
     } // for j
-    glBindBuffer(GL_ARRAY_BUFFER, vbo_ids_[3]);
-    glBufferData(GL_ARRAY_BUFFER, size_vertices + size_texcoord, 0, GL_STATIC_DRAW);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, size_vertices, vertices_ptr);
-    glBufferSubData(GL_ARRAY_BUFFER, size_vertices, size_texcoord, texcoord_ptr);
+    glEndList();
 
-    // Z
-    ind_vert = 0;
-    ind_txcd = 0;
+    // ZZZZZZZZZZZZZZZZZZZZZZZZZZZ
+    glNewList(display_list_index_ + 4, GL_COMPILE);
     for (int k = 0; k < length; ++k)
     {
       float tex_z_coord = (k+0.5) / static_cast<float>(length);
       float geo_z_coord = tex_z_coord * asml_->box_size_ + asml_->trans_z_ - half_size;
 
-      // corner 1
-      vertices_ptr[ind_vert++] = asml_->trans_x_ - half_size;
-      vertices_ptr[ind_vert++] = asml_->trans_y_ - half_size;
-      vertices_ptr[ind_vert++] = geo_z_coord;
-
-      texcoord_ptr[ind_txcd++] = 0.0f;
-      texcoord_ptr[ind_txcd++] = 0.0f;
-      texcoord_ptr[ind_txcd++] = tex_z_coord;
-
-      // corner 2
-      vertices_ptr[ind_vert++] = asml_->trans_x_ + half_size;
-      vertices_ptr[ind_vert++] = asml_->trans_y_ - half_size;
-      vertices_ptr[ind_vert++] = geo_z_coord;
-
-      texcoord_ptr[ind_txcd++] = 1.0f;
-      texcoord_ptr[ind_txcd++] = 0.0f;
-      texcoord_ptr[ind_txcd++] = tex_z_coord;
-
-      // corner 3
-      vertices_ptr[ind_vert++] = asml_->trans_x_ + half_size;
-      vertices_ptr[ind_vert++] = asml_->trans_y_ + half_size;
-      vertices_ptr[ind_vert++] = geo_z_coord;
-
-      texcoord_ptr[ind_txcd++] = 1.0f;
-      texcoord_ptr[ind_txcd++] = 1.0f;
-      texcoord_ptr[ind_txcd++] = tex_z_coord;
-
-      // corner 4
-      vertices_ptr[ind_vert++] = asml_->trans_x_ - half_size;
-      vertices_ptr[ind_vert++] = asml_->trans_y_ + half_size;
-      vertices_ptr[ind_vert++] = geo_z_coord;
-
-      texcoord_ptr[ind_txcd++] = 0.0f;
-      texcoord_ptr[ind_txcd++] = 1.0f;
-      texcoord_ptr[ind_txcd++] = tex_z_coord;
+      glBegin(GL_QUADS);
+      glTexCoord3f(0.0f, 0.0f, tex_z_coord); glVertex3f(asml_->trans_x_ - half_size, asml_->trans_y_ - half_size, geo_z_coord);
+      glTexCoord3f(1.0f, 0.0f, tex_z_coord); glVertex3f(asml_->trans_x_ + half_size, asml_->trans_y_ - half_size, geo_z_coord);
+      glTexCoord3f(1.0f, 1.0f, tex_z_coord); glVertex3f(asml_->trans_x_ + half_size, asml_->trans_y_ + half_size, geo_z_coord);
+      glTexCoord3f(0.0f, 1.0f, tex_z_coord); glVertex3f(asml_->trans_x_ - half_size, asml_->trans_y_ + half_size, geo_z_coord);
+      glEnd();
     } // for k
-    glBindBuffer(GL_ARRAY_BUFFER, vbo_ids_[4]);
-    glBufferData(GL_ARRAY_BUFFER, size_vertices + size_texcoord, 0, GL_STATIC_DRAW);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, size_vertices, vertices_ptr);
-    glBufferSubData(GL_ARRAY_BUFFER, size_vertices, size_texcoord, texcoord_ptr);
+    glEndList();
 
-    // z
-    ind_vert = 0;
-    ind_txcd = 0;
+    // zzzzzzzzzzzzzzzzzzzzzzzzzzz
+    glNewList(display_list_index_ + 5, GL_COMPILE);
     for (int k = length - 1; k >= 0; --k)
     {
       float tex_z_coord = (k+0.5) / static_cast<float>(length);
       float geo_z_coord = tex_z_coord * asml_->box_size_ + asml_->trans_z_ - half_size;
 
-      // corner 1
-      vertices_ptr[ind_vert++] = asml_->trans_x_ - half_size;
-      vertices_ptr[ind_vert++] = asml_->trans_y_ - half_size;
-      vertices_ptr[ind_vert++] = geo_z_coord;
-
-      texcoord_ptr[ind_txcd++] = 0.0f;
-      texcoord_ptr[ind_txcd++] = 0.0f;
-      texcoord_ptr[ind_txcd++] = tex_z_coord;
-
-      // corner 2
-      vertices_ptr[ind_vert++] = asml_->trans_x_ + half_size;
-      vertices_ptr[ind_vert++] = asml_->trans_y_ - half_size;
-      vertices_ptr[ind_vert++] = geo_z_coord;
-
-      texcoord_ptr[ind_txcd++] = 1.0f;
-      texcoord_ptr[ind_txcd++] = 0.0f;
-      texcoord_ptr[ind_txcd++] = tex_z_coord;
-
-      // corner 3
-      vertices_ptr[ind_vert++] = asml_->trans_x_ + half_size;
-      vertices_ptr[ind_vert++] = asml_->trans_y_ + half_size;
-      vertices_ptr[ind_vert++] = geo_z_coord;
-
-      texcoord_ptr[ind_txcd++] = 1.0f;
-      texcoord_ptr[ind_txcd++] = 1.0f;
-      texcoord_ptr[ind_txcd++] = tex_z_coord;
-
-      // corner 4
-      vertices_ptr[ind_vert++] = asml_->trans_x_ - half_size;
-      vertices_ptr[ind_vert++] = asml_->trans_y_ + half_size;
-      vertices_ptr[ind_vert++] = geo_z_coord;
-
-      texcoord_ptr[ind_txcd++] = 0.0f;
-      texcoord_ptr[ind_txcd++] = 1.0f;
-      texcoord_ptr[ind_txcd++] = tex_z_coord;
+      glBegin(GL_QUADS);
+      glTexCoord3f(0.0f, 0.0f, tex_z_coord); glVertex3f(asml_->trans_x_ - half_size, asml_->trans_y_ - half_size, geo_z_coord);
+      glTexCoord3f(1.0f, 0.0f, tex_z_coord); glVertex3f(asml_->trans_x_ + half_size, asml_->trans_y_ - half_size, geo_z_coord);
+      glTexCoord3f(1.0f, 1.0f, tex_z_coord); glVertex3f(asml_->trans_x_ + half_size, asml_->trans_y_ + half_size, geo_z_coord);
+      glTexCoord3f(0.0f, 1.0f, tex_z_coord); glVertex3f(asml_->trans_x_ - half_size, asml_->trans_y_ + half_size, geo_z_coord);
+      glEnd();
     } // for k
-    glBindBuffer(GL_ARRAY_BUFFER, vbo_ids_[5]);
-    glBufferData(GL_ARRAY_BUFFER, size_vertices + size_texcoord, 0, GL_STATIC_DRAW);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, size_vertices, vertices_ptr);
-    glBufferSubData(GL_ARRAY_BUFFER, size_vertices, size_texcoord, texcoord_ptr);
+    glEndList();
 
-    glBindBuffer(GL_ARRAY_BUFFER_ARB, 0);
+    // set shader
+    set_shader_unperturbed(shader_x_render_.get(), vol_tex, length);
+    set_shader_unperturbed(shader_y_render_.get(), vol_tex, length);
+    set_shader_unperturbed(shader_z_render_.get(), vol_tex, length);
 
-    delete [] vertices_ptr;
-    delete [] texcoord_ptr;
+    set_shader_perturbed(shader_x_perturbed_.get(), vol_tex, length);
+    set_shader_perturbed(shader_y_perturbed_.get(), vol_tex, length);
+    set_shader_perturbed(shader_z_perturbed_.get(), vol_tex, length);
 
     return true;
   }
 
+#ifdef __USE_DISPLATY_LIST_
+  void RenderGL::render_unperturbed(int i_view, GLuint vol_tex, int length)
+  {
+    //fprintf(stderr, "--- Render unperturbed : view %d \n", i_view);
 
+    float proj_mat[16];
+    float mv_mat[16];
+
+    float half_size =  0.5 * asml_->box_size_;
+
+    // get MODELVIEW and PROJECTION matrices
+    asml_->gl_projection_mats_[i_view].GetData(proj_mat);
+    asml_->camera_gl_extr_paras_[i_view].GetData(mv_mat);
+
+    glViewport(0, 0, width_, height_);
+    glMatrixMode(GL_PROJECTION);
+    glLoadMatrixf(proj_mat);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadMatrixf(mv_mat);
+
+    // choose shader and display list
+    GLSLShader * shader = NULL;
+    GLuint list_index;
+
+    switch (asml_->camera_orientations_[i_view])
+    {
+    case 'X':
+      shader = shader_x_render_.get();
+      list_index = display_list_index_;
+      break;
+    case 'x':
+      shader = shader_x_render_.get();
+      list_index = display_list_index_ + 1;
+      break;
+    case 'Y':
+      shader = shader_y_render_.get();
+      list_index = display_list_index_ + 2;
+      break;
+    case 'y':
+      shader = shader_y_render_.get();
+      list_index = display_list_index_ + 3;
+      break;
+    case 'Z':
+      shader = shader_z_render_.get();
+      list_index = display_list_index_ + 4;
+      break;
+    case 'z':
+      shader = shader_z_render_.get();
+      list_index = display_list_index_ + 5;
+      break;
+    }
+
+    // set shader 
+    set_shader_unperturbed(shader, vol_tex, length);
+
+    // bind fbo
+    rr_fbo_->BeginDraw2FBO();
+    {
+      glClearColor(0.0, 0.0, 0.0, 1.0);
+      glDisable(GL_DEPTH_TEST);
+      glEnable(GL_BLEND);
+      glBlendFuncSeparate(GL_DST_ALPHA, GL_ONE, GL_DST_ALPHA, GL_ZERO);
+
+      glClear(GL_COLOR_BUFFER_BIT);
+
+      shader->Begin();
+
+      // get the inversed camera matrix
+      float inv_camera[16];
+      asml_->camera_inv_gl_extr_paras_[i_view].GetData(inv_camera);
+      shader->SetUniformMatrix4fv("cameraInv", 1, GL_FALSE, inv_camera);
+
+      shader->SetUniform4f("cameraPos", 
+        asml_->camera_positions_[i_view].x,
+        asml_->camera_positions_[i_view].y,
+        asml_->camera_positions_[i_view].z,
+        asml_->camera_positions_[i_view].w);
+
+      // draw
+      glCallList(list_index);
+
+      shader->End();
+    }
+    rr_fbo_->EndDraw2FBO();
+
+
+#if 0
+    float * data = rr_fbo_->ReadPixels();
+    float * img = new float [3 * width_ * height_];
+    for (int y = 0; y < height_; ++y)
+    {
+      for (int x = 0; x < width_; ++x)
+      {
+        for (int c = 0; c < 3; ++c)
+        {
+          img[y * width_ * 3 + x * 3 + c] = data[y * width_ * 4 + x * 4 + c];
+        }
+      }
+    }
+
+    char path_buf[100];
+    sprintf(path_buf, "../Data/Camera%02d/show%06d.pfm", i_view, counter);
+    PFMImage * tmpimg = new PFMImage(width_, height_, 1, img);
+    tmpimg->WriteImage(path_buf);
+    delete [] img;
+    delete tmpimg;
+
+    ++counter;
+#endif
+
+  }
+
+  void RenderGL::render_perturbed(int i_view, GLuint vol_tex, int length, int interval, int slice, int pu, int pv)
+  {
+    float proj_mat[16];
+    float mv_mat[16];
+
+    float half_size = 0.5 * asml_->box_size_;
+
+    // get MODELVIEW and PROJECTION matrices
+    asml_->gl_projection_mats_[i_view].GetData(proj_mat);
+    asml_->camera_gl_extr_paras_[i_view].GetData(mv_mat);
+
+    glViewport(0, 0, width_, height_);
+    glMatrixMode(GL_PROJECTION);
+    glLoadMatrixf(proj_mat);
+    glMatrixMode(GL_MODELVIEW);
+    glLoadMatrixf(mv_mat);
+
+    // choose shader and display list
+    GLSLShader * shader = NULL;
+    GLuint list_index;
+
+    switch (asml_->camera_orientations_[i_view])
+    {
+    case 'X':
+      shader = shader_x_perturbed_.get();
+      list_index = display_list_index_;
+      break;
+    case 'x':
+      shader = shader_x_perturbed_.get();
+      list_index = display_list_index_ + 1;
+      break;
+    case 'Y':
+      shader = shader_y_perturbed_.get();
+      list_index = display_list_index_ + 2;
+      break;
+    case 'y':
+      shader = shader_y_perturbed_.get();
+      list_index = display_list_index_ + 3;
+      break;
+    case 'Z':
+      shader = shader_z_perturbed_.get();
+      list_index = display_list_index_ + 4;
+      break;
+    case 'z':
+      shader = shader_z_perturbed_.get();
+      list_index = display_list_index_ + 5;
+      break;
+    }
+
+    // set shaer
+    set_shader_perturbed(shader, vol_tex, length);
+
+    // bind fbo
+    rr_fbo_->BeginDraw2FBO();
+    {
+      glClearColor(0.0, 0.0, 0.0, 1.0);
+      glDisable(GL_DEPTH_TEST);
+      glEnable(GL_BLEND);
+      glBlendFuncSeparate(GL_DST_ALPHA, GL_ONE, GL_DST_ALPHA, GL_ZERO);
+
+      glClear(GL_COLOR_BUFFER_BIT);
+
+      shader->Begin();
+
+      // get the inversed camera matrix
+      float inv_camera[16];
+      asml_->camera_inv_gl_extr_paras_[i_view].GetData(inv_camera);
+      shader->SetUniformMatrix4fv("cameraInv", 1, GL_FALSE, inv_camera);
+      shader->SetUniform4f("cameraPos", 
+        asml_->camera_positions_[i_view].x,
+        asml_->camera_positions_[i_view].y,
+        asml_->camera_positions_[i_view].z,
+        asml_->camera_positions_[i_view].w);
+      shader->SetUniform4i("disturbPara", interval, pu, pv, slice);
+
+      // draw
+      glCallList(list_index);
+
+      shader->End();
+    }
+    rr_fbo_->EndDraw2FBO();
+
+
+#if 0
+    float * data = pr_fbo_->ReadPixels();
+    float * img = new float [3 * width_ * height_];
+    for (int y = 0; y < height_; ++y)
+    {
+      for (int x = 0; x < width_; ++x)
+      {
+        for (int c = 0; c < 3; ++c)
+        {
+          img[y * width_ * 3 + x * 3 + c] = data[y * width_ * 4 + x * 4 + c];
+        }
+      }
+    }
+
+    char path_buf[100];
+    sprintf(path_buf, "../Data/Camera%02d/grad%06d.pfm", i_view, counter);
+    PFMImage * tmpimg = new PFMImage(width_, height_, 1, img);
+    tmpimg->WriteImage(path_buf);
+    delete [] img;
+    delete tmpimg;
+
+    ++counter;
+#endif
+
+  }
+
+#else
   void RenderGL::render_unperturbed(int i_view, GLuint vol_tex, int length)
   {
     //fprintf(stderr, "--- Render unperturbed : view %d \n", i_view);
@@ -451,39 +465,62 @@ namespace as_modeling
     float inv_camera[16];
     asml_->camera_inv_gl_extr_paras_[i_view].GetData(inv_camera);
 
-    // choose shader and vbo
+    // choose shader
+
     GLSLShader * shader = NULL;
-    int vbo = 0;
     float step_size = asml_->box_size_ / static_cast<float>(length);
 
-    switch (asml_->camera_orientations_[i_view])
+    if (asml_->camera_orientations_[i_view] == 'x' || asml_->camera_orientations_[i_view] == 'X')
     {
-    case 'X':
+      // along x
       shader = shader_x_render_.get();
-      vbo = vbo_ids_[0];
-      break;
-    case 'x':
-      shader = shader_x_render_.get();
-      vbo = vbo_ids_[1];
-      break;
-    case 'Y':
+    }
+    else if (asml_->camera_orientations_[i_view] == 'y' || asml_->camera_orientations_[i_view] == 'Y')
+    {
+      // along y
       shader = shader_y_render_.get();
-      vbo = vbo_ids_[2];
-      break;
-    case 'y':
-      shader = shader_y_render_.get();
-      vbo = vbo_ids_[3];
-      break;
-    case 'Z':
+    }
+    else //if (asml_->camera_orientations_[i_view] == 'z' || asml_->camera_orientations_[i_view] == 'Z')
+    {
+      // along z
       shader = shader_z_render_.get();
-      vbo = vbo_ids_[4];
-      break;
-    case 'z':
-      shader = shader_z_render_.get();
-      vbo = vbo_ids_[5];
-      break;
     }
 
+#ifdef __TEST_RENDER__
+    rr_fbo_->BeginDraw2FBO();
+    {
+      //glBegin(GL_TRIANGLES);
+      //glColor3f(1.0, 0.0, 0.0);
+      //glVertex3f(0.0, 0.0, 0.0);
+      //glColor3f(0.0, 1.0, 0.0);
+      //glVertex3f(1.0, 1.0, 0.0);
+      //glColor3f(0.0, 0.0, 1.0);
+      //glVertex3f(1.0, 0.0, 0.0);
+      //glEnd();
+
+      int length = 32;
+      glBegin(GL_POINTS);
+      for (int ii=-1; ii<2; ii+=2)
+      {
+        for (int jj=-1; jj<2; jj+=2)
+        {
+          for (int kk=-1; kk<2; kk+=2)
+          {
+            glColor3f(1.0f*(ii+1)/2.0, 1.0f*(jj+1)/2.0f, 1.0f*(kk+1)/2.0f);
+            glVertex3f(
+              asml_->trans_x_ + ii*1.0 * half_size,
+              asml_->trans_y_ + jj*1.0 * half_size,
+              asml_->trans_z_ + kk*1.0 * half_size );
+          }
+        }
+      }
+      glEnd();
+
+    }
+    rr_fbo_->EndDraw2FBO();
+#endif //__TEST_RENDER__
+
+#ifndef __TEST_RENDER__
     // bind fbo
     rr_fbo_->BeginDraw2FBO();
     {
@@ -495,13 +532,6 @@ namespace as_modeling
       glClear(GL_COLOR_BUFFER_BIT);
 
       shader->Begin();
-
-      glBindBuffer(GL_ARRAY_BUFFER, vbo);
-      glEnableClientState(GL_COLOR_ARRAY);
-      glEnableClientState(GL_VERTEX_ARRAY);
-
-      glTexCoordPointer(3, GL_FLOAT, 0, (void*)(3 * 4 * sizeof(float)*length));
-      glVertexPointer(3, GL_FLOAT, 0, 0);
 
       // set shader uniforms
       //shader->SetUniform3f("boxTrans", asml_->trans_x_, asml_->trans_y_, asml_->trans_z_);
@@ -523,21 +553,119 @@ namespace as_modeling
       shader->SetUniform1i("volumeTex", 0);
       shader->SetUniformMatrix4fv("cameraInv", 1, GL_FALSE, inv_camera);
 
-      // Draw
-      glDrawArrays(GL_QUADS, 0, 4 * length);
 
-      glDisableClientState(GL_COLOR_ARRAY);
-      glDisableClientState(GL_VERTEX_ARRAY);
+#if 0
+      float tex_x_coord = (length/2+0.5) / static_cast<float>(length);
+      float geo_x_coord = asml_->box_size_ * tex_x_coord + asml_->trans_x_ - half_size;
 
-      glBindBuffer(GL_ARRAY_BUFFER, 0);
+      glBegin(GL_QUADS);
+      glTexCoord3f(tex_x_coord, 0.0f, 0.0f); glVertex3f(geo_x_coord, asml_->trans_y_ - half_size, asml_->trans_z_ - half_size);
+      glTexCoord3f(tex_x_coord, 1.0f, 0.0f); glVertex3f(geo_x_coord, asml_->trans_y_ + half_size, asml_->trans_z_ - half_size);
+      glTexCoord3f(tex_x_coord, 1.0f, 1.0f); glVertex3f(geo_x_coord, asml_->trans_y_ + half_size, asml_->trans_z_ + half_size);
+      glTexCoord3f(tex_x_coord, 0.0f, 1.0f); glVertex3f(geo_x_coord, asml_->trans_y_ - half_size, asml_->trans_z_ + half_size);
+      glEnd();
+#endif
 
+      if ('X' == asml_->camera_orientations_[i_view])
+      {
+        for (int i = 0; i < length; ++i)
+        {
+          float tex_x_coord = (i+0.5) / static_cast<float>(length);
+          float geo_x_coord = asml_->box_size_ * tex_x_coord + asml_->trans_x_ - half_size;
+
+          glBegin(GL_QUADS);
+          glTexCoord3f(tex_x_coord, 0.0f, 0.0f); glVertex3f(geo_x_coord, asml_->trans_y_ - half_size, asml_->trans_z_ - half_size);
+          glTexCoord3f(tex_x_coord, 1.0f, 0.0f); glVertex3f(geo_x_coord, asml_->trans_y_ + half_size, asml_->trans_z_ - half_size);
+          glTexCoord3f(tex_x_coord, 1.0f, 1.0f); glVertex3f(geo_x_coord, asml_->trans_y_ + half_size, asml_->trans_z_ + half_size);
+          glTexCoord3f(tex_x_coord, 0.0f, 1.0f); glVertex3f(geo_x_coord, asml_->trans_y_ - half_size, asml_->trans_z_ + half_size);
+          glEnd();
+        } // for i
+      }
+      else if ('x' == asml_->camera_orientations_[i_view])
+      {
+        for (int i = length - 1; i >= 0; --i)
+        {
+          float tex_x_coord = (i+0.5) / static_cast<float>(length);
+          float geo_x_coord = asml_->box_size_ * tex_x_coord + asml_->trans_x_ - half_size;
+
+          glBegin(GL_QUADS);
+          glTexCoord3f(tex_x_coord, 0.0f, 0.0f); glVertex3f(geo_x_coord, asml_->trans_y_ - half_size, asml_->trans_z_ - half_size);
+          glTexCoord3f(tex_x_coord, 1.0f, 0.0f); glVertex3f(geo_x_coord, asml_->trans_y_ + half_size, asml_->trans_z_ - half_size);
+          glTexCoord3f(tex_x_coord, 1.0f, 1.0f); glVertex3f(geo_x_coord, asml_->trans_y_ + half_size, asml_->trans_z_ + half_size);
+          glTexCoord3f(tex_x_coord, 0.0f, 1.0f); glVertex3f(geo_x_coord, asml_->trans_y_ - half_size, asml_->trans_z_ + half_size);
+          glEnd();
+        } // for i
+      }
+      else if ('Y' == asml_->camera_orientations_[i_view])
+      {
+        for (int j = 0; j < length; ++j)
+        {
+          float tex_y_coord = (j+0.5) / static_cast<float>(length);
+          float geo_y_coord = tex_y_coord * asml_->box_size_ + asml_->trans_y_ - half_size;
+
+          glBegin(GL_QUADS);
+          glTexCoord3f(0.0f, tex_y_coord, 0.0f); glVertex3f(asml_->trans_x_ - half_size, geo_y_coord, asml_->trans_z_ - half_size);
+          glTexCoord3f(1.0f, tex_y_coord, 0.0f); glVertex3f(asml_->trans_x_ + half_size, geo_y_coord, asml_->trans_z_ - half_size);
+          glTexCoord3f(1.0f, tex_y_coord, 1.0f); glVertex3f(asml_->trans_x_ + half_size, geo_y_coord, asml_->trans_z_ + half_size);
+          glTexCoord3f(0.0f, tex_y_coord, 1.0f); glVertex3f(asml_->trans_x_ - half_size, geo_y_coord, asml_->trans_z_ + half_size);
+          glEnd();
+        } // for j
+      }
+      else if ('y' == asml_->camera_orientations_[i_view])
+      {
+        for (int j = length-1; j >= 0; --j)
+        {
+          float tex_y_coord = (j+0.5) / static_cast<float>(length);
+          float geo_y_coord = tex_y_coord * asml_->box_size_ + asml_->trans_y_ - half_size;
+
+          glBegin(GL_QUADS);
+          glTexCoord3f(0.0f, tex_y_coord, 0.0f); glVertex3f(asml_->trans_x_ - half_size, geo_y_coord, asml_->trans_z_ - half_size);
+          glTexCoord3f(1.0f, tex_y_coord, 0.0f); glVertex3f(asml_->trans_x_ + half_size, geo_y_coord, asml_->trans_z_ - half_size);
+          glTexCoord3f(1.0f, tex_y_coord, 1.0f); glVertex3f(asml_->trans_x_ + half_size, geo_y_coord, asml_->trans_z_ + half_size);
+          glTexCoord3f(0.0f, tex_y_coord, 1.0f); glVertex3f(asml_->trans_x_ - half_size, geo_y_coord, asml_->trans_z_ + half_size);
+          glEnd();
+        } // for j
+      }
+      else if ('Z' == asml_->camera_orientations_[i_view])
+      {
+        for (int k = 0; k < length; ++k)
+        {
+          float tex_z_coord = (k+0.5) / static_cast<float>(length);
+          float geo_z_coord = tex_z_coord * asml_->box_size_ + asml_->trans_z_ - half_size;
+
+          glBegin(GL_QUADS);
+          glTexCoord3f(0.0f, 0.0f, tex_z_coord); glVertex3f(asml_->trans_x_ - half_size, asml_->trans_y_ - half_size, geo_z_coord);
+          glTexCoord3f(1.0f, 0.0f, tex_z_coord); glVertex3f(asml_->trans_x_ + half_size, asml_->trans_y_ - half_size, geo_z_coord);
+          glTexCoord3f(1.0f, 1.0f, tex_z_coord); glVertex3f(asml_->trans_x_ + half_size, asml_->trans_y_ + half_size, geo_z_coord);
+          glTexCoord3f(0.0f, 1.0f, tex_z_coord); glVertex3f(asml_->trans_x_ - half_size, asml_->trans_y_ + half_size, geo_z_coord);
+          glEnd();
+        }
+      }
+      else if ('z' == asml_->camera_orientations_[i_view])
+      {
+        for (int k = length - 1; k >= 0; --k)
+        {
+          float tex_z_coord = (k+0.5) / static_cast<float>(length);
+          float geo_z_coord = tex_z_coord * asml_->box_size_ + asml_->trans_z_ - half_size;
+
+          glBegin(GL_QUADS);
+          glTexCoord3f(0.0f, 0.0f, tex_z_coord); glVertex3f(asml_->trans_x_ - half_size, asml_->trans_y_ - half_size, geo_z_coord);
+          glTexCoord3f(1.0f, 0.0f, tex_z_coord); glVertex3f(asml_->trans_x_ + half_size, asml_->trans_y_ - half_size, geo_z_coord);
+          glTexCoord3f(1.0f, 1.0f, tex_z_coord); glVertex3f(asml_->trans_x_ + half_size, asml_->trans_y_ + half_size, geo_z_coord);
+          glTexCoord3f(0.0f, 1.0f, tex_z_coord); glVertex3f(asml_->trans_x_ - half_size, asml_->trans_y_ + half_size, geo_z_coord);
+          glEnd();
+        }
+      }
+
+      glFinish();
 
       shader->End();
     }
     rr_fbo_->EndDraw2FBO();
+#endif //__TEST_RENDER__
 
 
-#if 1
+#if 0
     float * data = rr_fbo_->ReadPixels();
     float * img = new float [3 * width_ * height_];
     for (int y = 0; y < height_; ++y)
@@ -589,39 +717,40 @@ namespace as_modeling
     float inv_camera[16];
     asml_->camera_inv_gl_extr_paras_[i_view].GetData(inv_camera);
 
-    // choose shader and vbo
+    // choose shader
+
     GLSLShader * shader = NULL;
-    int vbo = 0;
     float step_size = asml_->box_size_ / static_cast<float>(length);
 
-    switch (asml_->camera_orientations_[i_view])
+    if (asml_->camera_orientations_[i_view] == 'x' || asml_->camera_orientations_[i_view] == 'X')
     {
-    case 'X':
-      shader = shader_x_render_.get();
-      vbo = vbo_ids_[0];
-      break;
-    case 'x':
-      shader = shader_x_render_.get();
-      vbo = vbo_ids_[1];
-      break;
-    case 'Y':
-      shader = shader_y_render_.get();
-      vbo = vbo_ids_[2];
-      break;
-    case 'y':
-      shader = shader_y_render_.get();
-      vbo = vbo_ids_[3];
-      break;
-    case 'Z':
-      shader = shader_z_render_.get();
-      vbo = vbo_ids_[4];
-      break;
-    case 'z':
-      shader = shader_z_render_.get();
-      vbo = vbo_ids_[5];
-      break;
+      // along x
+      shader = shader_x_perturbed_.get();
+    }
+    else if (asml_->camera_orientations_[i_view] == 'y' || asml_->camera_orientations_[i_view] == 'Y')
+    {
+      // along y
+      shader = shader_y_perturbed_.get();
+    }
+    else //if (asml_->camera_orientations_[i_view] == 'z' || asml_->camera_orientations_[i_view] == 'Z')
+    {
+      // along z
+      shader = shader_z_perturbed_.get();
     }
 
+    /////////////////////////////////////////////////////////////////////////////////////////////////////////////
+#ifdef __TEST_RENDER__
+    pr_fbo_->BeginDraw2FBO();
+    {
+      glBegin(GL_POINTS);
+      glColor3f(1.0, 1.0, 1.0);
+      glVertex3f(0.0, 0.0, 0.0);
+      glEnd();
+    }
+    pr_fbo_->EndDraw2FBO();
+#endif //__TEST_RENDER__
+
+#ifndef __TEST_RENDER__
     // bind fbo
     pr_fbo_->BeginDraw2FBO();
     {
@@ -633,13 +762,6 @@ namespace as_modeling
       glClear(GL_COLOR_BUFFER_BIT);
 
       shader->Begin();
-
-      glBindBuffer(GL_ARRAY_BUFFER, vbo);
-      glEnableClientState(GL_COLOR_ARRAY);
-      glEnableClientState(GL_VERTEX_ARRAY);
-
-      glTexCoordPointer(3, GL_FLOAT, 0, (void*)(3 * 4 * sizeof(float)*length));
-      glVertexPointer(3, GL_FLOAT, 0, 0);
 
       // set shader uniforms
       shader->SetUniform1f("fwidth", 1.0f*length);
@@ -656,7 +778,6 @@ namespace as_modeling
         asml_->camera_positions_[i_view].z,
         asml_->camera_positions_[i_view].w);
       shader->SetUniform1f("stepSize", step_size);
-      shader->SetUniform4i("disturbPara", interval, pu, pv, slice);
 
       glActiveTexture(GL_TEXTURE0);
       glBindTexture(GL_TEXTURE_3D, vol_tex);
@@ -664,17 +785,113 @@ namespace as_modeling
 
       shader->SetUniformMatrix4fv("cameraInv", 1, GL_FALSE, inv_camera);
 
-      // Draw
-      glDrawArrays(GL_QUADS, 0, 4 * length);
+      if ('X' == asml_->camera_orientations_[i_view])
+      {
+        for (int i = 0; i < length; ++i)
+        {
+          float tex_x_coord = (i+0.5) / static_cast<float>(length);
+          float geo_x_coord = asml_->box_size_ * tex_x_coord + asml_->trans_x_ - half_size;
 
-      glDisableClientState(GL_COLOR_ARRAY);
-      glDisableClientState(GL_VERTEX_ARRAY);
+          shader->SetUniform4i("disturbPara", interval, pu, pv, slice);
 
-      glBindBuffer(GL_ARRAY_BUFFER, 0);
+          glBegin(GL_QUADS);
+          glTexCoord3f(tex_x_coord, 0.0f, 0.0f); glVertex3f(geo_x_coord, asml_->trans_y_ - half_size, asml_->trans_z_ - half_size);
+          glTexCoord3f(tex_x_coord, 1.0f, 0.0f); glVertex3f(geo_x_coord, asml_->trans_y_ + half_size, asml_->trans_z_ - half_size);
+          glTexCoord3f(tex_x_coord, 1.0f, 1.0f); glVertex3f(geo_x_coord, asml_->trans_y_ + half_size, asml_->trans_z_ + half_size);
+          glTexCoord3f(tex_x_coord, 0.0f, 1.0f); glVertex3f(geo_x_coord, asml_->trans_y_ - half_size, asml_->trans_z_ + half_size);
+          glEnd();
+        } // for i
+      }
+      else if ('x' == asml_->camera_orientations_[i_view])
+      {
+        for (int i = length - 1; i >= 0; --i)
+        {
+          float tex_x_coord = (i+0.5) / static_cast<float>(length);
+          float geo_x_coord = asml_->box_size_ * tex_x_coord + asml_->trans_x_ - half_size;
+
+          shader->SetUniform4i("disturbPara", interval, pu, pv, slice);
+
+          glBegin(GL_QUADS);
+          glTexCoord3f(tex_x_coord, 0.0f, 0.0f); glVertex3f(geo_x_coord, asml_->trans_y_ - half_size, asml_->trans_z_ - half_size);
+          glTexCoord3f(tex_x_coord, 1.0f, 0.0f); glVertex3f(geo_x_coord, asml_->trans_y_ + half_size, asml_->trans_z_ - half_size);
+          glTexCoord3f(tex_x_coord, 1.0f, 1.0f); glVertex3f(geo_x_coord, asml_->trans_y_ + half_size, asml_->trans_z_ + half_size);
+          glTexCoord3f(tex_x_coord, 0.0f, 1.0f); glVertex3f(geo_x_coord, asml_->trans_y_ - half_size, asml_->trans_z_ + half_size);
+          glEnd();
+        } // for i
+      }
+      else if ('Y' == asml_->camera_orientations_[i_view])
+      {
+        for (int j = 0; j < length; ++j)
+        {
+          float tex_y_coord = (j+0.5) / static_cast<float>(length);
+          float geo_y_coord = tex_y_coord * asml_->box_size_ + asml_->trans_y_ - half_size;
+
+          shader->SetUniform4i("disturbPara", interval, pu, pv, slice);
+
+          glBegin(GL_QUADS);
+          glTexCoord3f(0.0f, tex_y_coord, 0.0f); glVertex3f(asml_->trans_x_ - half_size, geo_y_coord, asml_->trans_z_ - half_size);
+          glTexCoord3f(1.0f, tex_y_coord, 0.0f); glVertex3f(asml_->trans_x_ + half_size, geo_y_coord, asml_->trans_z_ - half_size);
+          glTexCoord3f(1.0f, tex_y_coord, 1.0f); glVertex3f(asml_->trans_x_ + half_size, geo_y_coord, asml_->trans_z_ + half_size);
+          glTexCoord3f(0.0f, tex_y_coord, 1.0f); glVertex3f(asml_->trans_x_ - half_size, geo_y_coord, asml_->trans_z_ + half_size);
+          glEnd();
+        } // for j
+      }
+      else if ('y' == asml_->camera_orientations_[i_view])
+      {
+        for (int j = length-1; j >= 0; --j)
+        {
+          float tex_y_coord = (j+0.5) / static_cast<float>(length);
+          float geo_y_coord = tex_y_coord * asml_->box_size_ + asml_->trans_y_ - half_size;
+
+          shader->SetUniform4i("disturbPara", interval, pu, pv, slice);
+
+          glBegin(GL_QUADS);
+          glTexCoord3f(0.0f, tex_y_coord, 0.0f); glVertex3f(asml_->trans_x_ - half_size, geo_y_coord, asml_->trans_z_ - half_size);
+          glTexCoord3f(1.0f, tex_y_coord, 0.0f); glVertex3f(asml_->trans_x_ + half_size, geo_y_coord, asml_->trans_z_ - half_size);
+          glTexCoord3f(1.0f, tex_y_coord, 1.0f); glVertex3f(asml_->trans_x_ + half_size, geo_y_coord, asml_->trans_z_ + half_size);
+          glTexCoord3f(0.0f, tex_y_coord, 1.0f); glVertex3f(asml_->trans_x_ - half_size, geo_y_coord, asml_->trans_z_ + half_size);
+          glEnd();
+        } // for j
+      }
+      else if ('Z' == asml_->camera_orientations_[i_view])
+      {
+        for (int k = 0; k < length; ++k)
+        {
+          float tex_z_coord = (k+0.5) / static_cast<float>(length);
+          float geo_z_coord = tex_z_coord * asml_->box_size_ + asml_->trans_z_ - half_size;
+
+          shader->SetUniform4i("disturbPara", interval, pu, pv, slice);
+
+          glBegin(GL_QUADS);
+          glTexCoord3f(0.0f, 0.0f, tex_z_coord); glVertex3f(asml_->trans_x_ - half_size, asml_->trans_y_ - half_size, geo_z_coord);
+          glTexCoord3f(1.0f, 0.0f, tex_z_coord); glVertex3f(asml_->trans_x_ + half_size, asml_->trans_y_ - half_size, geo_z_coord);
+          glTexCoord3f(1.0f, 1.0f, tex_z_coord); glVertex3f(asml_->trans_x_ + half_size, asml_->trans_y_ + half_size, geo_z_coord);
+          glTexCoord3f(0.0f, 1.0f, tex_z_coord); glVertex3f(asml_->trans_x_ - half_size, asml_->trans_y_ + half_size, geo_z_coord);
+          glEnd();
+        }
+      }
+      else if ('z' == asml_->camera_orientations_[i_view])
+      {
+        for (int k = length - 1; k >= 0; --k)
+        {
+          float tex_z_coord = (k+0.5) / static_cast<float>(length);
+          float geo_z_coord = tex_z_coord * asml_->box_size_ + asml_->trans_z_ - half_size;
+
+          shader->SetUniform4i("disturbPara", interval, pu, pv, slice);
+
+          glBegin(GL_QUADS);
+          glTexCoord3f(0.0f, 0.0f, tex_z_coord); glVertex3f(asml_->trans_x_ - half_size, asml_->trans_y_ - half_size, geo_z_coord);
+          glTexCoord3f(1.0f, 0.0f, tex_z_coord); glVertex3f(asml_->trans_x_ + half_size, asml_->trans_y_ - half_size, geo_z_coord);
+          glTexCoord3f(1.0f, 1.0f, tex_z_coord); glVertex3f(asml_->trans_x_ + half_size, asml_->trans_y_ + half_size, geo_z_coord);
+          glTexCoord3f(0.0f, 1.0f, tex_z_coord); glVertex3f(asml_->trans_x_ - half_size, asml_->trans_y_ + half_size, geo_z_coord);
+          glEnd();
+        }
+      }
 
       shader->End();
     }
     pr_fbo_->EndDraw2FBO();
+#endif //__TEST_RENDER__
 
 #if 0
     float * data = rr_fbo_->ReadPixels();
@@ -702,6 +919,49 @@ namespace as_modeling
     ++counter;
 #endif
 
+  }
+
+#endif
+  void RenderGL::set_shader_unperturbed(GLSLShader * shader, GLuint vol_tex, int length)
+  {
+    // unperturbed
+    shader->Begin();
+
+    shader->SetUniform3f("lightIntensity", asml_->light_intensity_, 
+      asml_->light_intensity_, asml_->light_intensity_);
+    shader->SetUniform4f("lightPosWorld", asml_->light_x_, 
+      asml_->light_y_, asml_->light_z_, 1.0f);
+    shader->SetUniform1f("absorptionCoefficient", asml_->extinction_);
+    shader->SetUniform1f("scatteringCoefficient", asml_->scattering_);
+    float step_size = asml_->box_size_ / static_cast<float>(length);
+    shader->SetUniform1f("stepSize", step_size);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_3D, vol_tex);
+    shader->SetUniform1i("volumeTex", 0);
+
+    shader->End();
+  }
+
+  void RenderGL::set_shader_perturbed(GLSLShader * shader, GLuint vol_tex, int length)
+  {
+    // perturbed
+    shader->Begin();
+
+    shader->SetUniform1f("fwidth", 1.0f*length);
+    shader->SetUniform1f("disturb", asml_->disturb_);
+    shader->SetUniform3f("lightIntensity", asml_->light_intensity_, 
+      asml_->light_intensity_, asml_->light_intensity_);
+    shader->SetUniform4f("lightPosWorld", asml_->light_x_, 
+      asml_->light_y_, asml_->light_z_, 1.0f);
+    shader->SetUniform1f("absorptionCoefficient", asml_->extinction_);
+    shader->SetUniform1f("scatteringCoefficient", asml_->scattering_);
+    float step_size = asml_->box_size_ / static_cast<float>(length);
+    shader->SetUniform1f("stepSize", step_size);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_3D, vol_tex);
+    shader->SetUniform1i("volumeTex", 0);
+
+    shader->End();
   }
 
   RenderGL::RenderGL(ASModeling *p)

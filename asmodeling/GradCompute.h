@@ -10,6 +10,8 @@
 #include <cuda_runtime.h>
 #include <cuda_gl_interop.h>
 
+#include <cudpp.h>
+
 #include "../L-BFGS-B/ap.h"
 #include "../CudaImageUtil/CudaImgUtil.h"
 
@@ -42,7 +44,7 @@ namespace as_modeling{
     bool release( );
 
     // get the volume data
-    bool get_data(int level, scoped_array<float>& data, ap::real_1d_array &x);
+    bool get_data(int i_frame, int level, scoped_array<float>& data, ap::real_1d_array &x);
 
     // set the loaded ground truth images
     bool set_ground_truth_images(cuda_imageutil::Image_4c8u& gt_images);
@@ -122,7 +124,7 @@ namespace as_modeling{
 
     // CUDA host memory
     int * h_tag_volume;       // 
-    int * d_tag_volume;
+    //int * d_tag_volume;
     uint16 * h_projected_centers;
 
     std::vector<uint16> projected_centers_;
@@ -161,14 +163,17 @@ namespace as_modeling{
     float * p_device_x;
     float * p_device_g;
 
+    // cudpp scan plan
+    CUDPPHandle scanplan_;
+
     /////////////////////////////
     int num_views;
 
     ////////////////////////
     // for time profiling
     ////////////////////////
-    cudaEvent_t event_start;
-    cudaEvent_t event_stop;
+    cudaEvent_t event_start_;
+    cudaEvent_t event_stop_;
   };
 
   //ASMGradCompute::instance_ = NULL;

@@ -93,6 +93,10 @@ namespace as_modeling
       return false;
     }
 
+    // init space for result data
+    float * pdata = new float[max_vol_size_ * max_vol_size_ * max_vol_size_];
+    frame_volume_result_.reset();
+
     return true;
   }
 
@@ -104,23 +108,31 @@ namespace as_modeling
   /////////////////////////////////////////////////////////////////////////////
   bool ASModeling::OptimizeProcess(int num_of_frames)
   {
-    if (!OptimizeSingleFrame(0))
+    //if (!OptimizeSingleFrame(0))
+    //{
+    //  fprintf(stderr, "<<!-- Optimize First Frame Failed.\n");
+    //  return false;
+    //}
+
+    //StoreVolumeData(0);
+
+    if (!OptimizeSingleFrame(1))
     {
       fprintf(stderr, "<<!-- Optimize First Frame Failed.\n");
       return false;
     }
 
-    StoreVolumeData(0);
+    StoreVolumeData(1);
 
-    for (int i = 1; i < num_of_frames; ++i)
-    {
-      if (!OptimizeSuccFrames(i))
-      {
-        fprintf(stderr, "<<!-- Optimize Frame %d Failed.\n", i);
-        return false;
-      }
-      StoreVolumeData(i);
-    }
+    //for (int i = 1; i < num_of_frames; ++i)
+    //{
+    //  if (!OptimizeSuccFrames(i))
+    //  {
+    //    fprintf(stderr, "<<!-- Optimize Frame %d Failed.\n", i);
+    //    return false;
+    //  }
+    //  StoreVolumeData(i);
+    //}
 
     return true;
   }

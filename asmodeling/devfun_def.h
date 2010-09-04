@@ -3,6 +3,7 @@
 
 
 #include <cuda_runtime.h>
+#include <../Inc/cudpp.h>
 
 typedef unsigned short uint16;
 
@@ -73,7 +74,8 @@ float calculate_f_compact_cuda(
                                int range,
                                int n_items,       // num of non-zero voxels plus one zero indicator
                                float *f_array,
-                               float *sum_array
+                               float *sum_array,
+                               CUDPPHandle scanplan
                                );
 
 void calculate_g_cuda(
@@ -106,4 +108,37 @@ void test__(int width, int height, int iview, float * h_data1, float * h_data2);
 void tst_g(int width, int height, int iview, float * h_data);
 void tst_pcenters(int level, int width, int height, int iview, int nview,
                   unsigned short * pcenters, int * tag_vol, float * h_data);
+
+
+void test_GroundTruth(
+                      int i_view,
+                      int img_width,
+                      int img_height,
+                      float * gt
+                      );
+
+void test_PerturbedResult(
+                          int i_view,
+                          int img_width,
+                          int img_height,
+                          float * pr
+                          );
+
+void test_RenderResult(
+                       int i_view,
+                       int img_width,
+                       int img_height,
+                       float * rr
+                       );
+
+void test_ProjectedCenters(
+                           int i_view,
+                           int img_width,
+                           int img_height,
+                           float * pc,
+                           cudaExtent ext
+                           );
+
+void WarmUp();
+
 #endif //__CUDA_BRIDGE_H__

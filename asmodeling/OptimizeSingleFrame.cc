@@ -31,30 +31,6 @@ namespace as_modeling
 
     ASMGradCompute::Instance()->set_ground_truth_images(ground_truth_image_);
 
-    ////////////////////////////////////////////
-    //// for debugging
-    //cuda_imageutil::BMPImageUtil tmpbmp;
-    //tmpbmp.SetSizes(ground_truth_image_.GetWidth(), ground_truth_image_.GetHeight());
-    //for (int k = 0; k < num_cameras_; ++k)
-    //{
-    //  for (int j = 0; j < ground_truth_image_.GetHeight(); ++j)
-    //  {
-    //    for (int i = 0; i < ground_truth_image_.GetWidth(); ++i)
-    //    {
-    //      for (int c = 0; c < 3; ++c)
-    //      {
-    //        tmpbmp.GetPixelAt( i, k*ground_truth_image_.GetHeight()+j )[0] 
-    //        = ground_truth_image_.GetPixelAt( i, k*ground_truth_image_.GetHeight()+j )[0];
-    //        tmpbmp.GetPixelAt( i, k*ground_truth_image_.GetHeight()+j )[1] 
-    //        = ground_truth_image_.GetPixelAt( i, k*ground_truth_image_.GetHeight()+j )[1];
-    //        tmpbmp.GetPixelAt( i, k*ground_truth_image_.GetHeight()+j )[2] 
-    //        = ground_truth_image_.GetPixelAt( i, k*ground_truth_image_.GetHeight()+j )[2];
-    //      }
-    //    }
-    //  }
-    //}
-    //tmpbmp.SaveImage("../Data/groundtruth.bmp");
-    ////////////////////////////////////////////
 
     int i_level = initial_vol_level_;
     std::vector<float> host_x;
@@ -115,7 +91,7 @@ namespace as_modeling
 
     // get data
     // copy the volume data to HOST
-    if (!ASMGradCompute::Instance()->get_data(i_level, frame_volume_result_, lbfgsb_x_))
+    if (!ASMGradCompute::Instance()->get_data(iframe, i_level, frame_volume_result_, lbfgsb_x_))
     {
       fprintf( stderr, "===== Could not get volume data...\n" );
       return false;
@@ -171,7 +147,7 @@ namespace as_modeling
 
       // get data
       // copy the volume data to HOST
-      if (!ASMGradCompute::Instance()->get_data(i_level, frame_volume_result_, lbfgsb_x_))
+      if (!ASMGradCompute::Instance()->get_data(iframe, i_level, frame_volume_result_, lbfgsb_x_))
       {
         fprintf( stderr, "===== Could not get volume data...\n" );
         return false;

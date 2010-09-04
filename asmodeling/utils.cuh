@@ -13,8 +13,9 @@ typedef unsigned short uint16;
 //////////////////////////////////////////////////////////////////////////////////////////////////////
 texture<float4, 2, cudaReadModeElementType> render_result;
 texture<float4, 2, cudaReadModeElementType> perturbed_result;
-//texture<uchar4, 3, cudaReadModeElementType> ground_truth;
 texture<uchar4, 3, cudaReadModeNormalizedFloat> ground_truth;
+//texture<uchar4, 3, cudaReadModeElementType> ground_truth;
+
 texture<int, 3, cudaReadModeElementType> position_tag;
 
 texture<ushort2, 3, cudaReadModeElementType> pcenters;
@@ -82,6 +83,7 @@ void bind_prtex_cuda(cudaArray* data_array)
 void bind_gttex_cuda(cudaArray* data_array)
 {
   bind_tex<uchar4,3, cudaReadModeNormalizedFloat>(data_array, ground_truth);
+  //bind_tex<uchar4,3, cudaReadModeElementType>(data_array, ground_truth);
 }
 
 void unbind_rrtex_cuda()

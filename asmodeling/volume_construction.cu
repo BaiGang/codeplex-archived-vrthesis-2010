@@ -110,9 +110,9 @@ __global__ void construct_volume_from_prev(
 
   int tag_ind =  tex3D(
     position_tag,
-    __int2float_rn(threadIdx.x),
-    __int2float_rn(blockIdx.y),
-    __int2float_rn(blockIdx.x)
+    __int2float_rn(threadIdx.x>>1),
+    __int2float_rn(blockIdx.y>>1),
+    __int2float_rn(blockIdx.x>>1)
     );
 
   *((float*)(slice+blockIdx.y*vol_pptr.pitch) + threadIdx.x)

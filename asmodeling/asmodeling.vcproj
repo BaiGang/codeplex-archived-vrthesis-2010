@@ -65,7 +65,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="TinyXML.lib CudaImageUtil.lib L-BFGS-B.lib Utils.lib glut32.lib glew32.lib cudart.lib cUtil32.lib"
+				AdditionalDependencies="TinyXML.lib CudaImageUtil.lib L-BFGS-B.lib Utils.lib glut32.lib glew32.lib cudart.lib cudpp32.lib cUtil32.lib"
 				ShowProgress="2"
 				OutputFile="$(OutDir)\$(ProjectName)-d.exe"
 				LinkIncremental="2"
@@ -147,7 +147,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="TinyXML.lib CudaImageUtil.lib L-BFGS-B.lib Utils.lib glut32.lib glew32.lib cudart.lib cUtil32.lib"
+				AdditionalDependencies="TinyXML.lib CudaImageUtil.lib L-BFGS-B.lib Utils.lib glut32.lib glew32.lib cudart.lib cudpp32.lib cUtil32.lib"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="$(SolutionDir)\Lib"
 				GenerateDebugInformation="true"
@@ -230,7 +230,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="TinyXML.lib CudaImageUtil.lib L-BFGS-B.lib Utils.lib glut32.lib glew32.lib cudart.lib cUtil32.lib"
+				AdditionalDependencies="TinyXML.lib CudaImageUtil.lib L-BFGS-B.lib Utils.lib glut32.lib glew32.lib cudart.lib cudpp32.lib cUtil32.lib"
 				ShowProgress="2"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				LinkIncremental="1"

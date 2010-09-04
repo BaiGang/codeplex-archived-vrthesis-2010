@@ -4,6 +4,7 @@
 #include <cuda_runtime.h>
 #include <cutil_inline.h>
 #include <cutil_math.h>
+#include <../Inc/cudpp.h>
 
 #include "devfun_def.h"
 
@@ -145,7 +146,8 @@ float calculate_f_compact_cuda(
                                int range,
                                int n_items,       // num of non-zero voxels plus one zero indicator
                                float *f_array,
-                               float *sum_array
+                               float *sum_array,
+                               CUDPPHandle scanplan
                                )
 {
   dim3 grid_dim( (n_items/256)+((n_items%256)?1:0) , 1, 1);
@@ -159,12 +161,20 @@ float calculate_f_compact_cuda(
     );
   cutilSafeCall(cudaGetLastError());
 
-  cudaMemset( f_array, 0, sizeof(float) );
+  //cudaMemset( f_array, 0, sizeof(float) );
 
   // parallel reduction
-  reduceSinglePass(n_items, 256,
-    (n_items/256)+((n_items%256)?1:0), 
-    f_array, sum_array);
+  //reduceSinglePass(n_items, 256,
+  //  (n_items/256)+((n_items%256)?1:0), 
+  //  f_array, sum_array);
+  //reduce(n_items, 256, 
+  //  (n_items/256)+((n_items%256)?1:0), 
+  //  f_array, sum_array);
+
+  // Run the scan
+  cudppScan(scanplan, sum_array, f_array, n_items);
+
+  cutilSafeCall( cudaThreadSynchronize() );
 
   // copy and return result
   float result = 0.0f;
@@ -275,27 +285,126 @@ void get_volume_cuda(
 /////////////////////////////
 //Testing
 
-void test_rrprgt(
-                 int i_view,
-                 int img_width,
-                 int img_height,
-                 float * rr,
-                 float * pr,
-                 float * gt
-                 )
+void test_RenderResult(
+                       int i_view,
+                       int img_width,
+                       int img_height,
+                       float * rr
+                       )
 {
-  //float * d_rr;
-  //float * d_pr;
-  //float * d_gt;
+  float * d_rr;
+  cudaMalloc((void**)&d_rr, img_width * img_height * sizeof(float));
 
-  //cutilSafeCall(  );
-  //cutilSafeCall();
-  //cutilSafeCall();
+  cudaMemset(d_rr, 0, img_width * img_height * sizeof(float));
 
-  //cutilSafeCall();
-  //cutilSafeCall();
-  //cutilSafeCall();
+  dim3 dim_grid( img_width/16 + ((img_width%16)?1:0),
+    img_height/16 + ((img_height%16)?1:0), 1 );
+  dim3 dim_block( 16, 16, 1 );
+
+  Output_RenderResult<<<dim_grid, dim_block>>> (
+    i_view, img_width, img_height, d_rr);
+
+  cutilSafeCall( cudaGetLastError() );
+
+  cudaMemcpy(rr, d_rr, sizeof(float) * img_width * img_height, cudaMemcpyDeviceToHost);
+
+  cudaFree(d_rr);
 }
+
+void test_PerturbedResult(
+                          int i_view,
+                          int img_width,
+                          int img_height,
+                          float * pr
+                          )
+{
+  float * d_pr;
+  cudaMalloc((void**)&d_pr, img_width * img_height * sizeof(float));
+
+  cudaMemset(d_pr, 0, img_width * img_height * sizeof(float));
+
+  dim3 dim_grid( img_width/16 + ((img_width%16)?1:0),
+    img_height/16 + ((img_height%16)?1:0), 1 );
+  dim3 dim_block( 16, 16, 1 );
+
+  Output_PerturbedResult<<<dim_grid, dim_block>>> (
+    i_view, img_width, img_height, d_pr);
+
+  cutilSafeCall( cudaGetLastError() );
+
+  cudaMemcpy(pr, d_pr, sizeof(float) * img_width * img_height, cudaMemcpyDeviceToHost);
+
+  cudaFree(d_pr);
+}
+
+void test_GroundTruth(
+                      int i_view,
+                      int img_width,
+                      int img_height,
+                      float * gt
+                      )
+{
+  float * d_gt;
+  cutilSafeCall( cudaMalloc((void**)(&d_gt), img_width * img_height * sizeof(float)) );
+
+  cutilSafeCall( cudaGetLastError() );
+
+  cutilSafeCall( cudaMemset(d_gt, 0, img_width * img_height * sizeof(float)) );
+
+  cutilSafeCall( cudaGetLastError() );
+
+  dim3 dim_grid( img_width/16 + ((img_width%16)?1:0),
+    img_height/16 + ((img_height%16)?1:0), 1 );
+  dim3 dim_block( 16, 16, 1 );
+
+  fprintf(stderr, "grid : (%d, %d, %d)\nblock : (%d, %d, %d)\n", 
+    img_width/16 + ((img_width%16)?1:0),
+    img_height/16 + ((img_height%16)?1:0), 1,
+    16, 16, 1);
+
+  Output_GroundTruth<<<dim_grid, dim_block>>> (
+    i_view, img_width, img_height, d_gt);
+
+  cutilSafeCall( cudaGetLastError() );
+
+  cutilSafeCall( cudaMemcpy(gt, d_gt, sizeof(float) * img_width * img_height, cudaMemcpyDeviceToHost) );
+
+  cudaFree(d_gt);
+}
+
+void test_ProjectedCenters(
+                           int i_view,
+                           int img_width,
+                           int img_height,
+                           float * pc,
+                           cudaExtent ext
+                           )
+{
+  float * d_pc;
+  cutilSafeCall( cudaMalloc((void**)&d_pc, img_width * img_height * sizeof(float)));
+  cudaMemset(d_pc, 0, img_width * img_height * sizeof(float));
+  dim3 dim_grid(ext.height, 1, 1);
+  dim3 dim_block(ext.width, 1, 1);
+
+  Output_ProjectedCenters<<<dim_grid, dim_block>>>(
+    i_view, img_width, img_height, d_pc);
+
+  cutilSafeCall(cudaMemcpy(pc, d_pc, sizeof(float) * img_width * img_height, cudaMemcpyDeviceToHost));
+
+  cudaFree(d_pc);
+}
+
+void WarmUp()
+{
+  int a = 10;
+  dim3 grid_dim(100, 100, 1);
+  dim3 block_dim(16, 16, 1);
+
+  ThreadWarmUp<<<grid_dim, block_dim>>>(a);
+
+  cutilSafeCall( cudaGetLastError() );
+}
+
 
 ////////
 

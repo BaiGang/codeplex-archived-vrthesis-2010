@@ -37,7 +37,6 @@ namespace as_modeling
 
     Timer tmer_1, tmer_2, tmer_3;
     tmer_1.start();
-    tmer_2.start();
 
     f = 0.0;
 
@@ -55,6 +54,9 @@ namespace as_modeling
     {
       Instance()->p_host_x[i] = static_cast<float>(x(i));
     }
+
+    //////////////////////
+    cudaEventRecord(Instance()->event_start_);
 
     // copy to device x
     cutilSafeCall( cudaMemcpy(
@@ -97,6 +99,8 @@ namespace as_modeling
       cutilSafeCall( cudaGetLastError() );
     }
 
+
+
     // map gl graphics resource
     cutilSafeCall( cudaGraphicsMapResources(1, &(Instance()->resource_vol_)) );
 
@@ -117,7 +121,12 @@ namespace as_modeling
     // unmap gl graphics resource after writing-to operation
     cutilSafeCall( cudaGraphicsUnmapResources(1, &Instance()->resource_vol_) );
 
-    fprintf(stderr, "--- === --- COPY to GPU used %lf secs.\n", tmer_2.stop());
+    // //////////////////////////////////
+    cudaEventSynchronize(Instance()->event_stop_);
+    float copytime;
+    cudaEventElapsedTime(&copytime, Instance()->event_start_, Instance()->event_stop_);
+    fprintf(stderr, "CUDA EVENT PROFILING ==== set up vol tex used %f secs.\n", copytime * 0.001f);
+
     tmer_3.start();
 
 
@@ -137,6 +146,9 @@ namespace as_modeling
     // calc f and g[]
     for (int i_view = 0; i_view < Instance()->num_views; ++i_view)
     {
+      ///////////////////
+      cudaEventRecord(Instance()->event_start_);
+
       // render to image 
       Instance()->renderer_->render_unperturbed(i_view, Instance()->vol_tex_, length);
 
@@ -151,6 +163,13 @@ namespace as_modeling
       // bind array to cuda tex
       bind_rrtex_cuda(Instance()->rr_tex_cudaArray);
 
+      //////////////////////
+      //cudaEventSynchronize(Instance()->event_stop_);
+      //cudaEventElapsedTime(&copytime, Instance()->event_start_, Instance()->event_stop_);
+      //fprintf(stderr, "CUDA EVENT PROFILING ==== render and bind tex used %f secs.\n", copytime * 0.001f);
+
+      /////////////////////
+      //cudaEventRecord(Instance()->event_start_);
 
       // Lauch kernel
       float ff = calculate_f_compact_cuda(
@@ -159,13 +178,20 @@ namespace as_modeling
         p_range,
         n + 1,
         Instance()->p_device_x,
-        Instance()->d_temp_f
+        Instance()->d_temp_f,
+        Instance()->scanplan_
         );
-
+      ////////////////////
+      cudaEventSynchronize(Instance()->event_stop_);
+      cudaEventElapsedTime(&copytime, Instance()->event_start_, Instance()->event_stop_);
+      fprintf(stderr, "CUDA EVENT PROFILING ==== calc f used %f secs.\n", copytime * 0.001f);
 
       fprintf(stderr, "++ ++ ++ F value of view %d is %f\n", i_view, ff);
       f += ff;
       //f += 1.0f;
+
+      ///////////////////
+      cudaEventRecord(Instance()->event_start_);
 
       // calc g[]
       for (int pt_slice = 0; pt_slice < length; ++pt_slice)
@@ -174,6 +200,8 @@ namespace as_modeling
         {
           for (int pu = 0; pu < mm; ++pu)
           {
+
+
             Instance()->renderer_->render_perturbed(
               i_view,                  // view
               Instance()->vol_tex_,    // volume texture 
@@ -207,14 +235,20 @@ namespace as_modeling
               pt_slice,
               Instance()->p_device_g
               );
-            fprintf(stderr, "\t\tCalcG\t%d\t%d\t%d\t%lf\n", pt_slice, pu, pv, a.stop());
+            //fprintf(stderr, "\t\tCalcG\t%d\t%d\t%d\t%lf\n", pt_slice, pu, pv, a.stop());
 
             // unmap resource
             cutilSafeCall( cudaGraphicsUnmapResources(1, &(Instance()->resource_pr_)) );
 
+
           } // for pu
         } // for pv
       } // for each slice
+
+      ////////////////////
+      cudaEventSynchronize(Instance()->event_stop_);
+      cudaEventElapsedTime(&copytime, Instance()->event_start_, Instance()->event_stop_);
+      fprintf(stderr, "CUDA EVENT PROFILING ==== calc g (each pass) used %f secs.\n", copytime * 0.001f);
 
       // unmap resource
       cutilSafeCall( cudaGraphicsUnmapResources(1, &(Instance()->resource_rr_)) );
@@ -243,7 +277,7 @@ namespace as_modeling
   } // static grad_compute
 
 
-  bool ASMGradCompute::get_data(int level, scoped_array<float>& data, ap::real_1d_array &x)
+  bool ASMGradCompute::get_data(int i_frame, int level, scoped_array<float>& data, ap::real_1d_array &x)
   {
     int length = 1<<level;
     int vol_size = length * length * length;
@@ -335,8 +369,8 @@ namespace as_modeling
     {
       renderer_->render_unperturbed(i_view, vol_tex_, 1 << current_level_);
       char path_buf[100];
-      sprintf(path_buf, "../Data/Results/Frame%08d_View%02d_Level%d.PFM", 0, i_view, level);
-      float * data = renderer_->rr_fbo_->ReadPixels();
+      sprintf(path_buf, "../Data/Results/Frame%08d_View%02d_Level%d.PFM", i_frame, i_view, level);
+      float * data = renderer_->get_render_res();
       float * img = new float [p_asmodeling_->width_*p_asmodeling_->height_];
       for (int y = 0; y < p_asmodeling_->height_; ++y)
       {
@@ -350,11 +384,10 @@ namespace as_modeling
         0, img);
       sndipfm->WriteImage(path_buf);
     }
-
     float * imgdata = new float [length * length*length];
     PFMImage * pfmhaha = new PFMImage(length, length*length, 0, imgdata);
     char pathbuf [100];
-    sprintf(pathbuf, "../Data/Results/Result_Level%d.PFM", level);
+    sprintf(pathbuf, "../Data/Results/Frame%08d_Result_Level%d.PFM", i_frame, level);
     pfmhaha->WriteImage(pathbuf);
     delete pfmhaha;
     // set over
@@ -388,7 +421,7 @@ namespace as_modeling
     int max_size = max_length * max_length * max_length;
 
     // sub size means, the non-empty voxels are typically a proportion of the whole volume
-    int sub_size = 0.4 * max_size;
+    int sub_size = 0.6 * max_size;
 
     int tex_buffer_size = max_size * sizeof(float);
 
@@ -400,8 +433,11 @@ namespace as_modeling
     ///////////////////////////////////////////////////////
     //           Init CUDA
     ///////////////////////////////////////////////////////
-    cudaSetDevice( cutGetMaxGflopsDeviceId() );
     cudaGLSetGLDevice( cutGetMaxGflopsDeviceId() );
+
+    // warm up
+    WarmUp();
+
 
     // create gl texture for volume data storage
     glGenTextures(1, &vol_tex_);
@@ -454,9 +490,6 @@ namespace as_modeling
     full_vol_extent = make_cudaExtent(max_length*sizeof(float), max_length, max_length);
     cutilSafeCall( cudaMalloc3D(&d_full_vol_pptr, full_vol_extent) );
 
-
-    cutilSafeCall( cudaMalloc((void**)(&d_tag_volume), max_size * sizeof(int)) );
-
     cutilSafeCall( cudaMalloc((void**)(&p_device_x), sub_size*sizeof(float)) );
 
     cutilSafeCall( cudaMalloc((void**)(&p_device_g), sub_size * sizeof(float)) );
@@ -477,6 +510,10 @@ namespace as_modeling
     p_host_g = new float [sub_size];
     p_host_x = new float [sub_size];
 
+    // create event
+    cudaEventCreate(&event_start_);
+    cudaEventCreate(&event_stop_);
+
     return true;
   }
 
@@ -488,7 +525,8 @@ namespace as_modeling
 
     cutilSafeCall( cudaGraphicsUnregisterResource(resource_vol_));
 
-    cutilSafeCall( cudaFree( d_tag_volume ) );
+    cudaEventDestroy(event_start_);
+    cudaEventDestroy(event_stop_);
 
     cutilSafeCall( cudaFree( d_full_vol_pptr.ptr) );
     cutilSafeCall( cudaFree( d_vol_pitchedptr.ptr) );
@@ -544,6 +582,18 @@ namespace as_modeling
     pcenters_extent = make_cudaExtent(512, num_items / 512 + ((num_items%512)?1:0), num_views);
     cudaMalloc3DArray( &pcenters_cudaArray, &desc2, pcenters_extent);
 
+    ////////FILE * fp = fopen("../Data/test_pcenters.txt", "w");
+    ////////for (int i = 0; i < num_items - 1; ++i)
+    ////////{
+    ////////  for (int j = 0; j < num_views; ++j)
+    ////////  {
+    ////////    fprintf(fp, "%d %d\t", projected_centers_[i*2*num_views + j*2],
+    ////////      projected_centers_[i*2*num_views + j*2 + 1]);
+    ////////  }
+    ////////  fprintf(fp ,"\n");
+    ////////}
+    ////////fclose(fp);
+
     //
     // set projected center tex
     //
@@ -557,7 +607,8 @@ namespace as_modeling
         h_projected_centers[i_item*2+1] = projected_centers_[(i_item-1)*2*num_views + i_camera*2+1];
       }
 
-      /////////////////////////////////////////////////////////////////////////////////////////////////
+
+      ///////////////////////////////////////////////////////////////////////////////////////////////////
       //float * data = new float [p_asmodeling_->width_ * p_asmodeling_->height_];
       //memset(data, 0, sizeof(float)*p_asmodeling_->width_ * p_asmodeling_->height_);
       //for (int i = 0; i < num_items; ++i)
@@ -571,7 +622,8 @@ namespace as_modeling
       //sprintf(path_buf, "../Data/View%d.pfm", i_camera);
       //fm1->WriteImage(path_buf);
       //delete fm1;
-      //////////////////////////////////////////////////////////////////////////////////////////////////
+      //delete [] data;
+      ////////////////////////////////////////////////////////////////////////////////////////////////////
 
       cutilSafeCall( cudaGetLastError());
 
@@ -583,7 +635,8 @@ namespace as_modeling
       param.kind = cudaMemcpyHostToDevice;
 
       cutilSafeCall( cudaMemcpy3D(&param) );
-    }
+    } // for i_camera
+
 
 
     // 
@@ -604,17 +657,70 @@ namespace as_modeling
     bind_pcenters_cuda(pcenters_cudaArray);
     bind_postags_cuda(pos_tag_cudaArray);
 
-    cutilSafeCall( cudaMemcpy(
-      d_tag_volume, 
-      h_tag_volume, 
-      sizeof(int)*size, 
-      cudaMemcpyHostToDevice) );
+    //// debug ///////////////////////////////////////
+    //// out put projected centers
+    //for (int i_view = 0; i_view < num_views; ++i_view)
+    //{
+    //  float * testpc = new float[p_asmodeling_->width_ * p_asmodeling_->height_];
+    //  test_ProjectedCenters(i_view, p_asmodeling_->width_, p_asmodeling_->height_, testpc, pcenters_extent);
+    //  PFMImage tmpis(p_asmodeling_->width_, p_asmodeling_->height_, 0, testpc);
+    //  char pathbuff[100];
+    //  sprintf(pathbuff, "../Data/GPU_View%d.pfm", i_view);
+    //  tmpis.WriteImage(pathbuff);
+    //  delete[] testpc;
+    //}
 
+    // set the renderer for current level
+    renderer_->level_init(current_level_, vol_tex_);
+
+    //// testing.. ////////////////////////////////////////////
+    //for (int i = 0; i<num_views; ++i)
+    //{
+    //  cutilSafeCall( cudaGetLastError() );
+    //  float * data = new float [p_asmodeling_->width_ * p_asmodeling_->height_ * sizeof(float)];
+
+    //  fprintf(stderr, "Test GT for camera %d\n", i);
+    //  test_GroundTruth(i, p_asmodeling_->width_, p_asmodeling_->height_, data);
+
+    //  cutilSafeCall( cudaThreadSynchronize() );
+
+    //  cutilSafeCall( cudaGetLastError() );
+
+    //  PFMImage * ddd = new PFMImage(p_asmodeling_->width_, p_asmodeling_->height_, 0, data);
+    //  char buf[200];
+    //  sprintf(buf, "../Data/Results/GT%03d.pfm", i);
+    //  ddd->WriteImage(buf);
+    //  delete ddd;
+    //  delete [] data;
+    //}
+
+    //printf("Haha : \n");
+    //int aaa;
+    //scanf("%d", &aaa);
+
+    CUDPPConfiguration config;
+    config.op = CUDPP_ADD;
+    config.datatype = CUDPP_FLOAT;
+    config.algorithm = CUDPP_SCAN;
+    config.options = CUDPP_OPTION_BACKWARD | CUDPP_OPTION_EXCLUSIVE;
+    
+    scanplan_ = 0;
+    CUDPPResult result = cudppPlan(&scanplan_, config, num_items, 1, 0);  
+
+    if (CUDPP_SUCCESS != result)
+    {
+        fprintf(stderr, "Error creating CUDPPPlan\n");
+        return false;
+    }
 
     return true;
   }
 
 
+  // using previous results
+  // first downsample previous results
+  // then upsample to set current guess
+  // then feed back guess_x
   bool ASMGradCompute::succframe_init(int level, std::vector<float>& guess_x, ap::real_1d_array& prev_x)
   {
     // init using previous frame's result
@@ -622,8 +728,23 @@ namespace as_modeling
     int length = 1<<level;
     int size = length * length * length;
 
-    std::vector<float> dummy_list;
+    //////////////================
+    struct cudaPitchedPtr tmp_vol;
+    cudaExtent tmp_extent = make_cudaExtent(length/2*sizeof(float), length/2, length/2);
+    cutilSafeCall( cudaMalloc3D(&tmp_vol, tmp_extent) );
 
+    // downsample current result to tmp_vol
+    memset(p_host_x, 0, prev_x.gethighbound()*sizeof(float));
+
+
+    // upsample tmp_vol to vol_ptr
+
+    // cull out empty voxels
+
+    cudaFree(tmp_vol.ptr);
+    //////////////================
+
+    std::vector<float> dummy_list;
     set_density_tags(level, h_tag_volume, dummy_list, projected_centers_, false);
 
     int num_items = projected_centers_.size() / (2 * num_views) + 1;
@@ -673,11 +794,28 @@ namespace as_modeling
     bind_pcenters_cuda(pcenters_cudaArray);
     bind_postags_cuda(pos_tag_cudaArray);
 
-    cutilSafeCall( cudaMemcpy(
-      d_tag_volume, 
-      h_tag_volume, 
-      sizeof(int)*size, 
-      cudaMemcpyHostToDevice) );
+    // cudpp for prefix summation
+    CUDPPResult result = cudppDestroyPlan(scanplan_);
+    if (CUDPP_SUCCESS != result)
+    {
+      printf("Error destroying CUDPPPlan\n");
+      exit(-1);
+    }
+
+    CUDPPConfiguration config;
+    config.op = CUDPP_ADD;
+    config.datatype = CUDPP_FLOAT;
+    config.algorithm = CUDPP_SCAN;
+    config.options = CUDPP_OPTION_BACKWARD | CUDPP_OPTION_EXCLUSIVE;
+
+    scanplan_ = 0;
+    result = cudppPlan(&scanplan_, config, num_items, 1, 0);  
+
+    if (CUDPP_SUCCESS != result)
+    {
+      fprintf(stderr, "Error creating CUDPPPlan\n");
+      return false;
+    }
 
     return true;
   }
@@ -784,11 +922,11 @@ namespace as_modeling
     bind_pcenters_cuda(pcenters_cudaArray);
     bind_postags_cuda(pos_tag_cudaArray);
 
-    cutilSafeCall( cudaMemcpy(
-      d_tag_volume, 
-      h_tag_volume, 
-      sizeof(int)*size, 
-      cudaMemcpyHostToDevice) );
+    //cutilSafeCall( cudaMemcpy(
+    //  d_tag_volume, 
+    //  h_tag_volume, 
+    //  sizeof(int)*size, 
+    //  cudaMemcpyHostToDevice) );
 
     cull_empty_cells_cuda(
       &(Instance()->d_vol_pitchedptr),
@@ -815,6 +953,33 @@ namespace as_modeling
     for (int i = 1; i < num_items; ++i)
     {
       guess_x.push_back( Instance()->p_host_x[i] );
+    }
+
+    // set renderer for current level
+    renderer_->level_init(current_level_, vol_tex_);
+
+
+    // cudpp for prefix summation
+    CUDPPResult result = cudppDestroyPlan(scanplan_);
+    if (CUDPP_SUCCESS != result)
+    {
+        printf("Error destroying CUDPPPlan\n");
+        exit(-1);
+    }
+
+    CUDPPConfiguration config;
+    config.op = CUDPP_ADD;
+    config.datatype = CUDPP_FLOAT;
+    config.algorithm = CUDPP_SCAN;
+    config.options = CUDPP_OPTION_BACKWARD | CUDPP_OPTION_EXCLUSIVE;
+
+    scanplan_ = 0;
+    result = cudppPlan(&scanplan_, config, num_items, 1, 0);  
+
+    if (CUDPP_SUCCESS != result)
+    {
+      fprintf(stderr, "Error creating CUDPPPlan\n");
+      return false;
     }
 
     return true;
@@ -1041,11 +1206,6 @@ namespace as_modeling
 
   ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-  void set_projected_centers_alongX(int level, int * tag_volume,
-    std::vector<float> &density, std::vector<unsigned short> &pcenters, bool is_init_density)
-  {
-
-  }
 
 } // namespace as_modeling
 
