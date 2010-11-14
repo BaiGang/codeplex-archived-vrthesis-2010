@@ -19,15 +19,15 @@ namespace
 
 bool Configure::Init(const char * conf_filename, const char * camera_filename)
 {
-  if (!LoadCamera(camera_filename))
-  {
-    fprintf(stderr, "Error when loading camera file..\n");
-    return false;
-  }
-
   if (!LoadFile(conf_filename))
   {
     fprintf(stderr, "Error when loading configure file..\n");
+    return false;
+  }
+
+  if (!LoadCamera(camera_filename))
+  {
+    fprintf(stderr, "Error when loading camera file..\n");
     return false;
   }
 

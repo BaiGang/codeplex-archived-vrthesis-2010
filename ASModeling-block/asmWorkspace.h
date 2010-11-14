@@ -4,7 +4,14 @@
 #include <vector>
 #include <map>
 
-#include "../L-BFGS-B/apvt.h"
+// 
+#include <gl/glew.h>
+
+#include <cuda_runtime.h>
+#include <cutil_inline.h>
+#include <cuda_gl_interop.h>
+#include <cutil_gl_inline.h>
+#include <cutil_gl_error.h>
 
 #include "asmTypes.h"
 #include "asmOGL.h"
@@ -36,10 +43,11 @@ namespace asmodeling_block
     bool load_frame_images(uint32_t frame);
 
     //! init blocks and cells
-    bool init_value(void);
+    bool init_value_firstlevel(uint32_t level);
+    bool init_value_upperlevel(uint32_t level);
 
     //! reconstruct density volume
-    bool reconstruct(void);
+    bool reconstruct(uint32_t level);
 
     //! store the volume data
     bool store_frame_result(uint32_t frame);
@@ -47,6 +55,10 @@ namespace asmodeling_block
     //! temp data
     std::vector< Block >     blocks_cpu_;
     std::vector< Block_GPU > blocks_gpu_;
+
+    //! block num per dimension
+    const static uint32_t NBLOCK = 16;
+    uint32_t block_length;
 
     //! store each layer's block id
     std::map<int, std::vector<int> > along_x_;
@@ -58,6 +70,12 @@ namespace asmodeling_block
 
     //! density data here
     ap::real_1d_array x_array_;
+
+    //! lbfgsb data
+    ap::integer_1d_array lbfgsb_nbd_;
+    ap::real_1d_array    lbfgsb_l_;
+    ap::real_1d_array    lbfgsb_u_;
+    int lbfgsb_info_code_;
 
     //! Configure of the modeling system
     Configure conf_;
