@@ -52,6 +52,10 @@ namespace asmodeling_block
     //! store the volume data
     bool store_frame_result(uint32_t frame);
 
+    // cuda methods,  in asmWorkspace.cu
+    bool init_cuda_resources(void);
+    void upload_captured_images(void);
+
     //! temp data
     std::vector< Block >     blocks_cpu_;
     std::vector< Block_GPU > blocks_gpu_;
@@ -79,6 +83,20 @@ namespace asmodeling_block
 
     //! Configure of the modeling system
     Configure conf_;
+
+    // member data on device side
+
+    //! graphics resource for render result and perturbed result
+    cudaGraphicsResource * resource_rr_;
+    cudaGraphicsResource * resource_pr_;
+
+    cudaArray * rr_tex_cudaArray;
+    cudaArray * pr_tex_cudaArray;
+
+    // 3d, z maps to different images
+    cudaArray * gt_tex_cudaArray;
+    cudaExtent  gt_cudaArray_extent;
+
   };
 
   // grad compute 

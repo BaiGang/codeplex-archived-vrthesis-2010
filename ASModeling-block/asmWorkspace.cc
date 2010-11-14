@@ -74,7 +74,8 @@ bool Workspace::Init(const char * conf_filename, const char * camera_filename)
   }
 
   // init cuda
-  cudaGLSetGLDevice( cutGetMaxGflopsDeviceId() );
+  //
+  init_cuda_resources();
 
   // init data
   captured_image_.reset(new float[conf_.width_ * conf_.height_]);
@@ -130,7 +131,7 @@ bool Workspace::load_frame_images(uint32_t frame)
     {
       for (int u = 0; u < tmp_img.GetWidth(); ++u)
       {
-
+        captured_image_[image_offset + v * conf_.width_ + u] = static_cast<float>(tmp_img.GetPixel(u,v).g);
       }
     }
   }
