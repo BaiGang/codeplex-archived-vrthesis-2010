@@ -106,7 +106,7 @@ private:
 };
 
 /********************************************************************
-Class defining a complex number with double precision.
+Class defining a complex number with float precision.
 ********************************************************************/
 class complex;
 
@@ -114,25 +114,25 @@ class complex
 {
 public:
     complex():x(0.0),y(0.0){};
-    complex(const double &_x):x(_x),y(0.0){};
-    complex(const double &_x, const double &_y):x(_x),y(_y){};
+    complex(const float &_x):x(_x),y(0.0){};
+    complex(const float &_x, const float &_y):x(_x),y(_y){};
     complex(const complex &z):x(z.x),y(z.y){};
 
-    complex& operator= (const double& v){ x  = v; y = 0.0; return *this; };
-    complex& operator+=(const double& v){ x += v;          return *this; };
-    complex& operator-=(const double& v){ x -= v;          return *this; };
-    complex& operator*=(const double& v){ x *= v; y *= v;  return *this; };
-    complex& operator/=(const double& v){ x /= v; y /= v;  return *this; };
+    complex& operator= (const float& v){ x  = v; y = 0.0; return *this; };
+    complex& operator+=(const float& v){ x += v;          return *this; };
+    complex& operator-=(const float& v){ x -= v;          return *this; };
+    complex& operator*=(const float& v){ x *= v; y *= v;  return *this; };
+    complex& operator/=(const float& v){ x /= v; y /= v;  return *this; };
 
     complex& operator= (const complex& z){ x  = z.x; y  = z.y; return *this; };
     complex& operator+=(const complex& z){ x += z.x; y += z.y; return *this; };
     complex& operator-=(const complex& z){ x -= z.x; y -= z.y; return *this; };
-    complex& operator*=(const complex& z){ double t = x*z.x-y*z.y; y = x*z.y+y*z.x; x = t; return *this; };
+    complex& operator*=(const complex& z){ float t = x*z.x-y*z.y; y = x*z.y+y*z.x; x = t; return *this; };
     complex& operator/=(const complex& z)
     {
         ap::complex result;
-        double e;
-        double f;
+        float e;
+        float f;
         if( fabs(z.y)<fabs(z.x) )
         {
             e = z.y/z.x;
@@ -151,7 +151,7 @@ public:
         return *this;
     };
 
-    double x, y;
+    float x, y;
 };
 
 const complex operator/(const complex& lhs, const complex& rhs);
@@ -160,18 +160,18 @@ const bool operator!=(const complex& lhs, const complex& rhs);
 const complex operator+(const complex& lhs);
 const complex operator-(const complex& lhs);
 const complex operator+(const complex& lhs, const complex& rhs);
-const complex operator+(const complex& lhs, const double& rhs);
-const complex operator+(const double& lhs, const complex& rhs);
+const complex operator+(const complex& lhs, const float& rhs);
+const complex operator+(const float& lhs, const complex& rhs);
 const complex operator-(const complex& lhs, const complex& rhs);
-const complex operator-(const complex& lhs, const double& rhs);
-const complex operator-(const double& lhs, const complex& rhs);
+const complex operator-(const complex& lhs, const float& rhs);
+const complex operator-(const float& lhs, const complex& rhs);
 const complex operator*(const complex& lhs, const complex& rhs);
-const complex operator*(const complex& lhs, const double& rhs);
-const complex operator*(const double& lhs, const complex& rhs);
+const complex operator*(const complex& lhs, const float& rhs);
+const complex operator*(const float& lhs, const complex& rhs);
 const complex operator/(const complex& lhs, const complex& rhs);
-const complex operator/(const double& lhs, const complex& rhs);
-const complex operator/(const complex& lhs, const double& rhs);
-const double abscomplex(const complex &z);
+const complex operator/(const float& lhs, const complex& rhs);
+const complex operator/(const complex& lhs, const float& rhs);
+const float abscomplex(const complex &z);
 const complex conj(const complex &z);
 const complex csqr(const complex &z);
 
@@ -184,35 +184,35 @@ Templates for vector operations
 /********************************************************************
 BLAS functions
 ********************************************************************/
-double vdotproduct(const double *v1, const double *v2, int N);
+float vdotproduct(const float *v1, const float *v2, int N);
 complex vdotproduct(const complex *v1, const complex *v2, int N);
 
-void vmove(double *vdst, const double* vsrc, int N);
+void vmove(float *vdst, const float* vsrc, int N);
 void vmove(complex *vdst, const complex* vsrc, int N);
 
-void vmoveneg(double *vdst, const double *vsrc, int N);
+void vmoveneg(float *vdst, const float *vsrc, int N);
 void vmoveneg(complex *vdst, const complex *vsrc, int N);
 
-void vmove(double *vdst, const double *vsrc, int N, double alpha);
-void vmove(complex *vdst, const complex *vsrc, int N, double alpha);
+void vmove(float *vdst, const float *vsrc, int N, float alpha);
+void vmove(complex *vdst, const complex *vsrc, int N, float alpha);
 void vmove(complex *vdst, const complex *vsrc, int N, complex alpha);
 
-void vadd(double *vdst, const double *vsrc, int N);
+void vadd(float *vdst, const float *vsrc, int N);
 void vadd(complex *vdst, const complex *vsrc, int N);
 
-void vadd(double *vdst, const double *vsrc, int N, double alpha);
-void vadd(complex *vdst, const complex *vsrc, int N, double alpha);
+void vadd(float *vdst, const float *vsrc, int N, float alpha);
+void vadd(complex *vdst, const complex *vsrc, int N, float alpha);
 void vadd(complex *vdst, const complex *vsrc, int N, complex alpha);
 
-void vsub(double *vdst, const double *vsrc, int N);
+void vsub(float *vdst, const float *vsrc, int N);
 void vsub(complex *vdst, const complex *vsrc, int N);
 
-void vsub(double *vdst, const double *vsrc, int N, double alpha);
-void vsub(complex *vdst, const complex *vsrc, int N, double alpha);
+void vsub(float *vdst, const float *vsrc, int N, float alpha);
+void vsub(complex *vdst, const complex *vsrc, int N, float alpha);
 void vsub(complex *vdst, const complex *vsrc, int N, complex alpha);
 
-void vmul(double *vdst, int N, double alpha);
-void vmul(complex *vdst, int N, double alpha);
+void vmul(float *vdst, int N, float alpha);
+void vmul(complex *vdst, int N, float alpha);
 void vmul(complex *vdst, int N, complex alpha);
 
 
@@ -563,13 +563,16 @@ private:
 };
 
 
+//Edited by baigang, for memory compatibility.
+typedef float real_t;
+
 typedef template_1d_array<int>          integer_1d_array;
-typedef template_1d_array<double,true>  real_1d_array;
+typedef template_1d_array<real_t,true>  real_1d_array;
 typedef template_1d_array<complex>      complex_1d_array;
 typedef template_1d_array<bool>         boolean_1d_array;
 
 typedef template_2d_array<int>          integer_2d_array;
-typedef template_2d_array<double,true>  real_2d_array;
+typedef template_2d_array<real_t,true>  real_2d_array;
 typedef template_2d_array<complex>      complex_2d_array;
 typedef template_2d_array<bool>         boolean_2d_array;
 
@@ -628,23 +631,23 @@ struct rcommstate
 /********************************************************************
 Constants and functions introduced for compatibility with AlgoPascal
 ********************************************************************/
-extern const double machineepsilon;
-extern const double maxrealnumber;
-extern const double minrealnumber;
+extern const float machineepsilon;
+extern const float maxrealnumber;
+extern const float minrealnumber;
 
-int sign(double x);
-double randomreal();
+int sign(float x);
+float randomreal();
 int randominteger(int maxv);
-int round(double x);
-int trunc(double x);
-int ifloor(double x);
-int iceil(double x);
-double pi();
-double sqr(double x);
+int round(float x);
+int trunc(float x);
+int ifloor(float x);
+int iceil(float x);
+float pi();
+float sqr(float x);
 int maxint(int m1, int m2);
 int minint(int m1, int m2);
-double maxreal(double m1, double m2);
-double minreal(double m1, double m2);
+float maxreal(float m1, float m2);
+float minreal(float m1, float m2);
 
 }//namespace ap
 

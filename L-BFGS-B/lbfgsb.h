@@ -31,7 +31,7 @@ quote at least one of the references given below:
 /*-----------------------------------------------
 This routines must be defined by you:
 
-void funcgrad(const ap::real_1d_array& x, double& f, ap::real_1d_array& g);
+void funcgrad(const ap::real_1d_array& x, float& f, ap::real_1d_array& g);
 -----------------------------------------------*/
 
 /*************************************************************************
@@ -123,15 +123,15 @@ and it isn't necessary to allocate it in the FuncGrad subroutine.
 void lbfgsbminimize(const int& n,
      const int& m,
      ap::real_1d_array& x,
-     const double& epsg,
-     const double& epsf,
-     const double& epsx,
+     const float& epsg,
+     const float& epsf,
+     const float& epsx,
      const int& maxits,
      const ap::integer_1d_array& nbd,
      const ap::real_1d_array& l,
      const ap::real_1d_array& u,
      int& info,
-     void (*funcgrad)(const ap::real_1d_array& , double& , ap::real_1d_array& ));
+     void (*funcgrad)(const ap::real_1d_array& , float& , ap::real_1d_array& ));
 
 
 #endif

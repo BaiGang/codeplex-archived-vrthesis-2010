@@ -58,7 +58,7 @@ static void lbfgsbcauchy(const int& n,
      const ap::real_2d_array& ws,
      const ap::real_2d_array& sy,
      ap::real_2d_array& wt,
-     const double& theta,
+     const float& theta,
      const int& col,
      const int& head,
      ap::real_1d_array& p,
@@ -68,7 +68,7 @@ static void lbfgsbcauchy(const int& n,
      int& nint,
      const ap::real_1d_array& sg,
      const ap::real_1d_array& yg,
-     const double& sbgnrm,
+     const float& sbgnrm,
      int& info,
      ap::real_1d_array& workvec);
 static void lbfgsbcmprlb(const int& n,
@@ -83,7 +83,7 @@ static void lbfgsbcmprlb(const int& n,
      ap::real_1d_array& r,
      ap::real_1d_array& wa,
      const ap::integer_1d_array& index,
-     const double& theta,
+     const float& theta,
      const int& col,
      const int& head,
      const int& nfree,
@@ -93,7 +93,7 @@ static void lbfgsbcmprlb(const int& n,
      ap::real_1d_array& workvec2);
 static void lbfgsberrclb(const int& n,
      const int& m,
-     const double& factr,
+     const float& factr,
      const ap::real_1d_array& l,
      const ap::real_1d_array& u,
      const ap::integer_1d_array& nbd,
@@ -114,7 +114,7 @@ static void lbfgsbformk(const int& n,
      const ap::real_2d_array& ws,
      const ap::real_2d_array& wy,
      const ap::real_2d_array& sy,
-     const double& theta,
+     const float& theta,
      const int& col,
      const int& head,
      int& info,
@@ -125,7 +125,7 @@ static void lbfgsbformt(const int& m,
      const ap::real_2d_array& sy,
      const ap::real_2d_array& ss,
      const int& col,
-     const double& theta,
+     const float& theta,
      int& info);
 static void lbfgsbfreev(const int& n,
      int& nfree,
@@ -147,20 +147,20 @@ static void lbfgsblnsrlb(const int& n,
      const ap::real_1d_array& u,
      const ap::integer_1d_array& nbd,
      ap::real_1d_array& x,
-     const double& f,
-     double& fold,
-     double& gd,
-     double& gdold,
+     const float& f,
+     float& fold,
+     float& gd,
+     float& gdold,
      const ap::real_1d_array& g,
      const ap::real_1d_array& d,
      ap::real_1d_array& r,
      ap::real_1d_array& t,
      const ap::real_1d_array& z,
-     double& stp,
-     double& dnrm,
-     double& dtd,
-     double& xstep,
-     double& stpmx,
+     float& stp,
+     float& dnrm,
+     float& dtd,
+     float& xstep,
+     float& stpmx,
      const int& iter,
      int& ifun,
      int& iback,
@@ -184,18 +184,18 @@ static void lbfgsbmatupd(const int& n,
      const int& iupdat,
      int& col,
      int& head,
-     double& theta,
-     const double& rr,
-     const double& dr,
-     const double& stp,
-     const double& dtd);
+     float& theta,
+     const float& rr,
+     const float& dr,
+     const float& stp,
+     const float& dtd);
 static void lbfgsbprojgr(const int& n,
      const ap::real_1d_array& l,
      const ap::real_1d_array& u,
      const ap::integer_1d_array& nbd,
      const ap::real_1d_array& x,
      const ap::real_1d_array& g,
-     double& sbgnrm);
+     float& sbgnrm);
 static void lbfgsbsubsm(const int& n,
      const int& m,
      const int& nsub,
@@ -207,40 +207,40 @@ static void lbfgsbsubsm(const int& n,
      ap::real_1d_array& d,
      const ap::real_2d_array& ws,
      const ap::real_2d_array& wy,
-     const double& theta,
+     const float& theta,
      const int& col,
      const int& head,
      int& iword,
      ap::real_1d_array& wv,
      ap::real_2d_array& wn,
      int& info);
-static void lbfgsbdcsrch(const double& f,
-     const double& g,
-     double& stp,
-     const double& ftol,
-     const double& gtol,
-     const double& xtol,
-     const double& stpmin,
-     const double& stpmax,
+static void lbfgsbdcsrch(const float& f,
+     const float& g,
+     float& stp,
+     const float& ftol,
+     const float& gtol,
+     const float& xtol,
+     const float& stpmin,
+     const float& stpmax,
      int& task,
      ap::integer_1d_array& isave,
      ap::real_1d_array& dsave,
      int& addinfo);
-static void lbfgsbdcstep(double& stx,
-     double& fx,
-     double& dx,
-     double& sty,
-     double& fy,
-     double& dy,
-     double& stp,
-     const double& fp,
-     const double& dp,
+static void lbfgsbdcstep(float& stx,
+     float& fx,
+     float& dx,
+     float& sty,
+     float& fy,
+     float& dy,
+     float& stp,
+     const float& fp,
+     const float& dp,
      bool& brackt,
-     const double& stpmin,
-     const double& stpmax);
+     const float& stpmin,
+     const float& stpmax);
 static bool additionallbfgsbstoppingcriterion(int iter,
      const ap::real_1d_array& x,
-     double f,
+     float f,
      const ap::real_1d_array& g);
 static bool lbfgsbdpofa(ap::real_2d_array& a, const int& n);
 static void lbfgsbdtrsl(ap::real_2d_array& t,
@@ -249,7 +249,7 @@ static void lbfgsbdtrsl(ap::real_2d_array& t,
      const int& job,
      int& info);
 static void lbfgsbnewiteration(const ap::real_1d_array& x,
-     double f,
+     float f,
      const ap::real_1d_array& g);
 
 /*************************************************************************
@@ -341,17 +341,17 @@ and it isn't necessary to allocate it in the FuncGrad subroutine.
 void lbfgsbminimize(const int& n,
      const int& m,
      ap::real_1d_array& x,
-     const double& epsg,
-     const double& epsf,
-     const double& epsx,
+     const float& epsg,
+     const float& epsf,
+     const float& epsx,
      const int& maxits,
      const ap::integer_1d_array& nbd,
      const ap::real_1d_array& l,
      const ap::real_1d_array& u,
      int& info,
-     void (*funcgrad)(const ap::real_1d_array& , double& , ap::real_1d_array& ))
+     void (*funcgrad)(const ap::real_1d_array& , float& , ap::real_1d_array& ))
 {
-    double f;
+    float f;
     ap::real_1d_array g;
     ap::real_1d_array xold;
     ap::real_1d_array xdiff;
@@ -404,20 +404,20 @@ void lbfgsbminimize(const int& n,
     int nact;
     int ileave;
     int nenter;
-    double theta;
-    double fold;
-    double dr;
-    double rr;
-    double dnrm;
-    double xstep;
-    double sbgnrm;
-    double ddum;
-    double dtd;
-    double gd;
-    double gdold;
-    double stp;
-    double stpmx;
-    double tf;
+    float theta;
+    float fold;
+    float dr;
+    float rr;
+    float dnrm;
+    float xstep;
+    float sbgnrm;
+    float ddum;
+    float dtd;
+    float gd;
+    float gdold;
+    float stp;
+    float stpmx;
+    float tf;
     ap::real_1d_array workvec;
     ap::real_1d_array workvec2;
     ap::real_1d_array dsave13;
@@ -751,7 +751,7 @@ void lbfgsbminimize(const int& n,
             info = 2;
             return;
         }
-        ddum = ap::maxreal(fabs(fold), ap::maxreal(fabs(f), double(1)));
+        ddum = ap::maxreal(fabs(fold), ap::maxreal(fabs(f), float(1)));
         if( fold-f<=epsf*ddum )
         {
             info = 1;
@@ -953,7 +953,7 @@ static void lbfgsbbmv(const int& m,
     int i;
     int k;
     int i2;
-    double s;
+    float s;
 
     if( col==0 )
     {
@@ -1047,7 +1047,7 @@ static void lbfgsbcauchy(const int& n,
      const ap::real_2d_array& ws,
      const ap::real_2d_array& sy,
      ap::real_2d_array& wt,
-     const double& theta,
+     const float& theta,
      const int& col,
      const int& head,
      ap::real_1d_array& p,
@@ -1057,7 +1057,7 @@ static void lbfgsbcauchy(const int& n,
      int& nint,
      const ap::real_1d_array& sg,
      const ap::real_1d_array& yg,
-     const double& sbgnrm,
+     const float& sbgnrm,
      int& info,
      ap::real_1d_array& workvec)
 {
@@ -1074,25 +1074,25 @@ static void lbfgsbcauchy(const int& n,
     int nleft;
     int ibkmin;
     int iter;
-    double f1;
-    double f2;
-    double dt;
-    double dtm;
-    double tsum;
-    double dibp;
-    double zibp;
-    double dibp2;
-    double bkmin;
-    double tu;
-    double tl;
-    double wmc;
-    double wmp;
-    double wmw;
-    double tj;
-    double tj0;
-    double neggi;
-    double f2org;
-    double tmpv;
+    float f1;
+    float f2;
+    float dt;
+    float dtm;
+    float tsum;
+    float dibp;
+    float zibp;
+    float dibp2;
+    float bkmin;
+    float tu;
+    float tl;
+    float wmc;
+    float wmp;
+    float wmw;
+    float tj;
+    float tj0;
+    float neggi;
+    float f2org;
+    float tmpv;
 
     
     //
@@ -1536,7 +1536,7 @@ static void lbfgsbcmprlb(const int& n,
      ap::real_1d_array& r,
      ap::real_1d_array& wa,
      const ap::integer_1d_array& index,
-     const double& theta,
+     const float& theta,
      const int& col,
      const int& head,
      const int& nfree,
@@ -1549,8 +1549,8 @@ static void lbfgsbcmprlb(const int& n,
     int j;
     int k;
     int pointr;
-    double a1;
-    double a2;
+    float a1;
+    float a2;
 
     if( !cnstnd&&col>0 )
     {
@@ -1592,7 +1592,7 @@ static void lbfgsbcmprlb(const int& n,
 
 static void lbfgsberrclb(const int& n,
      const int& m,
-     const double& factr,
+     const float& factr,
      const ap::real_1d_array& l,
      const ap::real_1d_array& u,
      const ap::integer_1d_array& nbd,
@@ -1669,7 +1669,7 @@ static void lbfgsbformk(const int& n,
      const ap::real_2d_array& ws,
      const ap::real_2d_array& wy,
      const ap::real_2d_array& sy,
-     const double& theta,
+     const float& theta,
      const int& col,
      const int& head,
      int& info,
@@ -1694,11 +1694,11 @@ static void lbfgsbformk(const int& n,
     int dbegin;
     int dend;
     int upcl;
-    double temp1;
-    double temp2;
-    double temp3;
-    double temp4;
-    double v;
+    float temp1;
+    float temp2;
+    float temp3;
+    float temp4;
+    float v;
     int j;
 
     
@@ -1964,14 +1964,14 @@ static void lbfgsbformt(const int& m,
      const ap::real_2d_array& sy,
      const ap::real_2d_array& ss,
      const int& col,
-     const double& theta,
+     const float& theta,
      int& info)
 {
     int i;
     int j;
     int k;
     int k1;
-    double ddum;
+    float ddum;
 
     
     //
@@ -2084,8 +2084,8 @@ static void lbfgsbhpsolb(const int& n,
     int k;
     int indxin;
     int indxou;
-    double ddum;
-    double dout;
+    float ddum;
+    float dout;
 
     if( iheap==0 )
     {
@@ -2174,20 +2174,20 @@ static void lbfgsblnsrlb(const int& n,
      const ap::real_1d_array& u,
      const ap::integer_1d_array& nbd,
      ap::real_1d_array& x,
-     const double& f,
-     double& fold,
-     double& gd,
-     double& gdold,
+     const float& f,
+     float& fold,
+     float& gd,
+     float& gdold,
      const ap::real_1d_array& g,
      const ap::real_1d_array& d,
      ap::real_1d_array& r,
      ap::real_1d_array& t,
      const ap::real_1d_array& z,
-     double& stp,
-     double& dnrm,
-     double& dtd,
-     double& xstep,
-     double& stpmx,
+     float& stp,
+     float& dnrm,
+     float& dtd,
+     float& xstep,
+     float& stpmx,
      const int& iter,
      int& ifun,
      int& iback,
@@ -2201,13 +2201,13 @@ static void lbfgsblnsrlb(const int& n,
      ap::real_1d_array& dsave)
 {
     int i;
-    double a1;
-    double a2;
-    double v;
-    double ftol;
-    double gtol;
-    double xtol;
-    double big;
+    float a1;
+    float a2;
+    float v;
+    float ftol;
+    float gtol;
+    float xtol;
+    float big;
     int addinfo;
 
     
@@ -2314,7 +2314,7 @@ static void lbfgsblnsrlb(const int& n,
             return;
         }
     }
-    lbfgsbdcsrch(f, gd, stp, ftol, gtol, xtol, double(0), stpmx, csave, isave, dsave, addinfo);
+    lbfgsbdcsrch(f, gd, stp, ftol, gtol, xtol, float(0), stpmx, csave, isave, dsave, addinfo);
     xstep = stp*dnrm;
     if( csave!=4&&csave!=3 )
     {
@@ -2353,15 +2353,15 @@ static void lbfgsbmatupd(const int& n,
      const int& iupdat,
      int& col,
      int& head,
-     double& theta,
-     const double& rr,
-     const double& dr,
-     const double& stp,
-     const double& dtd)
+     float& theta,
+     const float& rr,
+     const float& dr,
+     const float& stp,
+     const float& dtd)
 {
     int j;
     int pointr;
-    double v;
+    float v;
 
     
     //
@@ -2439,10 +2439,10 @@ static void lbfgsbprojgr(const int& n,
      const ap::integer_1d_array& nbd,
      const ap::real_1d_array& x,
      const ap::real_1d_array& g,
-     double& sbgnrm)
+     float& sbgnrm)
 {
     int i;
-    double gi;
+    float gi;
 
     sbgnrm = 0;
     for(i = 1; i <= n; i++)
@@ -2481,7 +2481,7 @@ static void lbfgsbsubsm(const int& n,
      ap::real_1d_array& d,
      const ap::real_2d_array& ws,
      const ap::real_2d_array& wy,
-     const double& theta,
+     const float& theta,
      const int& col,
      const int& head,
      int& iword,
@@ -2498,10 +2498,10 @@ static void lbfgsbsubsm(const int& n,
     int i;
     int j;
     int k;
-    double alpha;
-    double dk;
-    double temp1;
-    double temp2;
+    float alpha;
+    float dk;
+    float temp1;
+    float temp2;
 
     if( nsub<=0 )
     {
@@ -2651,14 +2651,14 @@ static void lbfgsbsubsm(const int& n,
 }
 
 
-static void lbfgsbdcsrch(const double& f,
-     const double& g,
-     double& stp,
-     const double& ftol,
-     const double& gtol,
-     const double& xtol,
-     const double& stpmin,
-     const double& stpmax,
+static void lbfgsbdcsrch(const float& f,
+     const float& g,
+     float& stp,
+     const float& ftol,
+     const float& gtol,
+     const float& xtol,
+     const float& stpmin,
+     const float& stpmax,
      int& task,
      ap::integer_1d_array& isave,
      ap::real_1d_array& dsave,
@@ -2666,28 +2666,28 @@ static void lbfgsbdcsrch(const double& f,
 {
     bool brackt;
     int stage;
-    double finit;
-    double ftest;
-    double fm;
-    double fx;
-    double fxm;
-    double fy;
-    double fym;
-    double ginit;
-    double gtest;
-    double gm;
-    double gx;
-    double gxm;
-    double gy;
-    double gym;
-    double stx;
-    double sty;
-    double stmin;
-    double stmax;
-    double width;
-    double width1;
-    double xtrapl;
-    double xtrapu;
+    float finit;
+    float ftest;
+    float fm;
+    float fx;
+    float fxm;
+    float fy;
+    float fym;
+    float ginit;
+    float gtest;
+    float gm;
+    float gx;
+    float gxm;
+    float gy;
+    float gym;
+    float stx;
+    float sty;
+    float stmin;
+    float stmax;
+    float width;
+    float width1;
+    float xtrapl;
+    float xtrapu;
 
     xtrapl = 1.1E0;
     xtrapu = 4.0E0;
@@ -2984,29 +2984,29 @@ static void lbfgsbdcsrch(const double& f,
 }
 
 
-static void lbfgsbdcstep(double& stx,
-     double& fx,
-     double& dx,
-     double& sty,
-     double& fy,
-     double& dy,
-     double& stp,
-     const double& fp,
-     const double& dp,
+static void lbfgsbdcstep(float& stx,
+     float& fx,
+     float& dx,
+     float& sty,
+     float& fy,
+     float& dy,
+     float& stp,
+     const float& fp,
+     const float& dp,
      bool& brackt,
-     const double& stpmin,
-     const double& stpmax)
+     const float& stpmin,
+     const float& stpmax)
 {
-    double gamma;
-    double p;
-    double q;
-    double r;
-    double s;
-    double sgnd;
-    double stpc;
-    double stpf;
-    double stpq;
-    double theta;
+    float gamma;
+    float p;
+    float q;
+    float r;
+    float s;
+    float sgnd;
+    float stpc;
+    float stpf;
+    float stpq;
+    float theta;
 
     sgnd = dp*(dx/fabs(dx));
     
@@ -3096,7 +3096,7 @@ static void lbfgsbdcstep(double& stx,
                 // The case gamma = 0 only arises if the cubic does not tend
                 // to infinity in the direction of the step.
                 //
-                gamma = s*sqrt(ap::maxreal(double(0), ap::sqr(theta/s)-dx/s*(dp/s)));
+                gamma = s*sqrt(ap::maxreal(float(0), ap::sqr(theta/s)-dx/s*(dp/s)));
                 if( stp>stx )
                 {
                     gamma = -gamma;
@@ -3235,7 +3235,7 @@ static void lbfgsbdcstep(double& stx,
 
 static bool additionallbfgsbstoppingcriterion(int iter,
      const ap::real_1d_array& x,
-     double f,
+     float f,
      const ap::real_1d_array& g)
 {
     bool result;
@@ -3248,9 +3248,9 @@ static bool additionallbfgsbstoppingcriterion(int iter,
 static bool lbfgsbdpofa(ap::real_2d_array& a, const int& n)
 {
     bool result;
-    double t;
-    double s;
-    double v;
+    float t;
+    float s;
+    float v;
     int j;
     int jm1;
     int k;
@@ -3289,8 +3289,8 @@ static void lbfgsbdtrsl(ap::real_2d_array& t,
      const int& job,
      int& info)
 {
-    double temp;
-    double v;
+    float temp;
+    float v;
     int cse;
     int j;
     int jj;
@@ -3403,7 +3403,7 @@ static void lbfgsbdtrsl(ap::real_2d_array& t,
 
 
 static void lbfgsbnewiteration(const ap::real_1d_array& x,
-     double f,
+     float f,
      const ap::real_1d_array& g)
 {
 

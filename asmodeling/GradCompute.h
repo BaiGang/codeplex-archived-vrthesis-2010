@@ -24,7 +24,7 @@ namespace as_modeling{
   public:
 
     // for lbfgsbminimize callback
-    static void grad_compute(const ap::real_1d_array&, double&, ap::real_1d_array&);
+    static void grad_compute(const ap::real_1d_array&, float&, ap::real_1d_array&);
 
     // Singleton pattern 
     static inline ASMGradCompute* Instance( )

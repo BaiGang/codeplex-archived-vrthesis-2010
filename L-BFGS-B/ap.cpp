@@ -30,14 +30,14 @@ Optimized ABLAS interface
 #include <windows.h>
 extern "C"
 {
-typedef double  (*_ddot1)(const double*, const double*, long);
-typedef void    (*_dmove1)(const double*, const double*, long);
-typedef void    (*_dmoves1)(const double*, const double*, long, double);
-typedef void    (*_dmoveneg1)(const double*, const double*, long);
-typedef void    (*_dadd1)(const double*, const double*, long);
-typedef void    (*_dadds1)(const double*, const double*, long, double);
-typedef void    (*_dsub1)(const double*, const double*, long);
-typedef void    (*_dmuls1)(const double*, long, double);
+typedef float  (*_ddot1)(const float*, const float*, long);
+typedef void    (*_dmove1)(const float*, const float*, long);
+typedef void    (*_dmoves1)(const float*, const float*, long, float);
+typedef void    (*_dmoveneg1)(const float*, const float*, long);
+typedef void    (*_dadd1)(const float*, const float*, long);
+typedef void    (*_dadds1)(const float*, const float*, long, float);
+typedef void    (*_dsub1)(const float*, const float*, long);
+typedef void    (*_dmuls1)(const float*, long, float);
 }
 HINSTANCE ABLAS = LoadLibrary("ablas.dll");
 
@@ -51,9 +51,9 @@ static _dsub1     dsub1     = ABLAS==NULL ? NULL :     (_dsub1)  GetProcAddress(
 static _dmuls1    dmuls1    = ABLAS==NULL ? NULL :     (_dmuls1) GetProcAddress(ABLAS, "ASMMulS1");
 #endif
 
-const double ap::machineepsilon = 5E-16;
-const double ap::maxrealnumber  = 1E300;
-const double ap::minrealnumber  = 1E-300;
+const float ap::machineepsilon = 5E-16;
+const float ap::maxrealnumber  = 1E300;
+const float ap::minrealnumber  = 1E-300;
 
 /********************************************************************
 ap::complex operations
@@ -73,35 +73,35 @@ const ap::complex ap::operator-(const ap::complex& lhs)
 const ap::complex ap::operator+(const ap::complex& lhs, const ap::complex& rhs)
 { ap::complex r = lhs; r += rhs; return r; }
 
-const ap::complex ap::operator+(const ap::complex& lhs, const double& rhs)
+const ap::complex ap::operator+(const ap::complex& lhs, const float& rhs)
 { ap::complex r = lhs; r += rhs; return r; }
 
-const ap::complex ap::operator+(const double& lhs, const ap::complex& rhs)
+const ap::complex ap::operator+(const float& lhs, const ap::complex& rhs)
 { ap::complex r = rhs; r += lhs; return r; }
 
 const ap::complex ap::operator-(const ap::complex& lhs, const ap::complex& rhs)
 { ap::complex r = lhs; r -= rhs; return r; }
 
-const ap::complex ap::operator-(const ap::complex& lhs, const double& rhs)
+const ap::complex ap::operator-(const ap::complex& lhs, const float& rhs)
 { ap::complex r = lhs; r -= rhs; return r; }
 
-const ap::complex ap::operator-(const double& lhs, const ap::complex& rhs)
+const ap::complex ap::operator-(const float& lhs, const ap::complex& rhs)
 { ap::complex r = lhs; r -= rhs; return r; }
 
 const ap::complex ap::operator*(const ap::complex& lhs, const ap::complex& rhs)
 { return ap::complex(lhs.x*rhs.x - lhs.y*rhs.y,  lhs.x*rhs.y + lhs.y*rhs.x); }
 
-const ap::complex ap::operator*(const ap::complex& lhs, const double& rhs)
+const ap::complex ap::operator*(const ap::complex& lhs, const float& rhs)
 { return ap::complex(lhs.x*rhs,  lhs.y*rhs); }
 
-const ap::complex ap::operator*(const double& lhs, const ap::complex& rhs)
+const ap::complex ap::operator*(const float& lhs, const ap::complex& rhs)
 { return ap::complex(lhs*rhs.x,  lhs*rhs.y); }
 
 const ap::complex ap::operator/(const ap::complex& lhs, const ap::complex& rhs)
 {
     ap::complex result;
-    double e;
-    double f;
+    float e;
+    float f;
     if( fabs(rhs.y)<fabs(rhs.x) )
     {
         e = rhs.y/rhs.x;
@@ -119,11 +119,11 @@ const ap::complex ap::operator/(const ap::complex& lhs, const ap::complex& rhs)
     return result;
 }
 
-const ap::complex ap::operator/(const double& lhs, const ap::complex& rhs)
+const ap::complex ap::operator/(const float& lhs, const ap::complex& rhs)
 {
     ap::complex result;
-    double e;
-    double f;
+    float e;
+    float f;
     if( fabs(rhs.y)<fabs(rhs.x) )
     {
         e = rhs.y/rhs.x;
@@ -141,15 +141,15 @@ const ap::complex ap::operator/(const double& lhs, const ap::complex& rhs)
     return result;
 }
 
-const ap::complex ap::operator/(const ap::complex& lhs, const double& rhs)
+const ap::complex ap::operator/(const ap::complex& lhs, const float& rhs)
 { return ap::complex(lhs.x/rhs, lhs.y/rhs); }
 
-const double ap::abscomplex(const ap::complex &z)
+const float ap::abscomplex(const ap::complex &z)
 {
-    double w;
-    double xabs;
-    double yabs;
-    double v;
+    float w;
+    float xabs;
+    float yabs;
+    float v;
 
     xabs = fabs(z.x);
     yabs = fabs(z.y);
@@ -159,7 +159,7 @@ const double ap::abscomplex(const ap::complex &z)
         return w;
     else
     {
-        double t = v/w;
+        float t = v/w;
         return w*sqrt(1+t*t);
     }
 }
@@ -173,13 +173,13 @@ const ap::complex ap::csqr(const ap::complex &z)
 /********************************************************************
 BLAS functions
 ********************************************************************/
-double ap::vdotproduct(const double *v1, const double *v2, int N)
+float ap::vdotproduct(const float *v1, const float *v2, int N)
 {
 #ifdef AP_WIN32
     if( ddot1!=NULL )
         return ddot1(v1, v2, N);
 #endif
-    return ap::_vdotproduct<double>(v1, v2, N);
+    return ap::_vdotproduct<float>(v1, v2, N);
 }
 
 ap::complex ap::vdotproduct(const ap::complex *v1, const ap::complex *v2, int N)
@@ -187,7 +187,7 @@ ap::complex ap::vdotproduct(const ap::complex *v1, const ap::complex *v2, int N)
     return ap::_vdotproduct<ap::complex>(v1, v2, N);
 }
 
-void ap::vmove(double *vdst, const double* vsrc, int N)
+void ap::vmove(float *vdst, const float* vsrc, int N)
 {
 #ifdef AP_WIN32
     if( dmove1!=NULL )
@@ -196,7 +196,7 @@ void ap::vmove(double *vdst, const double* vsrc, int N)
         return;
     }
 #endif
-    ap::_vmove<double>(vdst, vsrc, N);
+    ap::_vmove<float>(vdst, vsrc, N);
 }
 
 void ap::vmove(ap::complex *vdst, const ap::complex* vsrc, int N)
@@ -204,7 +204,7 @@ void ap::vmove(ap::complex *vdst, const ap::complex* vsrc, int N)
     ap::_vmove<ap::complex>(vdst, vsrc, N);
 }
 
-void ap::vmoveneg(double *vdst, const double *vsrc, int N)
+void ap::vmoveneg(float *vdst, const float *vsrc, int N)
 {
 #ifdef AP_WIN32
     if( dmoveneg1!=NULL )
@@ -213,7 +213,7 @@ void ap::vmoveneg(double *vdst, const double *vsrc, int N)
         return;
     }
 #endif
-    ap::_vmoveneg<double>(vdst, vsrc, N);
+    ap::_vmoveneg<float>(vdst, vsrc, N);
 }
 
 void ap::vmoveneg(ap::complex *vdst, const ap::complex *vsrc, int N)
@@ -221,7 +221,7 @@ void ap::vmoveneg(ap::complex *vdst, const ap::complex *vsrc, int N)
     ap::_vmoveneg<ap::complex>(vdst, vsrc, N);
 }
 
-void ap::vmove(double *vdst, const double *vsrc, int N, double alpha)
+void ap::vmove(float *vdst, const float *vsrc, int N, float alpha)
 {
 #ifdef AP_WIN32
     if( dmoves1!=NULL )
@@ -230,12 +230,12 @@ void ap::vmove(double *vdst, const double *vsrc, int N, double alpha)
         return;
     }
 #endif
-    ap::_vmove<double,double>(vdst, vsrc, N, alpha);
+    ap::_vmove<float,float>(vdst, vsrc, N, alpha);
 }
 
-void ap::vmove(ap::complex *vdst, const ap::complex *vsrc, int N, double alpha)
+void ap::vmove(ap::complex *vdst, const ap::complex *vsrc, int N, float alpha)
 {
-    ap::_vmove<ap::complex,double>(vdst, vsrc, N, alpha);
+    ap::_vmove<ap::complex,float>(vdst, vsrc, N, alpha);
 }
 
 void ap::vmove(ap::complex *vdst, const ap::complex *vsrc, int N, ap::complex alpha)
@@ -243,7 +243,7 @@ void ap::vmove(ap::complex *vdst, const ap::complex *vsrc, int N, ap::complex al
     ap::_vmove<ap::complex,ap::complex>(vdst, vsrc, N, alpha);
 }
 
-void ap::vadd(double *vdst, const double *vsrc, int N)
+void ap::vadd(float *vdst, const float *vsrc, int N)
 {
 #ifdef AP_WIN32
     if( dadd1!=NULL )
@@ -252,7 +252,7 @@ void ap::vadd(double *vdst, const double *vsrc, int N)
         return;
     }
 #endif
-    ap::_vadd<double>(vdst, vsrc, N);
+    ap::_vadd<float>(vdst, vsrc, N);
 }
 
 void ap::vadd(ap::complex *vdst, const ap::complex *vsrc, int N)
@@ -260,7 +260,7 @@ void ap::vadd(ap::complex *vdst, const ap::complex *vsrc, int N)
     ap::_vadd<ap::complex>(vdst, vsrc, N);
 }
 
-void ap::vadd(double *vdst, const double *vsrc, int N, double alpha)
+void ap::vadd(float *vdst, const float *vsrc, int N, float alpha)
 {
 #ifdef AP_WIN32
     if( dadds1!=NULL )
@@ -269,12 +269,12 @@ void ap::vadd(double *vdst, const double *vsrc, int N, double alpha)
         return;
     }
 #endif
-    ap::_vadd<double,double>(vdst, vsrc, N, alpha);
+    ap::_vadd<float,float>(vdst, vsrc, N, alpha);
 }
 
-void ap::vadd(ap::complex *vdst, const ap::complex *vsrc, int N, double alpha)
+void ap::vadd(ap::complex *vdst, const ap::complex *vsrc, int N, float alpha)
 {
-    ap::_vadd<ap::complex,double>(vdst, vsrc, N, alpha);
+    ap::_vadd<ap::complex,float>(vdst, vsrc, N, alpha);
 }
 
 void ap::vadd(ap::complex *vdst, const ap::complex *vsrc, int N, ap::complex alpha)
@@ -282,7 +282,7 @@ void ap::vadd(ap::complex *vdst, const ap::complex *vsrc, int N, ap::complex alp
     ap::_vadd<ap::complex,ap::complex>(vdst, vsrc, N, alpha);
 }
 
-void ap::vsub(double *vdst, const double *vsrc, int N)
+void ap::vsub(float *vdst, const float *vsrc, int N)
 {
 #ifdef AP_WIN32
     if( dsub1!=NULL )
@@ -291,7 +291,7 @@ void ap::vsub(double *vdst, const double *vsrc, int N)
         return;
     }
 #endif
-    ap::_vsub<double>(vdst, vsrc, N);
+    ap::_vsub<float>(vdst, vsrc, N);
 }
 
 void ap::vsub(ap::complex *vdst, const ap::complex *vsrc, int N)
@@ -299,7 +299,7 @@ void ap::vsub(ap::complex *vdst, const ap::complex *vsrc, int N)
     ap::_vsub<ap::complex>(vdst, vsrc, N);
 }
 
-void ap::vsub(double *vdst, const double *vsrc, int N, double alpha)
+void ap::vsub(float *vdst, const float *vsrc, int N, float alpha)
 {
 #ifdef AP_WIN32
     if( dadds1!=NULL )
@@ -308,12 +308,12 @@ void ap::vsub(double *vdst, const double *vsrc, int N, double alpha)
         return;
     }
 #endif
-    ap::_vsub<double,double>(vdst, vsrc, N, alpha);
+    ap::_vsub<float,float>(vdst, vsrc, N, alpha);
 }
 
-void ap::vsub(ap::complex *vdst, const ap::complex *vsrc, int N, double alpha)
+void ap::vsub(ap::complex *vdst, const ap::complex *vsrc, int N, float alpha)
 {
-    ap::_vsub<ap::complex,double>(vdst, vsrc, N, alpha);
+    ap::_vsub<ap::complex,float>(vdst, vsrc, N, alpha);
 }
 
 void ap::vsub(ap::complex *vdst, const ap::complex *vsrc, int N, ap::complex alpha)
@@ -321,7 +321,7 @@ void ap::vsub(ap::complex *vdst, const ap::complex *vsrc, int N, ap::complex alp
     ap::_vsub<ap::complex,ap::complex>(vdst, vsrc, N, alpha);
 }
 
-void ap::vmul(double *vdst, int N, double alpha)
+void ap::vmul(float *vdst, int N, float alpha)
 {
 #ifdef AP_WIN32
     if( dmuls1!=NULL )
@@ -330,12 +330,12 @@ void ap::vmul(double *vdst, int N, double alpha)
         return;
     }
 #endif
-    ap::_vmul<double,double>(vdst, N, alpha);
+    ap::_vmul<float,float>(vdst, N, alpha);
 }
 
-void ap::vmul(ap::complex *vdst, int N, double alpha)
+void ap::vmul(ap::complex *vdst, int N, float alpha)
 {
-    ap::_vmul<ap::complex,double>(vdst, N, alpha);
+    ap::_vmul<ap::complex,float>(vdst, N, alpha);
 }
 
 void ap::vmul(ap::complex *vdst, int N, ap::complex alpha)
@@ -346,14 +346,14 @@ void ap::vmul(ap::complex *vdst, int N, ap::complex alpha)
 /********************************************************************
 standard functions
 ********************************************************************/
-int ap::sign(double x)
+int ap::sign(float x)
 {
     if( x>0 ) return  1;
     if( x<0 ) return -1;
     return 0;
 }
 
-double ap::randomreal()
+float ap::randomreal()
 {
     int i1 = rand();
     int i2 = rand();
@@ -361,29 +361,29 @@ double ap::randomreal()
         i1 =rand();
     while(i2==RAND_MAX)
         i2 =rand();
-    double mx = RAND_MAX;
+    float mx = RAND_MAX;
     return (i1+i2/mx)/mx;
 }
 
 int ap::randominteger(int maxv)
 {  return rand()%maxv; }
 
-int ap::round(double x)
+int ap::round(float x)
 { return int(floor(x+0.5)); }
 
-int ap::trunc(double x)
+int ap::trunc(float x)
 { return int(x>0 ? floor(x) : ceil(x)); }
 
-int ap::ifloor(double x)
+int ap::ifloor(float x)
 { return int(floor(x)); }
 
-int ap::iceil(double x)
+int ap::iceil(float x)
 { return int(ceil(x)); }
 
-double ap::pi()
+float ap::pi()
 { return 3.14159265358979323846; }
 
-double ap::sqr(double x)
+float ap::sqr(float x)
 { return x*x; }
 
 int ap::maxint(int m1, int m2)
@@ -396,12 +396,12 @@ int ap::minint(int m1, int m2)
     return m1>m2 ? m2 : m1;
 }
 
-double ap::maxreal(double m1, double m2)
+float ap::maxreal(float m1, float m2)
 {
     return m1>m2 ? m1 : m2;
 }
 
-double ap::minreal(double m1, double m2)
+float ap::minreal(float m1, float m2)
 {
     return m1>m2 ? m2 : m1;
 }
@@ -787,7 +787,7 @@ bool ap::opendataset(std::string file, dataset *pdataset)
             return false;
         for(nCol=0; nCol<nColumns; nCol++)
         {
-            double v;
+            float v;
             if( sscanf(Values[nCol].c_str(), "%lg", &v)!=1 )
                 return false;
             if( (nCol==nColumns-1) && pdataset->iscls && ((round(v)<0) || (round(v)>=pdataset->nclasses)) )

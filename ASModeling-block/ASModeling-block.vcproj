@@ -2,9 +2,9 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="9.00"
-	Name="Utils"
-	ProjectGUID="{75BAE538-D358-40E8-A1F7-60D486E2CC5D}"
-	RootNamespace="Utils"
+	Name="ASModeling-block"
+	ProjectGUID="{19ACD4F5-FBBB-4D20-88A7-5A45996C3A16}"
+	RootNamespace="ASModelingblock"
 	TargetFrameworkVersion="196613"
 	>
 	<Platforms>
@@ -40,10 +40,10 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="$(SolutionDir)\Inc"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)\Inc&quot;"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="1"
+				RuntimeLibrary="3"
 				WarningLevel="3"
 				DebugInformationFormat="4"
 			/>
@@ -58,6 +58,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
+				AdditionalDependencies="glut32.lib glew32.lib cudart.lib cUtil32.lib tbb_debug.lib tbbmalloc_debug.lib tbbmalloc_proxy_debug.lib L-BFGS-B.lib TinyXML.lib Utils.lib"
 				AdditionalLibraryDirectories="$(SolutionDir)\Lib"
 			/>
 			<Tool
@@ -102,11 +103,9 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="2"
-				InlineFunctionExpansion="2"
 				EnableIntrinsicFunctions="true"
-				FavorSizeOrSpeed="1"
-				AdditionalIncludeDirectories="$(SolutionDir)\Inc"
-				RuntimeLibrary="0"
+				AdditionalIncludeDirectories="&quot;$(SolutionDir)\Inc&quot;"
+				RuntimeLibrary="2"
 				EnableFunctionLevelLinking="true"
 				WarningLevel="3"
 				DebugInformationFormat="3"
@@ -122,6 +121,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
+				AdditionalDependencies="glut32.lib glew32.lib cudart.lib cUtil32.lib tbb.lib tbbmalloc.lib tbbmalloc_proxy.lib L-BFGS-B.lib TinyXML.lib Utils.lib"
 				AdditionalLibraryDirectories="$(SolutionDir)\Lib"
 			/>
 			<Tool
@@ -145,100 +145,74 @@
 	</References>
 	<Files>
 		<Filter
-			Name="math"
+			Name="Source Files"
+			Filter="cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
+			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath=".\math\BoundingBox.cpp"
+				RelativePath=".\asmBlock.cc"
 				>
 			</File>
 			<File
-				RelativePath=".\math\BoundingBox.h"
+				RelativePath=".\asmConfigure.cc"
 				>
 			</File>
 			<File
-				RelativePath=".\math\ConvexHull2D.cpp"
+				RelativePath=".\asmGEvaluator.cc"
 				>
 			</File>
 			<File
-				RelativePath=".\math\ConvexHull2D.h"
+				RelativePath=".\asmOGL.cc"
 				>
 			</File>
 			<File
-				RelativePath=".\math\geomath.h"
+				RelativePath=".\asmWorkspace.cc"
 				>
 			</File>
 			<File
-				RelativePath=".\math\matrix4.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\math\matrix4.h"
-				>
-			</File>
-			<File
-				RelativePath=".\math\vector4.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\math\vector4.h"
+				RelativePath=".\asmWorkspace.cu"
 				>
 			</File>
 		</Filter>
 		<Filter
-			Name="image"
+			Name="Header Files"
+			Filter="h;hpp;hxx;hm;inl;inc;xsd"
+			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
 			<File
-				RelativePath=".\image\BMPImage.cpp"
+				RelativePath=".\asmBlock.h"
 				>
 			</File>
 			<File
-				RelativePath=".\image\BMPImage.h"
+				RelativePath=".\asmConfigure.h"
 				>
 			</File>
 			<File
-				RelativePath=".\image\Image.cpp"
+				RelativePath=".\asmGEvaluator.h"
 				>
 			</File>
 			<File
-				RelativePath=".\image\Image.h"
+				RelativePath=".\asmOGL.h"
 				>
 			</File>
 			<File
-				RelativePath=".\image\PFMImage.cpp"
+				RelativePath=".\asmRenderer.h"
 				>
 			</File>
 			<File
-				RelativePath=".\image\PFMImage.h"
+				RelativePath=".\asmTypes.h"
+				>
+			</File>
+			<File
+				RelativePath=".\asmWorkspace.h"
 				>
 			</File>
 		</Filter>
 		<Filter
-			Name="timer"
+			Name="Resource Files"
+			Filter="rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
+			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
 			>
-			<File
-				RelativePath=".\Timer\CPUTimer.h"
-				>
-			</File>
-		</Filter>
-		<Filter
-			Name="openGL"
-			>
-			<File
-				RelativePath=".\openGL\GLFBO.cc"
-				>
-			</File>
-			<File
-				RelativePath=".\openGL\GLFBO.h"
-				>
-			</File>
-			<File
-				RelativePath=".\openGL\GLSLShader.cc"
-				>
-			</File>
-			<File
-				RelativePath=".\openGL\GLSLShader.h"
-				>
-			</File>
 		</Filter>
 	</Files>
 	<Globals>

@@ -31,7 +31,7 @@ namespace as_modeling
 
   ASMGradCompute* ASMGradCompute::instance_ = NULL;
 
-  void ASMGradCompute::grad_compute(const ap::real_1d_array& x, double &f, ap::real_1d_array &g)
+  void ASMGradCompute::grad_compute(const ap::real_1d_array& x, float &f, ap::real_1d_array &g)
   {
     fprintf(stderr, "=== == === == Grad Computing ....\n");
 
