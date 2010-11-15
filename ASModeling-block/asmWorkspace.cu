@@ -19,3 +19,9 @@ bool Workspace::init_cuda_resources(void)
 
   return true;
 }
+
+void Workspace::void zero_g()
+{
+	// memset g to 0
+	
+}

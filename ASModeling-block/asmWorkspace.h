@@ -52,9 +52,16 @@ namespace asmodeling_block
     //! store the volume data
     bool store_frame_result(uint32_t frame);
 
+	//! render the volume straightforwdly
+	void straight_render(int iview);
+	
+	//! render the perturbing group
+	void perturb_render(int iview, int block_layer, int slice, int pu, int pv);
+	
     // cuda methods,  in asmWorkspace.cu
-    bool init_cuda_resources(void);
-    void upload_captured_images(void);
+    bool init_cuda_resources(void);		//! 
+    void upload_captured_images(void);	//! upload each frame to 
+	void zero_g();						//! memset g to 0
 
     //! temp data
     std::vector< Block >     blocks_cpu_;
@@ -71,6 +78,9 @@ namespace asmodeling_block
 
     //! captured images here, merging into one big block
     scoped_array<float> captured_image_;
+	
+	//! captured images, seperated files
+	scoped_array<BMPImage> captured_BMPimages_;
 
     //! density data here
     ap::real_1d_array x_array_;
@@ -86,6 +96,11 @@ namespace asmodeling_block
 
     // member data on device side
 
+	//! gradients value
+	float * device_g;
+	uint32_t g_size;
+	
+	
     //! graphics resource for render result and perturbed result
     cudaGraphicsResource * resource_rr_;
     cudaGraphicsResource * resource_pr_;
