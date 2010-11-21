@@ -21,6 +21,7 @@
 
 #include "../L-BFGS-B/ap.h"
 #include "../L-BFGS-B/lbfgsb.h"
+#include "../Utils/image/BMPImage.h"
 
 
 namespace asmodeling_block

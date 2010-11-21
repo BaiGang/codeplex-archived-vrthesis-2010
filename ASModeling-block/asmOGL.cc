@@ -3,7 +3,7 @@
 #include <cstdio>
 #include <gl/glew.h>
 #include <gl/glut.h>
-#include "../Utils/openGL/GLSLShader.h"
+#include "../Utils/shader/GLSLShader.h"
 
 using namespace asmodeling_block;
 

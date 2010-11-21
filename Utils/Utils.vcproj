@@ -224,19 +224,19 @@
 			Name="openGL"
 			>
 			<File
-				RelativePath=".\openGL\GLFBO.cc"
+				RelativePath=".\shader\GLFBO.cc"
 				>
 			</File>
 			<File
-				RelativePath=".\openGL\GLFBO.h"
+				RelativePath=".\shader\GLFBO.h"
 				>
 			</File>
 			<File
-				RelativePath=".\openGL\GLSLShader.cc"
+				RelativePath=".\shader\GLSLShader.cc"
 				>
 			</File>
 			<File
-				RelativePath=".\openGL\GLSLShader.h"
+				RelativePath=".\shader\GLSLShader.h"
 				>
 			</File>
 		</Filter>

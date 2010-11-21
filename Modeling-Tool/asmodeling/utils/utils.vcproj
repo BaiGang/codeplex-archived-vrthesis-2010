@@ -191,6 +191,22 @@
 				RelativePath=".\GLCamera.h"
 				>
 			</File>
+			<File
+				RelativePath=".\GLFBO.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\GLFBO.h"
+				>
+			</File>
+			<File
+				RelativePath=".\GLSLShader.cc"
+				>
+			</File>
+			<File
+				RelativePath=".\GLSLShader.h"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="math"

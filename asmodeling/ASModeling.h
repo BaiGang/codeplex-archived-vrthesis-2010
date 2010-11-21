@@ -42,6 +42,7 @@ namespace as_modeling
     // Load configure file and camera parameters
     bool Initialize(const char * conf_filename, const char * camera_filename);
 
+
     // The whole optimization / reconstruction process
     // Treat the first frame specially,
     // then optimize successor frames one by one :)

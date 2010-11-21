@@ -571,6 +571,17 @@ namespace as_modeling
 
     int num_items = projected_centers_.size() / (2 * num_views) + 1;
 
+	///////////////////////////////
+	//////////////////////////////
+	//  here for debugging only
+	//
+	//
+	return true;
+	//
+	//
+	///////////////////////////////
+
+
     //
     // allocate space for the cudaArray 
     //

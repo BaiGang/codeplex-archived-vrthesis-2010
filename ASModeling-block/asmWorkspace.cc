@@ -176,7 +176,7 @@ bool Workspace::init_value_firstlevel(uint32_t level)
 	for (uint32_t jblock = 0; jblock < NBLOCK; ++jblock)
 	{
 		float block_nll_y = vol_nll_y + jblock * block_size;
-		for (uint_32t kblock = 0; kblock < NBLOCK; ++kblock)
+		for (uint32_t kblock = 0; kblock < NBLOCK; ++kblock)
 		{
 			float block_nll_z = vol_nll_z + kblock * block_size;
 			
@@ -276,7 +276,6 @@ bool Workspace::reconstruct(uint32_t level)
 bool Workspace::store_frame_result(asmodeling_block::uint32_t frame)
 {
   //
-  PFMImage
 
   return true;
 }

@@ -19,7 +19,7 @@ public:
 
 	BMPImage(IMAGETYPE imageType, int width, int height, WORD bitCount, BYTE* pixel);
 
-	BMPImage(IMAGETYPE imageType);
+	BMPImage(IMAGETYPE imageType = BMP);
 	virtual ~BMPImage(void);
 	//¿½±´¹¹Ôìº¯Êý
 	BMPImage(const BMPImage& bmpImage);

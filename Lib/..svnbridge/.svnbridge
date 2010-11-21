@@ -7,4 +7,9 @@ Utils.lib
 TinyXML.lib
 Utils.lib
 CudaImageUtil.lib
+</Value></Property><Property><Name>svn:ignore</Name><Value>L-BFGS-B.lib
+TinyXML.lib
+Utils.lib
+CudaImageUtil.lib
+ASModeling-block.lib
 </Value></Property></Properties></ItemProperties>

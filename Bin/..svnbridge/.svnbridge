@@ -3,4 +3,8 @@
 </Value></Property><Property><Name>svn:ignore</Name><Value>*.exe
 *.ilk
 *.pdb
+</Value></Property><Property><Name>svn:ignore</Name><Value>*.exe
+*.ilk
+*.pdb
+cudpp32_30_14.dll
 </Value></Property></Properties></ItemProperties>

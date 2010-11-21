@@ -94,8 +94,7 @@ namespace as_modeling
     }
 
     // init space for result data
-    float * pdata = new float[max_vol_size_ * max_vol_size_ * max_vol_size_];
-    frame_volume_result_.reset();
+    frame_volume_result_.reset(new float[max_vol_size_ * max_vol_size_ * max_vol_size_]);
 
     return true;
   }

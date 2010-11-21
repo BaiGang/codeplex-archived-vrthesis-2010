@@ -3,6 +3,7 @@
 
 
 #include <cuda_runtime.h>
+//#include <cutil_inline.h>
 #include <../Inc/cudpp.h>
 
 typedef unsigned short uint16;

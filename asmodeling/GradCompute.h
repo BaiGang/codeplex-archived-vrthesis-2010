@@ -62,6 +62,10 @@ namespace as_modeling{
     // init the new x
     bool succframe_init(int level, std::vector<float>& guess_x, ap::real_1d_array& prev_x);
 
+	// return the volume tag
+	// not this function is for debugging only...
+	int * get_volume_tags(){ return h_tag_volume; };
+
   private:
     // set the volume tag and projection center for current level
     // set indicators for the current level
