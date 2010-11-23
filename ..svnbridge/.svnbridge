@@ -4,4 +4,7 @@
 *.suo
 </Value></Property><Property><Name>svn:ignore</Name><Value>*.ncb
 *.suo
+</Value></Property><Property><Name>svn:ignore</Name><Value>*.ncb
+*.suo
+Modeling-Tool
 </Value></Property></Properties></ItemProperties>

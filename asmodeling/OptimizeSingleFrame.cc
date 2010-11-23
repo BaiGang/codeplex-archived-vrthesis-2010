@@ -18,55 +18,56 @@
 
 namespace as_modeling
 {
-  bool ASModeling::OptimizeSingleFrame(int iframe)
-  {
-    // first, load the frame
-    if (!load_captured_images(iframe))
-    {
-      fprintf(stderr, "<->  Error : Cannot load captured images, frame %d\n", iframe);
-      return false;
-    }
+	bool ASModeling::OptimizeSingleFrame(int iframe)
+	{
+		// first, load the frame
+		if (!load_captured_images(iframe))
+		{
+			fprintf(stderr, "<->  Error : Cannot load captured images, frame %d\n", iframe);
+			return false;
+		}
 
-    Timer tmer;
+		Timer tmer;
 
-    ASMGradCompute::Instance()->set_ground_truth_images(ground_truth_image_);
+		ASMGradCompute::Instance()->set_ground_truth_images(ground_truth_image_);
 
+		///////////////////////////////////////
+		///
+		///  Store initial volumes
+		///   right here right now
+		///
+		///////////////////////////////////////
+		memset(frame_volume_result_.get(), 0, sizeof(float)*max_vol_size_ * max_vol_size_ * max_vol_size_);
+		int * vol_tag = ASMGradCompute::Instance()->get_volume_tags();
+
+		for (int k = 0; k < max_vol_size_; ++k)
+		{
+			int zbase = k * max_vol_size_ * max_vol_size_;
+			for (int j = 0; j < max_vol_size_; ++j)
+			{
+				int ybase = zbase + j * max_vol_size_;
+				for (int i = 0; i < max_vol_size_; ++i)
+				{
+					frame_volume_result_[ybase + i] = (vol_tag[ybase+i] == 0) ? 0.0f : host_x[ vol_tag[ybase+i] ];
+				}
+			}
+		}
+		return true;
+		///////////////////////////////////////
+		///
+		///
+		///////////////////////////////////////
 
     int i_level = initial_vol_level_;
     std::vector<float> host_x;
 
     tmer.start();
 
-    //ASMGradCompute::Instance()->frame_init(i_level, host_x);
-	ASMGradCompute::Instance()->frame_init(max_vol_level_, host_x);
+    ASMGradCompute::Instance()->frame_init(i_level, host_x);
 
-	///////////////////////////////////////
-	///
-	///  Store initial volumes
-	///   right here right now
-	///
-	///////////////////////////////////////
-	memset(frame_volume_result_.get(), 0, sizeof(float)*max_vol_size_ * max_vol_size_ * max_vol_size_);
-	int * vol_tag = ASMGradCompute::Instance()->get_volume_tags();
 
-	for (int k = 0; k < max_vol_size_; ++k)
-	{
-		int zbase = k * max_vol_size_ * max_vol_size_;
-		for (int j = 0; j < max_vol_size_; ++j)
-		{
-			int ybase = zbase + j * max_vol_size_;
-			for (int i = 0; i < max_vol_size_; ++i)
-			{
-				frame_volume_result_[ybase + i] = (vol_tag[ybase+i] == 0) ? 0.0f : host_x[ vol_tag[ybase+i] ];
-			}
-		}
-	}
 
-	return true;
-	///////////////////////////////////////
-	///
-	///
-	///////////////////////////////////////
+
 
     fprintf(stderr, "TIMING : frame_init of level %d, used %lf secs.\n", i_level, tmer.stop());
 
