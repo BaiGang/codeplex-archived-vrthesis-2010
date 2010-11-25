@@ -76,6 +76,21 @@
     <None Include="res\Toolbar256.bmp">
       <Filter>资源文件</Filter>
     </None>
+    <None Include="res\bitmap1.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\writeslarge-modify.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\writelarge-modify.bmp">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\writesmall.ico">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\writesmall.png">
+      <Filter>资源文件</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="test.h">
@@ -114,6 +129,9 @@
     <ClInclude Include="image\PFMImage.h">
       <Filter>头文件\image</Filter>
     </ClInclude>
+    <ClInclude Include="OptionWnd.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp">
@@ -145,6 +163,9 @@
     </ClCompile>
     <ClCompile Include="image\PFMImage.cpp">
       <Filter>源文件\image</Filter>
+    </ClCompile>
+    <ClCompile Include="OptionWnd.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

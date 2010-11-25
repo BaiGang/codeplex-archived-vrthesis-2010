@@ -74,6 +74,8 @@ int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	m_wndProperties.EnableDocking(CBRS_ALIGN_RIGHT);
 	DockPane(&m_wndProperties);
 
+	m_wndOption.EnableDocking(CBRS_ALIGN_LEFT);
+	DockPane(&m_wndOption);
 
 	return 0;
 }
@@ -116,6 +118,16 @@ BOOL CMainFrame::CreateDockingWindows()
 		return FALSE; // 未能创建
 	}
 
+	CString strOptionWnd;
+	bNameValid = strOptionWnd.LoadString(IDS_PROPERTIES_WND);
+	ASSERT(bNameValid);
+	if (!m_wndOption.Create(strOptionWnd, this, CRect(0, 0, 100, 100), TRUE, ID_VIEW_OPTIONWND, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_LEFT
+		| CBRS_FLOAT_MULTI))
+	{
+		TRACE0("未能创建“属性”窗口\n");
+		return FALSE; // 未能创建
+	}
+
 	SetDockingWindowIcons(theApp.m_bHiColorIcons);
 	return TRUE;
 	
@@ -129,6 +141,9 @@ void CMainFrame::SetDockingWindowIcons(BOOL bHiColorIcons)
 
 	HICON hPropertiesBarIcon = (HICON) ::LoadImage(::AfxGetResourceHandle(), MAKEINTRESOURCE(bHiColorIcons ? IDI_PROPERTIES_WND_HC : IDI_PROPERTIES_WND), IMAGE_ICON, ::GetSystemMetrics(SM_CXSMICON), ::GetSystemMetrics(SM_CYSMICON), 0);
 	m_wndProperties.SetIcon(hPropertiesBarIcon, FALSE);
+
+	HICON hOptionBarIcon = (HICON) ::LoadImage(::AfxGetResourceHandle(), MAKEINTRESOURCE(bHiColorIcons ? IDI_OUTPUT_WND_HC : IDI_OUTPUT_WND), IMAGE_ICON, ::GetSystemMetrics(SM_CXSMICON), ::GetSystemMetrics(SM_CYSMICON), 0);
+	m_wndOption.SetIcon(hOptionBarIcon, FALSE);
 	
 }
 
@@ -241,4 +256,11 @@ void CMainFrame::OnSettingChange(UINT uFlags, LPCTSTR lpszSection)
 void CMainFrame::outputText(CString str)
 {
 	m_wndOutput.FillBuildWindow(str);
+}
+void CMainFrame::setRadio(bool isCamera)
+{
+	if (isCamera)
+		m_wndOption.setCamera();
+	else
+		m_wndOption.setLight();
 }

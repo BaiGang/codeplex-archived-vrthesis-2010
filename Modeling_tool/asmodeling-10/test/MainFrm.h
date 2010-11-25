@@ -15,6 +15,7 @@
 #pragma once
 #include "OutputWnd.h"
 #include "PropertiesWnd.h"
+#include "OptionWnd.h"
 
 class CMainFrame : public CFrameWndEx
 {
@@ -47,6 +48,7 @@ protected:  // 控件条嵌入成员
 	CMFCToolBarImages m_PanelImages;
 	COutputWnd        m_wndOutput;
 	CPropertiesWnd    m_wndProperties;
+	COptionWnd		  m_wndOption;
 
 // 生成的消息映射函数
 protected:
@@ -61,6 +63,7 @@ protected:
 
 public:
 	void outputText(CString str);
+	void setRadio(bool isCamera);
 };
 
 

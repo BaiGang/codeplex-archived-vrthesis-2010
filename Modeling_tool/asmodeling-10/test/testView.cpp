@@ -54,7 +54,7 @@ CtestView::CtestView()
 	// TODO: 在此处添加构造代码
 	this->m_GLPixelIndex = 0;
 	this->m_hGLContext = NULL;
-
+/*
 	picIndex = 0;
 	//assume
 	float length = 320;
@@ -66,7 +66,8 @@ CtestView::CtestView()
 	nextPic = new PFMImage(length, length*length, 0, imgdata3);
 
 	loadPic();
-}
+	*/
+}	
 
 CtestView::~CtestView()
 {
@@ -235,6 +236,7 @@ void CtestView::OnBnClickedRadioCamera()
 {
 	// TODO: 在此添加控件通知处理程序代码
 	currentRBState = CAMERA;
+	((CMainFrame*)theApp.m_pMainWnd)->setRadio(true);
 	Invalidate();
 }
 
@@ -243,6 +245,7 @@ void CtestView::OnBnClickedRadioLight()
 {
 	// TODO: 在此添加控件通知处理程序代码
 	currentRBState = LIGHT;
+	((CMainFrame*)theApp.m_pMainWnd)->setRadio(false);
 	Invalidate();
 }
 
@@ -318,6 +321,8 @@ void CtestView::outputText(char* str)
 
 int CtestView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
+/*	
+
 	if (CFormView::OnCreate(lpCreateStruct) == -1)
 		return -1;
 
@@ -334,6 +339,7 @@ int CtestView::OnCreate(LPCREATESTRUCT lpCreateStruct)
 		AfxMessageBox(_T("createViewGLContext failed!"));
 		return 0;
 	}
+	*/
 	return 0;
 }
 
@@ -369,6 +375,7 @@ void CtestView::OnSize(UINT nType, int cx, int cy)
 	CFormView::OnSize(nType, cx, cy);
 
 	// TODO: 在此处添加消息处理程序代码
+/*
 	GLsizei width,height;
 	GLdouble aspect;
 	width = cx;
@@ -387,4 +394,5 @@ void CtestView::OnSize(UINT nType, int cx, int cy)
 	gluOrtho2D(0.0,500.0*aspect,0.0,500.0);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
+	*/
 }

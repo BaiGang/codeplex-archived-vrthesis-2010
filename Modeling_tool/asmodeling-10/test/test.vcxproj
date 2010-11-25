@@ -97,6 +97,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
+    <None Include="res\bitmap1.bmp" />
     <None Include="res\buttons.bmp" />
     <None Include="res\filelarge.bmp" />
     <None Include="res\filesmall.bmp" />
@@ -115,14 +116,19 @@
     <None Include="res\testDoc.ico" />
     <None Include="res\Toolbar.bmp" />
     <None Include="res\Toolbar256.bmp" />
+    <None Include="res\writelarge-modify.bmp" />
     <None Include="res\writelarge.bmp" />
+    <None Include="res\writeslarge-modify.bmp" />
     <None Include="res\writesmall.bmp" />
+    <None Include="res\writesmall.ico" />
+    <None Include="res\writesmall.png" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="image\Image.h" />
     <ClInclude Include="image\PFMImage.h" />
     <ClInclude Include="INPUTDLG.h" />
     <ClInclude Include="MainFrm.h" />
+    <ClInclude Include="OptionWnd.h" />
     <ClInclude Include="OutputWnd.h" />
     <ClInclude Include="PropertiesWnd.h" />
     <ClInclude Include="Resource.h" />
@@ -137,6 +143,7 @@
     <ClCompile Include="image\PFMImage.cpp" />
     <ClCompile Include="INPUTDLG.cpp" />
     <ClCompile Include="MainFrm.cpp" />
+    <ClCompile Include="OptionWnd.cpp" />
     <ClCompile Include="OutputWnd.cpp" />
     <ClCompile Include="PropertiesWnd.cpp" />
     <ClCompile Include="stdafx.cpp">
