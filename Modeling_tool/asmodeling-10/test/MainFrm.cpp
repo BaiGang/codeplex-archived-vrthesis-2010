@@ -119,7 +119,7 @@ BOOL CMainFrame::CreateDockingWindows()
 	}
 
 	CString strOptionWnd;
-	bNameValid = strOptionWnd.LoadString(IDS_PROPERTIES_WND);
+	bNameValid = strOptionWnd.LoadString(IDS_OPTION_WND);
 	ASSERT(bNameValid);
 	if (!m_wndOption.Create(strOptionWnd, this, CRect(0, 0, 100, 100), TRUE, ID_VIEW_OPTIONWND, WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | CBRS_LEFT
 		| CBRS_FLOAT_MULTI))
