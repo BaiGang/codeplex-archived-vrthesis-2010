@@ -19,7 +19,8 @@
 #include "MainFrm.h"
 
 #include "testDoc.h"
-#include "testView.h"
+//#include "testView.h"
+#include "pmModelTool.h"
 
 #include "INPUTDLG.h"
 
@@ -128,7 +129,7 @@ BOOL CtestApp::InitInstance()
 		IDR_MAINFRAME,
 		RUNTIME_CLASS(CtestDoc),
 		RUNTIME_CLASS(CMainFrame),       // Ö÷ SDI ¿ò¼Ü´°¿Ú
-		RUNTIME_CLASS(CtestView));
+		RUNTIME_CLASS(CPmModelTool));
 	if (!pDocTemplate)
 		return FALSE;
 	AddDocTemplate(pDocTemplate);

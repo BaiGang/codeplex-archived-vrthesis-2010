@@ -49,8 +49,9 @@
 
 #import     "msxml3.dll"
 using   namespace   MSXML2; 
-#include <gl\gl.h> 
-#include <gl\glu.h> 
+#include <gl/glew.h>
+//#include <gl\gl.h> 
+//#include <gl\glu.h> 
 
 
 

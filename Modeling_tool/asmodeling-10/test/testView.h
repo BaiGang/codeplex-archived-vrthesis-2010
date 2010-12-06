@@ -16,8 +16,11 @@
 
 #include "resource.h"
 
+#include "shader/GLSLShader.h"
+#include "math/geomath.h"
 
-class CtestView : public CFormView
+
+class CtestView : public CView
 {
 protected: // 仅从序列化创建
 	CtestView();
@@ -51,6 +54,15 @@ public:
 #endif
 
 protected:
+	// utility functions for setting opengl
+	bool InitGL(void);
+	bool ReshapeGL(int width, int height);
+	bool DisplayGL(void);
+	// load in camera parameters
+	bool LoadCameras(void);
+
+	void DrawBox();
+	void DrawSmoke();
 
 // 生成的消息映射函数
 protected:
@@ -63,9 +75,9 @@ public:
 	afx_msg void OnBnClickedRadioCamera();
 	afx_msg void OnBnClickedRadioLight();
 
-	PFMImage* lastPic;
-	PFMImage* currentPic;
-	PFMImage* nextPic;
+	PFMImage * m_pLastPic;
+	PFMImage * m_pCurrentPic;
+	PFMImage * m_pNextPic;
 	int picIndex;
 
 	void loadPic();
@@ -85,10 +97,41 @@ public:
 	int m_GLPixelIndex;
 	BOOL CreateViewGLContext(HDC hDC);
 	HGLRC m_hGLContext;
+	HDC m_hDC;
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
 	afx_msg void OnPaint();
 	afx_msg void OnDestroy();
 	afx_msg void OnSize(UINT nType, int cx, int cy);
+
+protected:
+	//////////////////////////////////////
+	//  member variables for rendering
+	//////////////////////////////////////
+	
+	static const int NUM_CAMERAS = 8;
+
+	// GLSL shaders for volumetric rendering
+	GLSLShader m_shader_alongX;
+	GLSLShader m_shader_alongY;
+	GLSLShader m_shader_alongZ;
+
+	// mv and prj matrix for each camera
+	Matrix4 m_modelview_mats[NUM_CAMERAS];
+	Matrix4 m_projection_mats[NUM_CAMERAS];
+
+	// GL 3D texture for volume data
+	GLuint m_tex3d_id;
+
+	// quaternion for rotation
+
+	// mouse motion on screen
+	double m_mouse_x;
+	double m_mouse_y;
+	float m_quatRotate_start[4];
+
+
+
+	virtual void OnDraw(CDC* /*pDC*/);
 };
 
 #ifndef _DEBUG  // testView.cpp 中的调试版本

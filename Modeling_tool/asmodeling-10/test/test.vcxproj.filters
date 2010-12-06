@@ -19,6 +19,18 @@
     <Filter Include="源文件\image">
       <UniqueIdentifier>{580313ed-3fd0-48b3-b182-3cfd01e6e34e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件\gltools">
+      <UniqueIdentifier>{c461edfe-2552-4e7d-969c-3569319fb235}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\gltools">
+      <UniqueIdentifier>{bfd40874-6355-4c50-b525-19e92fbd9d98}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\math">
+      <UniqueIdentifier>{2f1ca312-da26-4ff2-8972-a594574b2509}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\math">
+      <UniqueIdentifier>{809baee9-15b7-43ca-96eb-cab772105899}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
@@ -132,6 +144,27 @@
     <ClInclude Include="OptionWnd.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="shader\GLSLShader.h">
+      <Filter>头文件\gltools</Filter>
+    </ClInclude>
+    <ClInclude Include="shader\GLFBO.h">
+      <Filter>头文件\gltools</Filter>
+    </ClInclude>
+    <ClInclude Include="math\vector4.h">
+      <Filter>头文件\math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\geomath.h">
+      <Filter>头文件\math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\matrix4.h">
+      <Filter>头文件\math</Filter>
+    </ClInclude>
+    <ClInclude Include="math\SimpleQuat.h">
+      <Filter>头文件\math</Filter>
+    </ClInclude>
+    <ClInclude Include="pmModelTool.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp">
@@ -165,6 +198,24 @@
       <Filter>源文件\image</Filter>
     </ClCompile>
     <ClCompile Include="OptionWnd.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="shader\GLSLShader.cc">
+      <Filter>源文件\gltools</Filter>
+    </ClCompile>
+    <ClCompile Include="shader\GLFBO.cc">
+      <Filter>源文件\gltools</Filter>
+    </ClCompile>
+    <ClCompile Include="math\vector4.cpp">
+      <Filter>源文件\math</Filter>
+    </ClCompile>
+    <ClCompile Include="math\matrix4.cpp">
+      <Filter>源文件\math</Filter>
+    </ClCompile>
+    <ClCompile Include="math\SimpleQuat.cpp">
+      <Filter>源文件\math</Filter>
+    </ClCompile>
+    <ClCompile Include="pmModelTool.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

@@ -1,0 +1,75 @@
+<?xml version="1.0" ?>
+<Parameters>
+  <PMedia>
+    <extinction value="0.08" />
+    <scattering value="0.05" />
+    <alpha value="0.00001" />
+  </PMedia>
+  <Render>
+    <CurrentView value="0" />
+    <width value="1024" />
+    <height value="1024" />
+    <RenderInterval>
+      <Level5 value="3" />
+      <Level6 value="2" />
+      <Level7 value="1" />
+      <Level8 value="0" />
+    </RenderInterval>
+    <RotAngle value="0" />
+  </Render>
+  <Light>
+    <LightType value="1" />
+    <LightIntensityR value="250000.0" />
+    <LightX value="34.519" />
+    <LightY value="-135.976" />
+    <LightZ value="136.421" />
+  </Light>
+  <Volume>
+    <!-- box size are the size of the delegate geometry       -->
+    <!-- Trans are translation of the delegate geometry       -->
+    <!-- We do not take rotation of the dg into consideration -->
+    <BoxSize value="17.0" />
+    <TransX value="15.0" />
+    <TransY value="-9.0" />
+    <TransZ value="12.0" />
+    <!-- the resolution of the volume data -->
+    <VolumeInitialLevel value="5"/>
+    <VolumeMaxLevel value="8"/>
+    <VolInterval>
+      <Level5 value="2" />
+      <Level6 value="2" />
+      <Level7 value="4" />
+      <Level8 value="4" />
+    </VolInterval>
+  </Volume>
+  <LBFGSB>
+    <!-- #    ConstrainType   If ConstrainType is equal to:                   -->
+    <!-- #                    * 0, X(i) has no constraints,                   -->
+    <!-- #                    * 1, X(i) has only lower boundary,              -->
+    <!-- #                    * 2, X(i) has both lower and upper boundaries,  -->
+    <!-- #                    * 3, X(i) has only upper boundary,              -->
+    <!-- #    lowerBoundary       -   lower boundaries of X(i) variables.     -->
+    <!-- #    upperBoundary       -   upper boundaries of X(i) variables.     -->
+    <disturb value="0.00001" />
+    <EpsG value="0.001" />
+    <EpsF value="0.0001" />
+    <EpsX value="0.0001" />
+    <MaxIts value="25" />
+    <m value="7" />
+    <ConstrainType value="1" />
+    <LowerBound value="0.0" />
+    <UpperBound value ="10.0" />
+    <!-- # return code:                                                                   -->
+    <!-- #                    * -2 unknown internal error,                                -->
+    <!-- #                    * -1 wrong parameters were specified,                       -->
+    <!-- #                    * 0 interrupted by user,                                    -->
+    <!-- #                    * 1 relative function decreasing is less or equal to EpsF,  -->
+    <!-- #                    * 2 step is less or equal to EpsX,                          -->
+    <!-- #                    * 4 gradient norm is less or equal to EpsG,                 -->
+    <!-- #                    * 5 number of iterations exceeds MaxIts.                    -->
+  </LBFGSB>
+  <CUDA>
+  </CUDA>
+  <Cameras>
+  </Cameras>
+</Parameters>
