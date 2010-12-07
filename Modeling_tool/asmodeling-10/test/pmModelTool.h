@@ -13,7 +13,8 @@
 //#include "3dsReader.h"		//C3dsReader说明文件
 //#include "TriList.h"		//CTriList说明文件
 //#include "header.h"
-
+#include "shader/GLSLShader.h"
+#include "math/geomath.h"
 
 class CPmModelTool : public CView
 {
@@ -73,6 +74,15 @@ public:
 	BOOL		mouseleftdown;	
 	CPoint		mouseprevpoint; 
 
+	// utility functions for setting opengl
+	bool InitGL(void);
+	bool ReshapeGL(int width, int height);
+	bool DisplayGL(void);
+	// load in camera parameters
+	bool LoadCameras(void);
+
+	void DrawBox();
+	void DrawSmoke();
 	
 #ifdef _DEBUG
 	virtual void AssertValid() const;
@@ -96,6 +106,55 @@ protected:
 	afx_msg void OnFileSave();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+protected:
+	afx_msg void OnBnClickedRadioCamera();
+	afx_msg void OnBnClickedRadioLight();
+
+	PFMImage * m_pLastPic;
+	PFMImage * m_pCurrentPic;
+	PFMImage * m_pNextPic;
+	int picIndex;
+	CPoint					m_mouseLast;			// Mouse Last point
+	enum RBState {CAMERA, LIGHT};
+	RBState currentRBState;
+
+	void loadPic();
+	char* cstring2char (CString cstr);
+	CString char2cstring(char* cstr);
+
+	bool itemHasNext(int index);
+	bool itemHasLast(int index);
+	int getFileCount(CString csFolderName);
+
+	void outputText(char* str);
+
+	afx_msg void OnBnClickedLast();
+	afx_msg void OnBnClickedNext();
+
+	//////////////////////////////////////
+	//  member variables for rendering
+	//////////////////////////////////////
+
+	static const int NUM_CAMERAS = 8;
+
+	// GLSL shaders for volumetric rendering
+	GLSLShader m_shader_alongX;
+	GLSLShader m_shader_alongY;
+	GLSLShader m_shader_alongZ;
+
+	// mv and prj matrix for each camera
+	Matrix4 m_modelview_mats[NUM_CAMERAS];
+	Matrix4 m_projection_mats[NUM_CAMERAS];
+
+	// GL 3D texture for volume data
+	GLuint m_tex3d_id;
+
+	// quaternion for rotation
+
+	// mouse motion on screen
+	double m_mouse_x;
+	double m_mouse_y;
+	float m_quatRotate_start[4];
 };
 
 #ifndef _DEBUG  // debug version in 3DSLoaderView.cpp
