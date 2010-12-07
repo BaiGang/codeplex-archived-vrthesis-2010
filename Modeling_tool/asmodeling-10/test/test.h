@@ -121,6 +121,8 @@ public:
 	afx_msg void OnButtonLastPic();
 	afx_msg void OnButtonNextPic();
 
+	void loadXml();
+
 	DECLARE_MESSAGE_MAP()
 	
 };

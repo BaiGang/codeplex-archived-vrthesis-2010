@@ -264,3 +264,8 @@ void CMainFrame::setRadio(bool isCamera)
 	else
 		m_wndOption.setLight();
 }
+
+void CMainFrame::reflesh()
+{
+	m_wndProperties.reflesh();
+}

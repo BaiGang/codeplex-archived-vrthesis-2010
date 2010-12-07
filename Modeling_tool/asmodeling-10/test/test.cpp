@@ -153,15 +153,15 @@ BOOL CtestApp::InitInstance()
 	//  在 SDI 应用程序中，这应在 ProcessShellCommand 之后发生
 
 
-	picIndex = 0;
-	//assume
-	float length = 320;
-	float * imgdata1 = new float [length * length*length];
-	float * imgdata2 = new float [length * length*length];
-	float * imgdata3 = new float [length * length*length];
-	lastPic =  new PFMImage(length, length*length, 0, imgdata1);
-	currentPic = new PFMImage(length, length*length, 0, imgdata2);
-	nextPic = new PFMImage(length, length*length, 0, imgdata3);
+	//picIndex = 0;
+	////assume
+	//float length = 320;
+	//float * imgdata1 = new float [length * length*length];
+	//float * imgdata2 = new float [length * length*length];
+	//float * imgdata3 = new float [length * length*length];
+	//lastPic =  new PFMImage(length, length*length, 0, imgdata1);
+	//currentPic = new PFMImage(length, length*length, 0, imgdata2);
+	//nextPic = new PFMImage(length, length*length, 0, imgdata3);
 
 
 	return TRUE;
@@ -276,4 +276,397 @@ char* CtestApp::cstring2char (CString cstr)
 	char * szUtf8=new char[len + 1];
 	WideCharToMultiByte (CP_UTF8, 0, cstr.AllocSysString(), -1, szUtf8, len, NULL,NULL);
 	return szUtf8;
+}
+
+void CtestApp::loadXml()
+{
+	if(FAILED(::CoInitialize(NULL)))  
+	{
+		AfxMessageBox(_T("failed"));
+	}
+
+	MSXML2::IXMLDOMDocumentPtr pDoc;
+	HRESULT hr;
+	hr=pDoc.CreateInstance(__uuidof(MSXML2::DOMDocument40));
+	if(FAILED(hr))
+	{ 
+		AfxMessageBox(_T("无法创建DOMDocument对象，请检查是否安装了MS XML Parser 运行库!")); 
+	} 
+
+	//加载文件 
+	CString filepath;
+	filepath = rootPath + _T("\\data\\configure.xml");
+	pDoc->load(filepath.GetBuffer(0)); 
+
+	MSXML2::IXMLDOMNodePtr pNode;
+
+	//在树中查找名为PMedia的节点,"//"表示在任意一层查找 
+	pNode=pDoc->selectSingleNode("//Parameters");
+
+	//节点数据 
+	CString strData;
+
+	//节点属性,放在链表中 
+	MSXML2::IXMLDOMNamedNodeMapPtr pAttrMap=NULL;
+	MSXML2::IXMLDOMNodePtr   pAttrItem;
+	_variant_t variantvalue;
+
+	MSXML2::IXMLDOMNodeListPtr pNodeList;
+	MSXML2::IXMLDOMNodeListPtr m_pNodeList;
+	MSXML2::IXMLDOMNodePtr pNodet;
+	MSXML2::IXMLDOMNodePtr m_pNodet;
+	pNodeList = pNode->childNodes;
+////////////////////////////// PMedia /////////////////////////
+	pNodet = pNodeList->item[0];
+	m_pNodeList = pNodet->childNodes;
+
+
+	m_pNodet = m_pNodeList->item[0];
+	m_pNodet->get_attributes(&pAttrMap);
+	//获得第0个属性
+	pAttrMap->get_item(0,&pAttrItem);
+	//取得节点的值
+	pAttrItem->get_nodeTypedValue(&variantvalue);
+	strData = (char *)(_bstr_t)variantvalue;
+	currentXML.PMedia.extinction = strData;
+
+	m_pNodet = m_pNodeList->item[1];
+	m_pNodet->get_attributes(&pAttrMap);
+	//获得第0个属性
+	pAttrMap->get_item(0,&pAttrItem);
+	//取得节点的值
+	pAttrItem->get_nodeTypedValue(&variantvalue);
+	strData = (char *)(_bstr_t)variantvalue;
+	currentXML.PMedia.scattering = strData;
+
+	m_pNodet = m_pNodeList->item[2];
+	m_pNodet->get_attributes(&pAttrMap);
+	//获得第0个属性
+	pAttrMap->get_item(0,&pAttrItem);
+	//取得节点的值
+	pAttrItem->get_nodeTypedValue(&variantvalue);
+	strData = (char *)(_bstr_t)variantvalue;
+	currentXML.PMedia.alaph = strData;
+////////////////////////////// Render ////////////////////////
+	
+	pNodet = pNodeList->item[1];
+	m_pNodeList = pNodet->childNodes;
+
+
+	m_pNodet = m_pNodeList->item[0];
+	m_pNodet->get_attributes(&pAttrMap);
+	//获得第0个属性
+	pAttrMap->get_item(0,&pAttrItem);
+	//取得节点的值
+	pAttrItem->get_nodeTypedValue(&variantvalue);
+	strData = (char *)(_bstr_t)variantvalue;
+	currentXML.Render.CurrentView = strData;
+
+	m_pNodet = m_pNodeList->item[1];
+	m_pNodet->get_attributes(&pAttrMap);
+	//获得第0个属性
+	pAttrMap->get_item(0,&pAttrItem);
+	//取得节点的值
+	pAttrItem->get_nodeTypedValue(&variantvalue);
+	strData = (char *)(_bstr_t)variantvalue;
+	currentXML.Render.width = strData;
+
+	m_pNodet = m_pNodeList->item[2];
+	m_pNodet->get_attributes(&pAttrMap);
+	//获得第0个属性
+	pAttrMap->get_item(0,&pAttrItem);
+	//取得节点的值
+	pAttrItem->get_nodeTypedValue(&variantvalue);
+	strData = (char *)(_bstr_t)variantvalue;
+	currentXML.Render.height = strData;
+////////////////////////////// Render ////////////////////////////
+//////////////////////////////////////// IntervalLevel //////////
+	m_pNodet = m_pNodeList->item[3];
+	m_pNodeList = m_pNodet->childNodes;
+
+	m_pNodet = m_pNodeList->item[0];
+	m_pNodet->get_attributes(&pAttrMap);
+	//获得第0个属性
+	pAttrMap->get_item(0,&pAttrItem);
+	//取得节点的值
+	pAttrItem->get_nodeTypedValue(&variantvalue);
+	strData = (char *)(_bstr_t)variantvalue;
+	currentXML.Render.RenderInterval.Level5 = strData;
+
+	m_pNodet = m_pNodeList->item[1];
+	m_pNodet->get_attributes(&pAttrMap);
+	//获得第0个属性
+	pAttrMap->get_item(0,&pAttrItem);
+	//取得节点的值
+	pAttrItem->get_nodeTypedValue(&variantvalue);
+	strData = (char *)(_bstr_t)variantvalue;
+	currentXML.Render.RenderInterval.Level6 = strData;
+
+	m_pNodet = m_pNodeList->item[2];
+	m_pNodet->get_attributes(&pAttrMap);
+	//获得第0个属性
+	pAttrMap->get_item(0,&pAttrItem);
+	//取得节点的值
+	pAttrItem->get_nodeTypedValue(&variantvalue);
+	strData = (char *)(_bstr_t)variantvalue;
+	currentXML.Render.RenderInterval.Level7 = strData;
+
+	m_pNodet = m_pNodeList->item[3];
+	m_pNodet->get_attributes(&pAttrMap);
+	//获得第0个属性
+	pAttrMap->get_item(0,&pAttrItem);
+	//取得节点的值
+	pAttrItem->get_nodeTypedValue(&variantvalue);
+	strData = (char *)(_bstr_t)variantvalue;
+	currentXML.Render.RenderInterval.Level8 = strData;
+///////////////////////////////// Render //////////////////////////
+////////////////////////////////////////// IntervalLevel End //////
+	pNodet = pNodeList->item[1];
+	m_pNodeList = pNodet->childNodes;
+
+	m_pNodet = m_pNodeList->item[4];
+	m_pNodet->get_attributes(&pAttrMap);
+	//获得第0个属性
+	pAttrMap->get_item(0,&pAttrItem);
+	//取得节点的值
+	pAttrItem->get_nodeTypedValue(&variantvalue);
+	strData = (char *)(_bstr_t)variantvalue;
+	currentXML.Render.RotAngle = strData;
+
+////////////////////////////// Light ////////////////////////
+	pNodet = pNodeList->item[2];
+	m_pNodeList = pNodet->childNodes;
+
+
+	m_pNodet = m_pNodeList->item[0];
+	m_pNodet->get_attributes(&pAttrMap);
+	//获得第0个属性
+	pAttrMap->get_item(0,&pAttrItem);
+	//取得节点的值
+	pAttrItem->get_nodeTypedValue(&variantvalue);
+	strData = (char *)(_bstr_t)variantvalue;
+	currentXML.Light.LightType = strData;
+
+	m_pNodet = m_pNodeList->item[1];
+	m_pNodet->get_attributes(&pAttrMap);
+	//获得第0个属性
+	pAttrMap->get_item(0,&pAttrItem);
+	//取得节点的值
+	pAttrItem->get_nodeTypedValue(&variantvalue);
+	strData = (char *)(_bstr_t)variantvalue;
+	currentXML.Light.LightIntensityR = strData;
+
+	m_pNodet = m_pNodeList->item[2];
+	m_pNodet->get_attributes(&pAttrMap);
+	//获得第0个属性
+	pAttrMap->get_item(0,&pAttrItem);
+	//取得节点的值
+	pAttrItem->get_nodeTypedValue(&variantvalue);
+	strData = (char *)(_bstr_t)variantvalue;
+	currentXML.Light.LightX = strData;
+
+	m_pNodet = m_pNodeList->item[3];
+	m_pNodet->get_attributes(&pAttrMap);
+	//获得第0个属性
+	pAttrMap->get_item(0,&pAttrItem);
+	//取得节点的值
+	pAttrItem->get_nodeTypedValue(&variantvalue);
+	strData = (char *)(_bstr_t)variantvalue;
+	currentXML.Light.LightY = strData;
+
+	m_pNodet = m_pNodeList->item[4];
+	m_pNodet->get_attributes(&pAttrMap);
+	//获得第0个属性
+	pAttrMap->get_item(0,&pAttrItem);
+	//取得节点的值
+	pAttrItem->get_nodeTypedValue(&variantvalue);
+	strData = (char *)(_bstr_t)variantvalue;
+	currentXML.Light.LightZ = strData;
+
+////////////////////////////// Volume ////////////////////////
+	pNodet = pNodeList->item[3];
+	m_pNodeList = pNodet->childNodes;
+
+
+	m_pNodet = m_pNodeList->item[3];
+	m_pNodet->get_attributes(&pAttrMap);
+	//获得第0个属性
+	pAttrMap->get_item(0,&pAttrItem);
+	//取得节点的值
+	pAttrItem->get_nodeTypedValue(&variantvalue);
+	strData = (char *)(_bstr_t)variantvalue;
+	currentXML.Volume.BoxSize = strData;
+
+	m_pNodet = m_pNodeList->item[4];
+	m_pNodet->get_attributes(&pAttrMap);
+	//获得第0个属性
+	pAttrMap->get_item(0,&pAttrItem);
+	//取得节点的值
+	pAttrItem->get_nodeTypedValue(&variantvalue);
+	strData = (char *)(_bstr_t)variantvalue;
+	currentXML.Volume.TransX = strData;
+
+	m_pNodet = m_pNodeList->item[5];
+	m_pNodet->get_attributes(&pAttrMap);
+	//获得第0个属性
+	pAttrMap->get_item(0,&pAttrItem);
+	//取得节点的值
+	pAttrItem->get_nodeTypedValue(&variantvalue);
+	strData = (char *)(_bstr_t)variantvalue;
+	currentXML.Volume.TransY = strData;
+
+	m_pNodet = m_pNodeList->item[6];
+	m_pNodet->get_attributes(&pAttrMap);
+	//获得第0个属性
+	pAttrMap->get_item(0,&pAttrItem);
+	//取得节点的值
+	pAttrItem->get_nodeTypedValue(&variantvalue);
+	strData = (char *)(_bstr_t)variantvalue;
+	currentXML.Volume.TransZ = strData;
+
+	m_pNodet = m_pNodeList->item[8];
+	m_pNodet->get_attributes(&pAttrMap);
+	//获得第0个属性
+	pAttrMap->get_item(0,&pAttrItem);
+	//取得节点的值
+	pAttrItem->get_nodeTypedValue(&variantvalue);
+	strData = (char *)(_bstr_t)variantvalue;
+	currentXML.Volume.VolumeInitialLevel = strData;
+
+	m_pNodet = m_pNodeList->item[9];
+	m_pNodet->get_attributes(&pAttrMap);
+	//获得第0个属性
+	pAttrMap->get_item(0,&pAttrItem);
+	//取得节点的值
+	pAttrItem->get_nodeTypedValue(&variantvalue);
+	strData = (char *)(_bstr_t)variantvalue;
+	currentXML.Volume.VolumeMaxLevel = strData;
+////////////////////////////// Volume ////////////////////////////
+//////////////////////////////////////// IntervalLevel //////////
+	m_pNodet = m_pNodeList->item[10];
+	m_pNodeList = m_pNodet->childNodes;
+
+	m_pNodet = m_pNodeList->item[0];
+	m_pNodet->get_attributes(&pAttrMap);
+	//获得第0个属性
+	pAttrMap->get_item(0,&pAttrItem);
+	//取得节点的值
+	pAttrItem->get_nodeTypedValue(&variantvalue);
+	strData = (char *)(_bstr_t)variantvalue;
+	currentXML.Volume.VolInterval.Level5 = strData;
+
+	m_pNodet = m_pNodeList->item[1];
+	m_pNodet->get_attributes(&pAttrMap);
+	//获得第0个属性
+	pAttrMap->get_item(0,&pAttrItem);
+	//取得节点的值
+	pAttrItem->get_nodeTypedValue(&variantvalue);
+	strData = (char *)(_bstr_t)variantvalue;
+	currentXML.Volume.VolInterval.Level6 = strData;
+
+	m_pNodet = m_pNodeList->item[2];
+	m_pNodet->get_attributes(&pAttrMap);
+	//获得第0个属性
+	pAttrMap->get_item(0,&pAttrItem);
+	//取得节点的值
+	pAttrItem->get_nodeTypedValue(&variantvalue);
+	strData = (char *)(_bstr_t)variantvalue;
+	currentXML.Volume.VolInterval.Level7 = strData;
+
+	m_pNodet = m_pNodeList->item[3];
+	m_pNodet->get_attributes(&pAttrMap);
+	//获得第0个属性
+	pAttrMap->get_item(0,&pAttrItem);
+	//取得节点的值
+	pAttrItem->get_nodeTypedValue(&variantvalue);
+	strData = (char *)(_bstr_t)variantvalue;
+	currentXML.Volume.VolInterval.Level8 = strData;
+///////////////////////////////// Volume //////////////////////////
+////////////////////////////////////////// IntervalLevel End //////
+
+////////////////////////////// LBFGSB ////////////////////////
+	pNodet = pNodeList->item[4];
+	m_pNodeList = pNodet->childNodes;
+
+
+	m_pNodet = m_pNodeList->item[7];
+	m_pNodet->get_attributes(&pAttrMap);
+	//获得第0个属性
+	pAttrMap->get_item(0,&pAttrItem);
+	//取得节点的值
+	pAttrItem->get_nodeTypedValue(&variantvalue);
+	strData = (char *)(_bstr_t)variantvalue;
+	currentXML.LBFGSB.disturb = strData;
+
+	m_pNodet = m_pNodeList->item[8];
+	m_pNodet->get_attributes(&pAttrMap);
+	//获得第0个属性
+	pAttrMap->get_item(0,&pAttrItem);
+	//取得节点的值
+	pAttrItem->get_nodeTypedValue(&variantvalue);
+	strData = (char *)(_bstr_t)variantvalue;
+	currentXML.LBFGSB.EpsG = strData;
+
+	m_pNodet = m_pNodeList->item[9];
+	m_pNodet->get_attributes(&pAttrMap);
+	//获得第0个属性
+	pAttrMap->get_item(0,&pAttrItem);
+	//取得节点的值
+	pAttrItem->get_nodeTypedValue(&variantvalue);
+	strData = (char *)(_bstr_t)variantvalue;
+	currentXML.LBFGSB.EpsF = strData;
+
+	m_pNodet = m_pNodeList->item[10];
+	m_pNodet->get_attributes(&pAttrMap);
+	//获得第0个属性
+	pAttrMap->get_item(0,&pAttrItem);
+	//取得节点的值
+	pAttrItem->get_nodeTypedValue(&variantvalue);
+	strData = (char *)(_bstr_t)variantvalue;
+	currentXML.LBFGSB.EpsX = strData;
+
+	m_pNodet = m_pNodeList->item[11];
+	m_pNodet->get_attributes(&pAttrMap);
+	//获得第0个属性
+	pAttrMap->get_item(0,&pAttrItem);
+	//取得节点的值
+	pAttrItem->get_nodeTypedValue(&variantvalue);
+	strData = (char *)(_bstr_t)variantvalue;
+	currentXML.LBFGSB.MaxIts = strData;
+
+	m_pNodet = m_pNodeList->item[12];
+	m_pNodet->get_attributes(&pAttrMap);
+	//获得第0个属性
+	pAttrMap->get_item(0,&pAttrItem);
+	//取得节点的值
+	pAttrItem->get_nodeTypedValue(&variantvalue);
+	strData = (char *)(_bstr_t)variantvalue;
+	currentXML.LBFGSB.m = strData;
+
+	m_pNodet = m_pNodeList->item[13];
+	m_pNodet->get_attributes(&pAttrMap);
+	//获得第0个属性
+	pAttrMap->get_item(0,&pAttrItem);
+	//取得节点的值
+	pAttrItem->get_nodeTypedValue(&variantvalue);
+	strData = (char *)(_bstr_t)variantvalue;
+	currentXML.LBFGSB.ConstrainType = strData;
+
+	m_pNodet = m_pNodeList->item[14];
+	m_pNodet->get_attributes(&pAttrMap);
+	//获得第0个属性
+	pAttrMap->get_item(0,&pAttrItem);
+	//取得节点的值
+	pAttrItem->get_nodeTypedValue(&variantvalue);
+	strData = (char *)(_bstr_t)variantvalue;
+	currentXML.LBFGSB.LowerBound = strData;
+
+	m_pNodet = m_pNodeList->item[15];
+	m_pNodet->get_attributes(&pAttrMap);
+	//获得第0个属性
+	pAttrMap->get_item(0,&pAttrItem);
+	//取得节点的值
+	pAttrItem->get_nodeTypedValue(&variantvalue);
+	strData = (char *)(_bstr_t)variantvalue;
+	currentXML.LBFGSB.UpperBound = strData;
 }

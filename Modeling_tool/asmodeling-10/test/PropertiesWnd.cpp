@@ -305,13 +305,13 @@ void CPropertiesWnd::SetPropListFont()
 
 void CPropertiesWnd::reflesh()
 {
-	MSXML2::IXMLDOMDocumentPtr pDoc;
-	HRESULT hr;
-	hr=pDoc.CreateInstance(__uuidof(MSXML2::DOMDocument40));
-	if(FAILED(hr))
-	{ 
-		AfxMessageBox(_T("无法创建DOMDocument对象，请检查是否安装了MS XML Parser 运行库!")); 
-	} 
+	//MSXML2::IXMLDOMDocumentPtr pDoc;
+	//HRESULT hr;
+	//hr=pDoc.CreateInstance(__uuidof(MSXML2::DOMDocument40));
+	//if(FAILED(hr))
+	//{ 
+	//	AfxMessageBox(_T("无法创建DOMDocument对象，请检查是否安装了MS XML Parser 运行库!")); 
+	//} 
 
 	pGroup1->GetSubItem(0)->SetValue((_variant_t) theApp.currentXML.PMedia.extinction);
 	pGroup1->GetSubItem(1)->SetValue((_variant_t) theApp.currentXML.PMedia.scattering);

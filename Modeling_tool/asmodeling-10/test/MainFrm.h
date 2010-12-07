@@ -64,6 +64,7 @@ protected:
 public:
 	void outputText(CString str);
 	void setRadio(bool isCamera);
+	void reflesh();
 };
 
 
