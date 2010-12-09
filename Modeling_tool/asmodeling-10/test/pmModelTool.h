@@ -155,6 +155,22 @@ protected:
 	double m_mouse_x;
 	double m_mouse_y;
 	float m_quatRotate_start[4];
+public:
+	afx_msg void OnButtonCamera0();
+	afx_msg void OnButtonCamera3();
+	afx_msg void OnButtonCamera1();
+	afx_msg void OnButtonCamera2();
+	afx_msg void OnButtonCamera4();
+	afx_msg void OnButtonCamera5();
+	afx_msg void OnButtonCamera6();
+	afx_msg void OnButtonCamera7();
+	afx_msg void OnSlider1();
+	afx_msg void OnSlider2();
+	afx_msg void OnSlider3();
+	bool setVolume(int id, int n);
+	afx_msg void OnVolEdit1();
+	afx_msg void OnVolEdit2();
+	afx_msg void OnVolEdit3();
 };
 
 #ifndef _DEBUG  // debug version in 3DSLoaderView.cpp

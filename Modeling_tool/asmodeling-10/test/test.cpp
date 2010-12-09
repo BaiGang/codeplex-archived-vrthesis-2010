@@ -291,12 +291,17 @@ void CtestApp::loadXml()
 	if(FAILED(hr))
 	{ 
 		AfxMessageBox(_T("无法创建DOMDocument对象，请检查是否安装了MS XML Parser 运行库!")); 
+		return;
 	} 
 
 	//加载文件 
 	CString filepath;
 	filepath = rootPath + _T("\\data\\configure.xml");
-	pDoc->load(filepath.GetBuffer(0)); 
+	if(pDoc->load(filepath.GetBuffer(0)) == false)
+	{
+		AfxMessageBox(_T("Failed when read \\data\\configure.xml"));
+		return;
+	}
 
 	MSXML2::IXMLDOMNodePtr pNode;
 

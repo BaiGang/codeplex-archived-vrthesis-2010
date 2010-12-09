@@ -49,6 +49,20 @@ BEGIN_MESSAGE_MAP(CPmModelTool, CView)
 	ON_BN_CLICKED(IDC_RADIO_LIGHT, &CPmModelTool::OnBnClickedRadioLight)
 	ON_COMMAND(ID_LAST, &CPmModelTool::OnBnClickedLast)
 	ON_COMMAND(ID_NEXT, &CPmModelTool::OnBnClickedNext)
+	ON_COMMAND(ID_BUTTON_CAMERA0, &CPmModelTool::OnButtonCamera0)
+	ON_COMMAND(ID_BUTTON_CAMERA3, &CPmModelTool::OnButtonCamera3)
+	ON_COMMAND(ID_BUTTON_CAMERA1, &CPmModelTool::OnButtonCamera1)
+	ON_COMMAND(ID_BUTTON_CAMERA2, &CPmModelTool::OnButtonCamera2)
+	ON_COMMAND(ID_BUTTON_CAMERA4, &CPmModelTool::OnButtonCamera4)
+	ON_COMMAND(ID_BUTTON_CAMERA5, &CPmModelTool::OnButtonCamera5)
+	ON_COMMAND(ID_BUTTON_CAMERA6, &CPmModelTool::OnButtonCamera6)
+	ON_COMMAND(ID_BUTTON_CAMERA7, &CPmModelTool::OnButtonCamera7)
+	ON_COMMAND(ID_VOL_SLIDER1, &CPmModelTool::OnSlider1)
+	ON_COMMAND(ID_VOL_SLIDER2, &CPmModelTool::OnSlider2)
+	ON_COMMAND(ID_VOL_SLIDER3, &CPmModelTool::OnSlider3)
+	ON_COMMAND(ID_VOL_EDIT1, &CPmModelTool::OnVolEdit1)
+	ON_COMMAND(ID_VOL_EDIT2, &CPmModelTool::OnVolEdit2)
+	ON_COMMAND(ID_VOL_EDIT3, &CPmModelTool::OnVolEdit3)
 END_MESSAGE_MAP()
 
 /////////////////////////////////////////////////////////////////////////////
@@ -850,4 +864,155 @@ void CPmModelTool::DrawBox()
 void CPmModelTool::DrawSmoke()
 {
 	;
+}
+
+void CPmModelTool::OnButtonCamera0()
+{
+	// TODO: 在此添加命令处理程序代码
+}
+
+
+void CPmModelTool::OnButtonCamera3()
+{
+	// TODO: 在此添加命令处理程序代码
+}
+
+
+void CPmModelTool::OnButtonCamera1()
+{
+	// TODO: 在此添加命令处理程序代码
+}
+
+
+void CPmModelTool::OnButtonCamera2()
+{
+	// TODO: 在此添加命令处理程序代码
+}
+
+
+void CPmModelTool::OnButtonCamera4()
+{
+	// TODO: 在此添加命令处理程序代码
+}
+
+
+void CPmModelTool::OnButtonCamera5()
+{
+	// TODO: 在此添加命令处理程序代码
+}
+
+
+void CPmModelTool::OnButtonCamera6()
+{
+	// TODO: 在此添加命令处理程序代码
+}
+
+
+void CPmModelTool::OnButtonCamera7()
+{
+	// TODO: 在此添加命令处理程序代码
+}
+
+
+void CPmModelTool::OnSlider1()
+{
+	// TODO: 在此添加命令处理程序代码
+	int n;
+	CString str;
+	CMainFrame *pMain=(CMainFrame *)AfxGetApp()->m_pMainWnd;
+	CMFCRibbonSlider* pSlider = DYNAMIC_DOWNCAST(CMFCRibbonSlider, pMain->m_wndRibbonBar.FindByID(ID_VOL_SLIDER1));
+	n = pSlider->GetPos();
+	str.Format(_T("%d"), n);
+	CMFCRibbonRichEditCtrl *pEdit = (CMFCRibbonRichEditCtrl *)(pMain->m_wndRibbonBar.GetDlgItem(ID_VOL_EDIT1));
+	pEdit->SetWindowTextW(str);
+}
+
+
+void CPmModelTool::OnSlider2()
+{
+	// TODO: 在此添加命令处理程序代码
+	int n;
+	CString str;
+	CMainFrame *pMain=(CMainFrame *)AfxGetApp()->m_pMainWnd;
+	CMFCRibbonSlider* pSlider = DYNAMIC_DOWNCAST(CMFCRibbonSlider, pMain->m_wndRibbonBar.FindByID(ID_VOL_SLIDER2));
+	n = pSlider->GetPos();
+	str.Format(_T("%.2f"), ((float)n)/100);
+	CMFCRibbonRichEditCtrl *pEdit = (CMFCRibbonRichEditCtrl *)(pMain->m_wndRibbonBar.GetDlgItem(ID_VOL_EDIT2));
+	pEdit->SetWindowTextW(str);
+}
+
+
+void CPmModelTool::OnSlider3()
+{
+	// TODO: 在此添加命令处理程序代码
+	int n;
+	CString str;
+	CMainFrame *pMain=(CMainFrame *)AfxGetApp()->m_pMainWnd;
+	CMFCRibbonSlider* pSlider = DYNAMIC_DOWNCAST(CMFCRibbonSlider, pMain->m_wndRibbonBar.FindByID(ID_VOL_SLIDER3));
+	n = pSlider->GetPos();
+	str.Format(_T("%.2f"), ((float)n)/100);
+	CMFCRibbonRichEditCtrl *pEdit = (CMFCRibbonRichEditCtrl *)(pMain->m_wndRibbonBar.GetDlgItem(ID_VOL_EDIT3));
+	pEdit->SetWindowTextW(str);
+}
+
+
+bool CPmModelTool::setVolume(int id, int n)
+{
+	int max,min;
+	CString str;
+	CMainFrame *pMain=(CMainFrame *)AfxGetApp()->m_pMainWnd;
+	CMFCRibbonSlider* p = DYNAMIC_DOWNCAST(CMFCRibbonSlider, pMain->m_wndRibbonBar.FindByID(id));
+	max = p->GetRangeMax();
+	min = p->GetRangeMin();
+
+	if (n>max || n<min)
+	{
+		str.Format(_T("%d is Out of Range (%d, %d)"), n, min, max);
+		AfxMessageBox(str);
+		return false;
+	}
+
+	p->SetPos(n);
+	return true;
+}
+
+
+void CPmModelTool::OnVolEdit1()
+{
+	// TODO: 在此添加命令处理程序代码
+	CMainFrame *pMain=(CMainFrame *)AfxGetApp()->m_pMainWnd;
+	CMFCRibbonRichEditCtrl *p = (CMFCRibbonRichEditCtrl *)(pMain->m_wndRibbonBar.GetDlgItem(ID_VOL_EDIT1));
+	CString str;
+	int n;
+	p->GetWindowTextW(str);
+	n = atoi(cstring2char(str)) ;
+	setVolume(ID_VOL_SLIDER1, n);
+}
+
+
+void CPmModelTool::OnVolEdit2()
+{
+	// TODO: 在此添加命令处理程序代码
+	CMainFrame *pMain=(CMainFrame *)AfxGetApp()->m_pMainWnd;
+	CMFCRibbonRichEditCtrl *p = (CMFCRibbonRichEditCtrl *)(pMain->m_wndRibbonBar.GetDlgItem(ID_VOL_EDIT2));
+	CString str;
+	int n;
+	p->GetWindowTextW(str);
+	float value = _wtof(str);
+	n = value*100;
+	setVolume(ID_VOL_SLIDER2, n);
+}
+
+
+void CPmModelTool::OnVolEdit3()
+{
+	// TODO: 在此添加命令处理程序代码
+	CMainFrame *pMain=(CMainFrame *)AfxGetApp()->m_pMainWnd;
+	CMFCRibbonRichEditCtrl *p = (CMFCRibbonRichEditCtrl *)(pMain->m_wndRibbonBar.GetDlgItem(ID_VOL_EDIT3));
+	CString str;
+	int n;
+	p->GetWindowTextW(str);
+	float value = _wtof(str);
+	n = value*100;
+	setVolume(ID_VOL_SLIDER3, n);
 }

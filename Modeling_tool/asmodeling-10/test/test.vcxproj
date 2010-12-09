@@ -106,6 +106,7 @@
     <None Include="ReadMe.txt" />
     <None Include="res\bitmap1.bmp" />
     <None Include="res\buttons.bmp" />
+    <None Include="res\Camera.png" />
     <None Include="res\filelarge.bmp" />
     <None Include="res\filesmall.bmp" />
     <None Include="res\main.bmp" />
