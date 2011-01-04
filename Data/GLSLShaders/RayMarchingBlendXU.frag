@@ -38,7 +38,7 @@ void main()
   vec3 lightAttenuation = lightIntensity  / pow(distance(lightPosWorld.xyz, VertexPosWorld.xyz), 2.0);	   
 
   //ªÒ»°√‹∂»
-  float density = texture3D(volumeTex, gl_TexCoord[0].stp).r;
+  float density = 10.0 * texture3D(volumeTex, gl_TexCoord[0].stp).r;
 
   if(density < 0.00001)
     discard;

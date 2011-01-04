@@ -18,45 +18,43 @@
 
 namespace as_modeling
 {
-	bool ASModeling::OptimizeSingleFrame(int iframe)
-	{
-		// first, load the frame
-		if (!load_captured_images(iframe))
-		{
-			fprintf(stderr, "<->  Error : Cannot load captured images, frame %d\n", iframe);
-			return false;
-		}
+  bool ASModeling::OptimizeSingleFrame(int iframe)
+  {
+    // first, load the frame
+    if (!load_captured_images(iframe))
+    {
+      fprintf(stderr, "<->  Error : Cannot load captured images, frame %d\n", iframe);
+      return false;
+    }
 
-		Timer tmer;
+    Timer tmer;
 
-		ASMGradCompute::Instance()->set_ground_truth_images(ground_truth_image_);
+    ASMGradCompute::Instance()->set_ground_truth_images(ground_truth_image_);
 
-		///////////////////////////////////////
-		///
-		///  Store initial volumes
-		///   right here right now
-		///
-		///////////////////////////////////////
-		memset(frame_volume_result_.get(), 0, sizeof(float)*max_vol_size_ * max_vol_size_ * max_vol_size_);
-		int * vol_tag = ASMGradCompute::Instance()->get_volume_tags();
-
-		for (int k = 0; k < max_vol_size_; ++k)
-		{
-			int zbase = k * max_vol_size_ * max_vol_size_;
-			for (int j = 0; j < max_vol_size_; ++j)
-			{
-				int ybase = zbase + j * max_vol_size_;
-				for (int i = 0; i < max_vol_size_; ++i)
-				{
-					frame_volume_result_[ybase + i] = (vol_tag[ybase+i] == 0) ? 0.0f : host_x[ vol_tag[ybase+i] ];
-				}
-			}
-		}
-		return true;
-		///////////////////////////////////////
-		///
-		///
-		///////////////////////////////////////
+    ////////////////////////////////////////////
+    //// for debugging
+    //cuda_imageutil::BMPImageUtil tmpbmp;
+    //tmpbmp.SetSizes(ground_truth_image_.GetWidth(), ground_truth_image_.GetHeight());
+    //for (int k = 0; k < num_cameras_; ++k)
+    //{
+    //  for (int j = 0; j < ground_truth_image_.GetHeight(); ++j)
+    //  {
+    //    for (int i = 0; i < ground_truth_image_.GetWidth(); ++i)
+    //    {
+    //      for (int c = 0; c < 3; ++c)
+    //      {
+    //        tmpbmp.GetPixelAt( i, k*ground_truth_image_.GetHeight()+j )[0] 
+    //        = ground_truth_image_.GetPixelAt( i, k*ground_truth_image_.GetHeight()+j )[0];
+    //        tmpbmp.GetPixelAt( i, k*ground_truth_image_.GetHeight()+j )[1] 
+    //        = ground_truth_image_.GetPixelAt( i, k*ground_truth_image_.GetHeight()+j )[1];
+    //        tmpbmp.GetPixelAt( i, k*ground_truth_image_.GetHeight()+j )[2] 
+    //        = ground_truth_image_.GetPixelAt( i, k*ground_truth_image_.GetHeight()+j )[2];
+    //      }
+    //    }
+    //  }
+    //}
+    //tmpbmp.SaveImage("../Data/groundtruth.bmp");
+    ////////////////////////////////////////////
 
     int i_level = initial_vol_level_;
     std::vector<float> host_x;
@@ -64,10 +62,6 @@ namespace as_modeling
     tmer.start();
 
     ASMGradCompute::Instance()->frame_init(i_level, host_x);
-
-
-
-
 
     fprintf(stderr, "TIMING : frame_init of level %d, used %lf secs.\n", i_level, tmer.stop());
 
@@ -114,6 +108,7 @@ namespace as_modeling
 
     fprintf(stderr, "TIMING : call lbfgsbminimize of level %d, used %lf secs.\n", i_level, tmer.stop());
 
+    fprintf(stderr, "Level : %d\nreturned info code : %d\n\n", i_level, lbfgsb_info_code_);
     printf("Level : %d\nreturned info code : %d\n\n", i_level, lbfgsb_info_code_);
 
     //ASMGradCompute::Instance()->get_data(i_level, frame_volume_result_, lbfgsb_x_);
@@ -121,7 +116,7 @@ namespace as_modeling
 
     // get data
     // copy the volume data to HOST
-    if (!ASMGradCompute::Instance()->get_data(iframe, i_level, frame_volume_result_, lbfgsb_x_))
+    if (!ASMGradCompute::Instance()->get_data(i_level, frame_volume_result_, lbfgsb_x_))
     {
       fprintf( stderr, "===== Could not get volume data...\n" );
       return false;
@@ -177,7 +172,7 @@ namespace as_modeling
 
       // get data
       // copy the volume data to HOST
-      if (!ASMGradCompute::Instance()->get_data(iframe, i_level, frame_volume_result_, lbfgsb_x_))
+      if (!ASMGradCompute::Instance()->get_data(i_level, frame_volume_result_, lbfgsb_x_))
       {
         fprintf( stderr, "===== Could not get volume data...\n" );
         return false;

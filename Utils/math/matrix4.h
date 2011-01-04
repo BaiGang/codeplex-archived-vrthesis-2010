@@ -1,19 +1,3 @@
-//Copyright (c) 2005 HU Yong (huyong@vrlab.buaa.edu.cn)
-//  All rights reserved.
-
-
-/********************************************************************
-	created:	2005/06/02
-	created:	2:6:2005   17:47
-	filename: 	f:\code\VREngine\VREngine\Math\matrix4.h
-	file path:	f:\code\VREngine\VREngine\Math
-	file base:	matrix4
-	file ext:	h
-	author:		HuYong
-	
-	purpose:	
-*********************************************************************/
-
 #ifndef _MATRIX4_H
 #define _MATRIX4_H
 #include "geomath.h"

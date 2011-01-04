@@ -1,15 +1,3 @@
-/********************************************************************
-	created:	2007/05/24
-	created:	24:5:2007   20:43
-	filename: 	E:\work\code\基于图像的真实物体属性建模\SVBRDF\SVBRDF\CommonTools\image\Image.h
-	file path:	E:\work\code\基于图像的真实物体属性建模\SVBRDF\SVBRDF\CommonTools\image
-	file base:	Image
-	file ext:	h
-	author:		HuYong
-	
-	purpose:	所有图像类的基类
-*********************************************************************/
-
 #pragma once
 #include <string>
 using namespace std;

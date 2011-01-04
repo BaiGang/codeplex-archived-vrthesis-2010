@@ -1,3 +1,6 @@
+// A simple timer
+// by baigang
+
 #ifndef _CPU_TIMER_H_
 #define _CPU_TIMER_H_
 

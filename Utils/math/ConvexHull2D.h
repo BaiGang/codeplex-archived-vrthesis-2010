@@ -1,7 +1,3 @@
-//Copyright (c) 2005 HU Yong (huyong@vrlab.buaa.edu.cn)
-//  All rights reserved.
-
-
 #pragma once
 #include <vector>
 #include <math.h>

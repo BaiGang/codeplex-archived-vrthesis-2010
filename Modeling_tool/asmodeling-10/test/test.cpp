@@ -41,6 +41,7 @@ BEGIN_MESSAGE_MAP(CtestApp, CWinAppEx)
 	ON_COMMAND(ID_ROOT, &CtestApp::OnSetRoot)
 	ON_COMMAND(ID_BUTTON6, &CtestApp::OnButtonLastPic)
 	ON_COMMAND(ID_BUTTON7, &CtestApp::OnButtonNextPic)
+	ON_COMMAND(ID_BUTTON_EXE, &CtestApp::OnButtonExe)
 END_MESSAGE_MAP()
 
 
@@ -171,6 +172,15 @@ int CtestApp::ExitInstance()
 {
 	//TODO: 处理可能已添加的附加资源
 	AfxOleTerm(FALSE);
+
+	CWnd * hwnd;
+	hwnd = (CWnd*)FindWindow(NULL, _T("Reconstructed Smoke Volume Result."));
+
+	if(hwnd)
+	{
+		// here to add code to exit exe
+//		hwnd->CloseWindow();  //this program could not exit as normal, so this function works bad = =
+	}
 
 	return CWinAppEx::ExitInstance();
 }
@@ -674,4 +684,14 @@ void CtestApp::loadXml()
 	pAttrItem->get_nodeTypedValue(&variantvalue);
 	strData = (char *)(_bstr_t)variantvalue;
 	currentXML.LBFGSB.UpperBound = strData;
+}
+
+void CtestApp::OnButtonExe()
+{
+	// TODO: 在此添加命令处理程序代码
+	WinExec("ASRendering.exe",SW_SHOW);
+	Sleep(1000);
+	CMainFrame   *pMain=(CMainFrame   *)AfxGetApp()->m_pMainWnd;   
+    CPmModelTool   *pView=(CPmModelTool   *)pMain->GetActiveView();
+	pView->setExePos();
 }

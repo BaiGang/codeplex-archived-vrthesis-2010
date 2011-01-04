@@ -18,9 +18,7 @@ namespace as_modeling
     bool init();
     bool release();
 
-    //! Generate a list for all primitives
-    bool level_init(int level, GLuint vol_tex);
-
+    void render(int i); // dummy
     void render_unperturbed(int i_view, GLuint vol_tex, int length);
     void render_perturbed(int i_view, GLuint vol_tex, int length, int interval, int slice, int pu, int pv);
 
@@ -49,17 +47,10 @@ namespace as_modeling
     scoped_ptr<GLSLShader> shader_y_render_; // along y axis, ..
     scoped_ptr<GLSLShader> shader_z_render_; // along z axis, ..
 
-    scoped_ptr<GLSLShader> shader_x_perturbed_; // along x axis, perturbed
-    scoped_ptr<GLSLShader> shader_y_perturbed_; // along y axis, ..
-    scoped_ptr<GLSLShader> shader_z_perturbed_; // along z axis, ..
-
-    void set_shader_unperturbed( GLSLShader * shader, GLuint vol_tex, int length);
-    void set_shader_perturbed( GLSLShader * shader, GLuint vol_tex, int length);
-
-    // display list index
-    GLuint display_list_index_;
-
-  private:
+    scoped_ptr<GLSLShader> shader_x_pertuerbed_; // along x axis, perturbed
+    scoped_ptr<GLSLShader> shader_y_pertuerbed_; // along y axis, ..
+    scoped_ptr<GLSLShader> shader_z_pertuerbed_; // along z axis, ..
+  public:
     scoped_ptr<CGLFBO> rr_fbo_;     // render result fbo, for calc f
     scoped_ptr<CGLFBO> pr_fbo_;     // perturbed result fbo, for calc g
 

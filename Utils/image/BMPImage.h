@@ -1,15 +1,3 @@
-/********************************************************************
-	created:	2007/07/02
-	created:	2:7:2007   16:37
-	filename: 	I:\HuYong\SVBRDF\CommonTools\image\BMPImage.h
-	file path:	I:\HuYong\SVBRDF\CommonTools\image
-	file base:	BMPImage
-	file ext:	h
-	author:		HuYong
-	
-	purpose:	24位BMP图像的存取操作
-*********************************************************************/
-
 #pragma once
 #include "image.h"
 #include<windows.h>

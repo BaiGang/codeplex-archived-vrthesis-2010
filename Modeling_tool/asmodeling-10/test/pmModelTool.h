@@ -16,6 +16,11 @@
 #include "shader/GLSLShader.h"
 #include "math/geomath.h"
 
+#define BOX_SIZE 17.0f
+#define BOX_LENGTH 128
+
+
+
 class CPmModelTool : public CView
 {
 protected: // create from serialization only
@@ -65,7 +70,7 @@ public:
 /*
 	C3dsExport  exp;
 	CTriList	m_triList;	*/	
-	BOOL		m_3dsLoaded;	
+	//BOOL		m_3dsLoaded;	
 	float		camRot[3];		
 	float		camPos[3];		
 	float		sceneRot[3];	
@@ -83,6 +88,15 @@ public:
 
 	void DrawBox();
 	void DrawSmoke();
+
+	int GetOrientation();
+	void DrawSmoke_alongxN(void);
+	void DrawSmoke_alongyN(void);
+	void DrawSmoke_alongzN(void);
+	void DrawSmoke_alongxP(void);
+	void DrawSmoke_alongyP(void);
+	void DrawSmoke_alongzP(void);
+
 	
 #ifdef _DEBUG
 	virtual void AssertValid() const;
@@ -138,9 +152,17 @@ protected:
 	static const int NUM_CAMERAS = 8;
 
 	// GLSL shaders for volumetric rendering
-	GLSLShader m_shader_alongX;
-	GLSLShader m_shader_alongY;
-	GLSLShader m_shader_alongZ;
+	GLSLShader m_shader_along_x;
+	GLSLShader m_shader_along_y;
+	GLSLShader m_shader_along_z;
+
+	Vector4 m_CameraPos;
+	float m_CameraInv[16];
+	float m_LightPosition[4];
+	float m_LightDist;
+	float m_LightMultiplier;
+	float m_extinction;
+	float m_scattering;
 
 	// mv and prj matrix for each camera
 	Matrix4 m_modelview_mats[NUM_CAMERAS];
@@ -155,7 +177,9 @@ protected:
 	double m_mouse_x;
 	double m_mouse_y;
 	float m_quatRotate_start[4];
+	float m_quatRotate_update[4];
 public:
+	void SetCamera(int i);
 	afx_msg void OnButtonCamera0();
 	afx_msg void OnButtonCamera3();
 	afx_msg void OnButtonCamera1();
@@ -171,6 +195,10 @@ public:
 	afx_msg void OnVolEdit1();
 	afx_msg void OnVolEdit2();
 	afx_msg void OnVolEdit3();
+	afx_msg void OnButtonStart();
+
+	// set .exe  position
+	void setExePos();
 };
 
 #ifndef _DEBUG  // debug version in 3DSLoaderView.cpp

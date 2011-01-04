@@ -1,5 +1,5 @@
 // ASMloadcameras.cpp
-// Load in camera parameters
+// Load in Configure parameters
 // Bai, Gang.
 // March 22ed, 2010.
 

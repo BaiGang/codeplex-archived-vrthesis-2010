@@ -1,45 +1,45 @@
 <?xml version="1.0" ?>
 <Parameters>
   <PMedia>
-    <extinction value="0.1" />
+    <extinction value="0.08" />
     <scattering value="0.05" />
     <alpha value="0.00001" />
   </PMedia>
   <Render>
     <CurrentView value="0" />
-    <width value="696" />
-    <height value="520" />
+    <width value="1024" />
+    <height value="1024" />
     <RenderInterval>
-      <Level5 value="2" />
-      <Level6 value="1" />
+      <Level5 value="3" />
+      <Level6 value="2" />
       <Level7 value="1" />
-      <Level8 value="1" />
+      <Level8 value="0" />
     </RenderInterval>
     <RotAngle value="0" />
   </Render>
   <Light>
     <LightType value="1" />
-    <LightIntensityR value="5000000.0" />
-    <LightX value="41.8558" />
-    <LightY value="-107.286" />
-    <LightZ value="84.9029" />
+    <LightIntensityR value="250000.0" />
+    <LightX value="34.519" />
+    <LightY value="-135.976" />
+    <LightZ value="136.421" />
   </Light>
   <Volume>
     <!-- box size are the size of the delegate geometry       -->
     <!-- Trans are translation of the delegate geometry       -->
     <!-- We do not take rotation of the dg into consideration -->
-    <BoxSize value="8.0" />
-    <TransX value="6.0" />
-    <TransY value="-12.0" />
-    <TransZ value="2.0" />
+    <BoxSize value="17.0" />
+    <TransX value="15.0" />
+    <TransY value="-9.0" />
+    <TransZ value="12.0" />
     <!-- the resolution of the volume data -->
     <VolumeInitialLevel value="5"/>
     <VolumeMaxLevel value="8"/>
     <VolInterval>
-      <Level5 value="4" />
-      <Level6 value="4" />
-      <Level7 value="8" />
-      <Level8 value="8" />
+      <Level5 value="2" />
+      <Level6 value="2" />
+      <Level7 value="4" />
+      <Level8 value="4" />
     </VolInterval>
   </Volume>
   <LBFGSB>
@@ -51,10 +51,10 @@
     <!-- #    lowerBoundary       -   lower boundaries of X(i) variables.     -->
     <!-- #    upperBoundary       -   upper boundaries of X(i) variables.     -->
     <disturb value="0.00001" />
-    <EpsG value="0.0001" />
+    <EpsG value="0.001" />
     <EpsF value="0.0001" />
     <EpsX value="0.0001" />
-    <MaxIts value="50" />
+    <MaxIts value="25" />
     <m value="7" />
     <ConstrainType value="1" />
     <LowerBound value="0.0" />

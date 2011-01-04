@@ -29,8 +29,8 @@ namespace as_modeling
 			int zbase = i_camera * height_;
 
 			BMPImage tmpBMP;
-			sprintf_s(path_buf, 200, "D:/BaiGang/NEWNEW/asmodeling-56327/Data/result%02d/result_smoke2_Scene4_%d-DVR Express CLSAS%d.bmp", i_camera, 1+i_camera, 2907+iframe);
-
+			sprintf_s(path_buf, 200, "../../Result/result%02d/result_smoke2_Scene4_%d-DVR Express CLSAS%d.bmp",
+				i_camera, i_camera+1, iframe);
 			//sprintf_s(path_buf, 200, "../Data/Camera%02d/Frame%05d.bmp", i_camera, iframe);
 
 			if (!tmpBMP.ReadImage(path_buf))
@@ -68,7 +68,11 @@ namespace as_modeling
 		for (int i_camera = 0; i_camera < num_cameras_; ++i_camera)
 		{
 			int zbase = i_camera * height_;
-			sprintf_s(path_buf, 200, "../Data/Camera%02d/image%d.pfm", i_camera, i_camera);
+			sprintf_s(path_buf, 200, "../../Result/result%02d/result_smoke2_Scene4_%d-DVR Express CLSAS%d.bmp",
+				i_camera, i_camera+1, iframe);
+
+			fprintf(stderr, "Loading image %s\n", path_buf); 
+
 			if (!tmpPFM.ReadImage(path_buf))
 			{
 				fprintf(stderr, "Error when loading %s \n", path_buf);

@@ -46,7 +46,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="../CudaImageUtil;&quot;$(SolutionDir)/Inc&quot;;../TinyXML;../Utils;&quot;../L-BFGS-B&quot;"
+				AdditionalIncludeDirectories="../CudaImageUtil;&quot;$(SolutionDir)\Inc&quot;;../TinyXML;../Utils;&quot;../L-BFGS-B&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE;"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -65,7 +65,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="TinyXML.lib CudaImageUtil.lib L-BFGS-B.lib Utils.lib glut32.lib glew32.lib cudart.lib cudpp32.lib cUtil32.lib"
+				AdditionalDependencies="TinyXML.lib CudaImageUtil.lib L-BFGS-B.lib Utils.lib glut32.lib glew32.lib cudart.lib cUtil32.lib"
 				ShowProgress="2"
 				OutputFile="$(OutDir)\$(ProjectName)-d.exe"
 				LinkIncremental="2"
@@ -147,7 +147,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="TinyXML.lib CudaImageUtil.lib L-BFGS-B.lib Utils.lib glut32.lib glew32.lib cudart.lib cudpp32.lib cUtil32.lib"
+				AdditionalDependencies="TinyXML.lib CudaImageUtil.lib L-BFGS-B.lib Utils.lib glut32.lib glew32.lib cudart.lib cUtil32.lib"
 				LinkIncremental="2"
 				AdditionalLibraryDirectories="$(SolutionDir)\Lib"
 				GenerateDebugInformation="true"
@@ -230,7 +230,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="TinyXML.lib CudaImageUtil.lib L-BFGS-B.lib Utils.lib glut32.lib glew32.lib cudart.lib cudpp32.lib cUtil32.lib"
+				AdditionalDependencies="TinyXML.lib CudaImageUtil.lib L-BFGS-B.lib Utils.lib glut32.lib glew32.lib cudart.lib cUtil32.lib"
 				ShowProgress="2"
 				OutputFile="$(OutDir)\$(ProjectName).exe"
 				LinkIncremental="1"
@@ -347,52 +347,10 @@
 			<File
 				RelativePath=".\devfun_def.h"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="EmuDebug|Win32"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\GradCompute.cc"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="EmuDebug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-					/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\GradCompute.cu"
@@ -434,13 +392,6 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCustomBuildTool"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="EmuDebug|Win32"
 					>
 					<Tool
 						Name="VCCustomBuildTool"

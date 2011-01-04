@@ -3,14 +3,12 @@
 #include <stdafx.h>
 #include <cstdlib>
 #include <cstdio>
-#include <vector>
+#include <list>
 
-#include "RenderGL.h"  // glew.h must be loaded befor gl.h
+#include "RenderGL.h"  // glew.h must be loaded before gl.h
 
 #include <cuda_runtime.h>
 #include <cuda_gl_interop.h>
-
-#include <cudpp.h>
 
 #include "../L-BFGS-B/ap.h"
 #include "../CudaImageUtil/CudaImgUtil.h"
@@ -24,7 +22,7 @@ namespace as_modeling{
   public:
 
     // for lbfgsbminimize callback
-    static void grad_compute(const ap::real_1d_array&, float&, ap::real_1d_array&);
+    static void grad_compute(const ap::real_1d_array&, double&, ap::real_1d_array&);
 
     // Singleton pattern 
     static inline ASMGradCompute* Instance( )
@@ -44,7 +42,7 @@ namespace as_modeling{
     bool release( );
 
     // get the volume data
-    bool get_data(int i_frame, int level, scoped_array<float>& data, ap::real_1d_array &x);
+    bool get_data(int level, scoped_array<float>& data, ap::real_1d_array &x);
 
     // set the loaded ground truth images
     bool set_ground_truth_images(cuda_imageutil::Image_4c8u& gt_images);
@@ -62,10 +60,6 @@ namespace as_modeling{
     // init the new x
     bool succframe_init(int level, std::vector<float>& guess_x, ap::real_1d_array& prev_x);
 
-	// return the volume tag
-	// not this function is for debugging only...
-	int * get_volume_tags(){ return h_tag_volume; };
-
   private:
     // set the volume tag and projection center for current level
     // set indicators for the current level
@@ -75,16 +69,8 @@ namespace as_modeling{
     //  is_init_density : if true, the density will be set,
     //                    else, just set the tag_volume
     void set_density_tags(int level, int *tag_volume, std::vector<float> &density, 
-      std::vector<uint16> &centers, bool is_init_density);
+      std::list<uint16> &centers, bool is_init_density);
 
-    void set_projected_centers_alongX(int level, int * tag_volume,
-      std::vector<float> &density, std::vector<unsigned short> &pcenters, bool is_init_density);
-
-    void set_projected_centers_alongY(int level, int * tag_volume,
-      std::vector<float> &density, std::vector<unsigned short> &pcenters, bool is_init_density);
-
-    void set_projected_centers_alongZ(int level, int * tag_volume,
-      std::vector<float> &density, std::vector<unsigned short> &pcenters, bool is_init_density);
 
   public:
     // must feed with an ASModeling 
@@ -119,6 +105,9 @@ namespace as_modeling{
     cudaGraphicsResource * resource_pcenters;  // projected centers
 #endif // __USE_TEX_MEMORY_CUDA__
 
+    // pbo
+    // for cuda access
+    GLuint pbo_;
 
     // volume texture id
     GLuint vol_tex_;
@@ -127,11 +116,11 @@ namespace as_modeling{
     int current_level_;
 
     // CUDA host memory
+    float * h_vol_data;       // 
     int * h_tag_volume;       // 
-    //int * d_tag_volume;
     uint16 * h_projected_centers;
 
-    std::vector<uint16> projected_centers_;
+    std::list<uint16> projected_centers_;
 
     // for lbfgsb routine
     float * p_host_x;   // x, 
@@ -146,6 +135,11 @@ namespace as_modeling{
 
     float * d_temp_f;
 
+#ifndef __USE_TEX_MEMORY_CUDA__
+    uint16 * d_projected_centers;
+    int * d_tag_volume;
+#endif // __USE_TEX_MEMORY_CUDA__
+
     cudaArray * vol_tex_cudaArray;
     cudaExtent  vol_cudaArray_extent;
     cudaArray * rr_tex_cudaArray;
@@ -154,11 +148,9 @@ namespace as_modeling{
     cudaArray * gt_tex_cudaArray;
     cudaExtent  gt_cudaArray_extent;
 
-    cudaArray * pos_tag_cudaArray;
-    cudaExtent  pos_tag_extent;
-
-    cudaArray * pcenters_cudaArray;
-    cudaExtent   pcenters_extent;
+#ifdef __USE_TEX_MEMORY_CUDA__
+    cudaArray * tag_vol_cudaArray;
+#endif
 
     float * d_vol_bufferptr;
     size_t vol_buffer_num_bytes_;
@@ -167,17 +159,14 @@ namespace as_modeling{
     float * p_device_x;
     float * p_device_g;
 
-    // cudpp scan plan
-    CUDPPHandle scanplan_;
-
     /////////////////////////////
     int num_views;
 
     ////////////////////////
     // for time profiling
     ////////////////////////
-    cudaEvent_t event_start_;
-    cudaEvent_t event_stop_;
+    cudaEvent_t event_start;
+    cudaEvent_t event_stop;
   };
 
   //ASMGradCompute::instance_ = NULL;

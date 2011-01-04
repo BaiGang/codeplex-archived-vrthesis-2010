@@ -454,7 +454,7 @@ bool CtestView::ReshapeGL(int width, int height)
 
 bool CtestView::DisplayGL(void)
 {
-	glClearColor(0.0, 0.0, 0.0, 1.0);
+	glClearColor(0.4, 0.6, 0.6, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 	// Rotate & Draw
@@ -591,8 +591,31 @@ void CtestView::OnDraw(CDC* /*pDC*/)
 
 void CtestView::DrawBox(void)
 {
-	glBegin(GL_POINTS);
-	
+	float BOX_SIZE = 2.0f;
+	float g_CenterX = 0.0f;
+	float g_CenterY = 0.0f;
+	float g_CenterZ = 0.0f;
+	float pos = 0.5f * BOX_SIZE;
+
+	glEnable(GL_DEPTH_TEST);
+	glDisable(GL_BLEND);
+
+	glColor3f(1.0f, 1.0f, 0.0f);
+	glBegin(GL_LINES);
+	glVertex3f(g_CenterX-pos, g_CenterY-pos, g_CenterZ-pos);	glVertex3f(g_CenterX+pos, g_CenterY-pos, g_CenterZ-pos);
+	glVertex3f(g_CenterX+pos, g_CenterY-pos, g_CenterZ-pos);	glVertex3f(g_CenterX+pos, g_CenterY+pos, g_CenterZ-pos);
+	glVertex3f(g_CenterX+pos, g_CenterY+pos, g_CenterZ-pos);	glVertex3f(g_CenterX-pos, g_CenterY+pos, g_CenterZ-pos);
+	glVertex3f(g_CenterX-pos, g_CenterY+pos, g_CenterZ-pos);	glVertex3f(g_CenterX-pos, g_CenterY-pos, g_CenterZ-pos);
+
+	glVertex3f(g_CenterX-pos, g_CenterY-pos, g_CenterZ+pos);	glVertex3f(g_CenterX-pos, g_CenterY-pos, g_CenterZ-pos);
+	glVertex3f(g_CenterX-pos, g_CenterY+pos, g_CenterZ+pos);	glVertex3f(g_CenterX-pos, g_CenterY+pos, g_CenterZ-pos);
+	glVertex3f(g_CenterX+pos, g_CenterY+pos, g_CenterZ+pos);	glVertex3f(g_CenterX+pos, g_CenterY+pos, g_CenterZ-pos);
+	glVertex3f(g_CenterX+pos, g_CenterY-pos, g_CenterZ+pos);	glVertex3f(g_CenterX+pos, g_CenterY-pos, g_CenterZ-pos);
+
+	glVertex3f(g_CenterX-pos, g_CenterY-pos, g_CenterZ+pos);	glVertex3f(g_CenterX+pos, g_CenterY-pos, g_CenterZ+pos);
+	glVertex3f(g_CenterX+pos, g_CenterY-pos, g_CenterZ+pos);	glVertex3f(g_CenterX+pos, g_CenterY+pos, g_CenterZ+pos);
+	glVertex3f(g_CenterX+pos, g_CenterY+pos, g_CenterZ+pos);	glVertex3f(g_CenterX-pos, g_CenterY+pos, g_CenterZ+pos);
+	glVertex3f(g_CenterX-pos, g_CenterY+pos, g_CenterZ+pos);	glVertex3f(g_CenterX-pos, g_CenterY-pos, g_CenterZ+pos);
 	glEnd();
 }
 

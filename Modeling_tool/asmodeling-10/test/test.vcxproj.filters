@@ -31,6 +31,9 @@
     <Filter Include="源文件\math">
       <UniqueIdentifier>{809baee9-15b7-43ca-96eb-cab772105899}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ASModeler">
+      <UniqueIdentifier>{257fdeb6-047f-4255-bc61-8519e4e2b513}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
@@ -103,6 +106,9 @@
     <None Include="res\writesmall.png">
       <Filter>资源文件</Filter>
     </None>
+    <None Include="res\Camera.png">
+      <Filter>资源文件</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="test.h">
@@ -165,6 +171,24 @@
     <ClInclude Include="pmModelTool.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="..\..\..\asmodeling\ASModeling.h">
+      <Filter>ASModeler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\asmodeling\devfun_def.h">
+      <Filter>ASModeler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\asmodeling\GLFBO.h">
+      <Filter>ASModeler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\asmodeling\GLSLShader.h">
+      <Filter>ASModeler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\asmodeling\GradCompute.h">
+      <Filter>ASModeler</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\asmodeling\RenderGL.h">
+      <Filter>ASModeler</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp">
@@ -217,6 +241,48 @@
     </ClCompile>
     <ClCompile Include="pmModelTool.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\asmodeling\StoreVolumeData.cc">
+      <Filter>ASModeler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\asmodeling\ASMloadCameraFile.cc">
+      <Filter>ASModeler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\asmodeling\ASMloadConfigFile.cc">
+      <Filter>ASModeler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\asmodeling\ASMloadImages.cc">
+      <Filter>ASModeler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\asmodeling\ASModeling.cc">
+      <Filter>ASModeler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\asmodeling\ASMParallelInit.cc">
+      <Filter>ASModeler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\asmodeling\GLFBO.cc">
+      <Filter>ASModeler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\asmodeling\GLSLShader.cc">
+      <Filter>ASModeler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\asmodeling\GradCompute.cc">
+      <Filter>ASModeler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\asmodeling\main.cc">
+      <Filter>ASModeler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\asmodeling\OptimizeSingleFrame.cc">
+      <Filter>ASModeler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\asmodeling\OptimizeSuccFrames.cc">
+      <Filter>ASModeler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\asmodeling\RenderGL.cc">
+      <Filter>ASModeler</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\asmodeling\stdafx.cc">
+      <Filter>ASModeler</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

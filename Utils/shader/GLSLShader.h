@@ -1,9 +1,3 @@
-//Copyright (c) 2005 HU Yong (huyong@vrlab.buaa.edu.cn)
-//  All rights reserved.
-
-// Edited by BAI Gang
-//  - console log print
-
 #ifndef _GLSLSHADER_H
 #define _GLSLSHADER_H
 //#include <windows.h>

@@ -40,11 +40,11 @@ namespace as_modeling
     tmpshader = new GLSLShader();
     shader_z_render_.reset(tmpshader);
     tmpshader = new GLSLShader();
-    shader_x_perturbed_.reset(tmpshader);
+    shader_x_pertuerbed_.reset(tmpshader);
     tmpshader = new GLSLShader();
-    shader_y_perturbed_.reset(tmpshader);
+    shader_y_pertuerbed_.reset(tmpshader);
     tmpshader = new GLSLShader();
-    shader_z_perturbed_.reset(tmpshader);
+    shader_z_pertuerbed_.reset(tmpshader);
 
     shader_x_render_->InitShaders(
       "../Data/GLSLShaders/RayMarchingBlend.vert",
@@ -59,15 +59,15 @@ namespace as_modeling
       "../Data/GLSLShaders/RayMarchingBlendZU.frag"
       );
 
-    shader_x_perturbed_->InitShaders(
+    shader_x_pertuerbed_->InitShaders(
       "../Data/GLSLShaders/RayMarchingBlend.vert",
       "../Data/GLSLShaders/RayMarchingBlendX.frag"
       );
-    shader_y_perturbed_->InitShaders(
+    shader_y_pertuerbed_->InitShaders(
       "../Data/GLSLShaders/RayMarchingBlend.vert",
       "../Data/GLSLShaders/RayMarchingBlendY.frag"
       );
-    shader_z_perturbed_->InitShaders(
+    shader_z_pertuerbed_->InitShaders(
       "../Data/GLSLShaders/RayMarchingBlend.vert",
       "../Data/GLSLShaders/RayMarchingBlendZ.frag"
       );
@@ -82,9 +82,6 @@ namespace as_modeling
     pr_fbo_->Init(width_, height_);
     pr_fbo_->CheckFBOErr();
 
-    // six orientations
-    display_list_index_ = glGenLists(6);
-
     glClearColor(0.0, 0.0, 0.0, 1.0);
     glDisable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
@@ -96,348 +93,9 @@ namespace as_modeling
   bool RenderGL::release( )
   {
     // reallocate the resource
-
-    glDeleteLists( display_list_index_, 6 );
     return true;
   }
 
-
-  bool RenderGL::level_init(int level, GLuint vol_tex)
-  {
-    int length = 1 << level;
-    float half_size =  0.5 * asml_->box_size_;
-
-    // XXXXXXXXXXXXXXXXXXXXXXXXXXX
-    glNewList(display_list_index_, GL_COMPILE);
-    for (int i = 0; i < length; ++i)
-    {
-      float tex_x_coord = (i+0.5) / static_cast<float>(length);
-      float geo_x_coord = asml_->box_size_ * tex_x_coord + asml_->trans_x_ - half_size;
-
-      glBegin(GL_QUADS);
-      glTexCoord3f(tex_x_coord, 0.0f, 0.0f); glVertex3f(geo_x_coord, asml_->trans_y_ - half_size, asml_->trans_z_ - half_size);
-      glTexCoord3f(tex_x_coord, 1.0f, 0.0f); glVertex3f(geo_x_coord, asml_->trans_y_ + half_size, asml_->trans_z_ - half_size);
-      glTexCoord3f(tex_x_coord, 1.0f, 1.0f); glVertex3f(geo_x_coord, asml_->trans_y_ + half_size, asml_->trans_z_ + half_size);
-      glTexCoord3f(tex_x_coord, 0.0f, 1.0f); glVertex3f(geo_x_coord, asml_->trans_y_ - half_size, asml_->trans_z_ + half_size);
-      glEnd();
-    } // for i
-    glEndList();
-
-    // xxxxxxxxxxxxxxxxxxxxxxxxxxx
-    glNewList(display_list_index_ + 1, GL_COMPILE);
-    for (int i = length - 1; i >= 0; --i)
-    {
-      float tex_x_coord = (i+0.5) / static_cast<float>(length);
-      float geo_x_coord = asml_->box_size_ * tex_x_coord + asml_->trans_x_ - half_size;
-
-      glBegin(GL_QUADS);
-      glTexCoord3f(tex_x_coord, 0.0f, 0.0f); glVertex3f(geo_x_coord, asml_->trans_y_ - half_size, asml_->trans_z_ - half_size);
-      glTexCoord3f(tex_x_coord, 1.0f, 0.0f); glVertex3f(geo_x_coord, asml_->trans_y_ + half_size, asml_->trans_z_ - half_size);
-      glTexCoord3f(tex_x_coord, 1.0f, 1.0f); glVertex3f(geo_x_coord, asml_->trans_y_ + half_size, asml_->trans_z_ + half_size);
-      glTexCoord3f(tex_x_coord, 0.0f, 1.0f); glVertex3f(geo_x_coord, asml_->trans_y_ - half_size, asml_->trans_z_ + half_size);
-      glEnd();
-    } // for i
-    glEndList();
-
-    // YYYYYYYYYYYYYYYYYYYYYYYYYYY
-    glNewList(display_list_index_ + 2, GL_COMPILE);
-    for (int j = 0; j < length; ++j)
-    {
-      float tex_y_coord = (j+0.5) / static_cast<float>(length);
-      float geo_y_coord = tex_y_coord * asml_->box_size_ + asml_->trans_y_ - half_size;
-
-      glBegin(GL_QUADS);
-      glTexCoord3f(0.0f, tex_y_coord, 0.0f); glVertex3f(asml_->trans_x_ - half_size, geo_y_coord, asml_->trans_z_ - half_size);
-      glTexCoord3f(1.0f, tex_y_coord, 0.0f); glVertex3f(asml_->trans_x_ + half_size, geo_y_coord, asml_->trans_z_ - half_size);
-      glTexCoord3f(1.0f, tex_y_coord, 1.0f); glVertex3f(asml_->trans_x_ + half_size, geo_y_coord, asml_->trans_z_ + half_size);
-      glTexCoord3f(0.0f, tex_y_coord, 1.0f); glVertex3f(asml_->trans_x_ - half_size, geo_y_coord, asml_->trans_z_ + half_size);
-      glEnd();
-    } // for j
-    glEndList();
-
-
-    // yyyyyyyyyyyyyyyyyyyyyyyyyyy
-    glNewList(display_list_index_ + 3, GL_COMPILE);
-    for (int j = length-1; j >= 0; --j)
-    {
-      float tex_y_coord = (j+0.5) / static_cast<float>(length);
-      float geo_y_coord = tex_y_coord * asml_->box_size_ + asml_->trans_y_ - half_size;
-
-      glBegin(GL_QUADS);
-      glTexCoord3f(0.0f, tex_y_coord, 0.0f); glVertex3f(asml_->trans_x_ - half_size, geo_y_coord, asml_->trans_z_ - half_size);
-      glTexCoord3f(1.0f, tex_y_coord, 0.0f); glVertex3f(asml_->trans_x_ + half_size, geo_y_coord, asml_->trans_z_ - half_size);
-      glTexCoord3f(1.0f, tex_y_coord, 1.0f); glVertex3f(asml_->trans_x_ + half_size, geo_y_coord, asml_->trans_z_ + half_size);
-      glTexCoord3f(0.0f, tex_y_coord, 1.0f); glVertex3f(asml_->trans_x_ - half_size, geo_y_coord, asml_->trans_z_ + half_size);
-      glEnd();
-    } // for j
-    glEndList();
-
-    // ZZZZZZZZZZZZZZZZZZZZZZZZZZZ
-    glNewList(display_list_index_ + 4, GL_COMPILE);
-    for (int k = 0; k < length; ++k)
-    {
-      float tex_z_coord = (k+0.5) / static_cast<float>(length);
-      float geo_z_coord = tex_z_coord * asml_->box_size_ + asml_->trans_z_ - half_size;
-
-      glBegin(GL_QUADS);
-      glTexCoord3f(0.0f, 0.0f, tex_z_coord); glVertex3f(asml_->trans_x_ - half_size, asml_->trans_y_ - half_size, geo_z_coord);
-      glTexCoord3f(1.0f, 0.0f, tex_z_coord); glVertex3f(asml_->trans_x_ + half_size, asml_->trans_y_ - half_size, geo_z_coord);
-      glTexCoord3f(1.0f, 1.0f, tex_z_coord); glVertex3f(asml_->trans_x_ + half_size, asml_->trans_y_ + half_size, geo_z_coord);
-      glTexCoord3f(0.0f, 1.0f, tex_z_coord); glVertex3f(asml_->trans_x_ - half_size, asml_->trans_y_ + half_size, geo_z_coord);
-      glEnd();
-    } // for k
-    glEndList();
-
-    // zzzzzzzzzzzzzzzzzzzzzzzzzzz
-    glNewList(display_list_index_ + 5, GL_COMPILE);
-    for (int k = length - 1; k >= 0; --k)
-    {
-      float tex_z_coord = (k+0.5) / static_cast<float>(length);
-      float geo_z_coord = tex_z_coord * asml_->box_size_ + asml_->trans_z_ - half_size;
-
-      glBegin(GL_QUADS);
-      glTexCoord3f(0.0f, 0.0f, tex_z_coord); glVertex3f(asml_->trans_x_ - half_size, asml_->trans_y_ - half_size, geo_z_coord);
-      glTexCoord3f(1.0f, 0.0f, tex_z_coord); glVertex3f(asml_->trans_x_ + half_size, asml_->trans_y_ - half_size, geo_z_coord);
-      glTexCoord3f(1.0f, 1.0f, tex_z_coord); glVertex3f(asml_->trans_x_ + half_size, asml_->trans_y_ + half_size, geo_z_coord);
-      glTexCoord3f(0.0f, 1.0f, tex_z_coord); glVertex3f(asml_->trans_x_ - half_size, asml_->trans_y_ + half_size, geo_z_coord);
-      glEnd();
-    } // for k
-    glEndList();
-
-    // set shader
-    set_shader_unperturbed(shader_x_render_.get(), vol_tex, length);
-    set_shader_unperturbed(shader_y_render_.get(), vol_tex, length);
-    set_shader_unperturbed(shader_z_render_.get(), vol_tex, length);
-
-    set_shader_perturbed(shader_x_perturbed_.get(), vol_tex, length);
-    set_shader_perturbed(shader_y_perturbed_.get(), vol_tex, length);
-    set_shader_perturbed(shader_z_perturbed_.get(), vol_tex, length);
-
-    return true;
-  }
-
-#ifdef __USE_DISPLATY_LIST_
-  void RenderGL::render_unperturbed(int i_view, GLuint vol_tex, int length)
-  {
-    //fprintf(stderr, "--- Render unperturbed : view %d \n", i_view);
-
-    float proj_mat[16];
-    float mv_mat[16];
-
-    float half_size =  0.5 * asml_->box_size_;
-
-    // get MODELVIEW and PROJECTION matrices
-    asml_->gl_projection_mats_[i_view].GetData(proj_mat);
-    asml_->camera_gl_extr_paras_[i_view].GetData(mv_mat);
-
-    glViewport(0, 0, width_, height_);
-    glMatrixMode(GL_PROJECTION);
-    glLoadMatrixf(proj_mat);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadMatrixf(mv_mat);
-
-    // choose shader and display list
-    GLSLShader * shader = NULL;
-    GLuint list_index;
-
-    switch (asml_->camera_orientations_[i_view])
-    {
-    case 'X':
-      shader = shader_x_render_.get();
-      list_index = display_list_index_;
-      break;
-    case 'x':
-      shader = shader_x_render_.get();
-      list_index = display_list_index_ + 1;
-      break;
-    case 'Y':
-      shader = shader_y_render_.get();
-      list_index = display_list_index_ + 2;
-      break;
-    case 'y':
-      shader = shader_y_render_.get();
-      list_index = display_list_index_ + 3;
-      break;
-    case 'Z':
-      shader = shader_z_render_.get();
-      list_index = display_list_index_ + 4;
-      break;
-    case 'z':
-      shader = shader_z_render_.get();
-      list_index = display_list_index_ + 5;
-      break;
-    }
-
-    // set shader 
-    set_shader_unperturbed(shader, vol_tex, length);
-
-    // bind fbo
-    rr_fbo_->BeginDraw2FBO();
-    {
-      glClearColor(0.0, 0.0, 0.0, 1.0);
-      glDisable(GL_DEPTH_TEST);
-      glEnable(GL_BLEND);
-      glBlendFuncSeparate(GL_DST_ALPHA, GL_ONE, GL_DST_ALPHA, GL_ZERO);
-
-      glClear(GL_COLOR_BUFFER_BIT);
-
-      shader->Begin();
-
-      // get the inversed camera matrix
-      float inv_camera[16];
-      asml_->camera_inv_gl_extr_paras_[i_view].GetData(inv_camera);
-      shader->SetUniformMatrix4fv("cameraInv", 1, GL_FALSE, inv_camera);
-
-      shader->SetUniform4f("cameraPos", 
-        asml_->camera_positions_[i_view].x,
-        asml_->camera_positions_[i_view].y,
-        asml_->camera_positions_[i_view].z,
-        asml_->camera_positions_[i_view].w);
-
-      // draw
-      glCallList(list_index);
-
-      shader->End();
-    }
-    rr_fbo_->EndDraw2FBO();
-
-
-#if 0
-    float * data = rr_fbo_->ReadPixels();
-    float * img = new float [3 * width_ * height_];
-    for (int y = 0; y < height_; ++y)
-    {
-      for (int x = 0; x < width_; ++x)
-      {
-        for (int c = 0; c < 3; ++c)
-        {
-          img[y * width_ * 3 + x * 3 + c] = data[y * width_ * 4 + x * 4 + c];
-        }
-      }
-    }
-
-    char path_buf[100];
-    sprintf(path_buf, "../Data/Camera%02d/show%06d.pfm", i_view, counter);
-    PFMImage * tmpimg = new PFMImage(width_, height_, 1, img);
-    tmpimg->WriteImage(path_buf);
-    delete [] img;
-    delete tmpimg;
-
-    ++counter;
-#endif
-
-  }
-
-  void RenderGL::render_perturbed(int i_view, GLuint vol_tex, int length, int interval, int slice, int pu, int pv)
-  {
-    float proj_mat[16];
-    float mv_mat[16];
-
-    float half_size = 0.5 * asml_->box_size_;
-
-    // get MODELVIEW and PROJECTION matrices
-    asml_->gl_projection_mats_[i_view].GetData(proj_mat);
-    asml_->camera_gl_extr_paras_[i_view].GetData(mv_mat);
-
-    glViewport(0, 0, width_, height_);
-    glMatrixMode(GL_PROJECTION);
-    glLoadMatrixf(proj_mat);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadMatrixf(mv_mat);
-
-    // choose shader and display list
-    GLSLShader * shader = NULL;
-    GLuint list_index;
-
-    switch (asml_->camera_orientations_[i_view])
-    {
-    case 'X':
-      shader = shader_x_perturbed_.get();
-      list_index = display_list_index_;
-      break;
-    case 'x':
-      shader = shader_x_perturbed_.get();
-      list_index = display_list_index_ + 1;
-      break;
-    case 'Y':
-      shader = shader_y_perturbed_.get();
-      list_index = display_list_index_ + 2;
-      break;
-    case 'y':
-      shader = shader_y_perturbed_.get();
-      list_index = display_list_index_ + 3;
-      break;
-    case 'Z':
-      shader = shader_z_perturbed_.get();
-      list_index = display_list_index_ + 4;
-      break;
-    case 'z':
-      shader = shader_z_perturbed_.get();
-      list_index = display_list_index_ + 5;
-      break;
-    }
-
-    // set shaer
-    set_shader_perturbed(shader, vol_tex, length);
-
-    // bind fbo
-    rr_fbo_->BeginDraw2FBO();
-    {
-      glClearColor(0.0, 0.0, 0.0, 1.0);
-      glDisable(GL_DEPTH_TEST);
-      glEnable(GL_BLEND);
-      glBlendFuncSeparate(GL_DST_ALPHA, GL_ONE, GL_DST_ALPHA, GL_ZERO);
-
-      glClear(GL_COLOR_BUFFER_BIT);
-
-      shader->Begin();
-
-      // get the inversed camera matrix
-      float inv_camera[16];
-      asml_->camera_inv_gl_extr_paras_[i_view].GetData(inv_camera);
-      shader->SetUniformMatrix4fv("cameraInv", 1, GL_FALSE, inv_camera);
-      shader->SetUniform4f("cameraPos", 
-        asml_->camera_positions_[i_view].x,
-        asml_->camera_positions_[i_view].y,
-        asml_->camera_positions_[i_view].z,
-        asml_->camera_positions_[i_view].w);
-      shader->SetUniform4i("disturbPara", interval, pu, pv, slice);
-
-      // draw
-      glCallList(list_index);
-
-      shader->End();
-    }
-    rr_fbo_->EndDraw2FBO();
-
-
-#if 0
-    float * data = pr_fbo_->ReadPixels();
-    float * img = new float [3 * width_ * height_];
-    for (int y = 0; y < height_; ++y)
-    {
-      for (int x = 0; x < width_; ++x)
-      {
-        for (int c = 0; c < 3; ++c)
-        {
-          img[y * width_ * 3 + x * 3 + c] = data[y * width_ * 4 + x * 4 + c];
-        }
-      }
-    }
-
-    char path_buf[100];
-    sprintf(path_buf, "../Data/Camera%02d/grad%06d.pfm", i_view, counter);
-    PFMImage * tmpimg = new PFMImage(width_, height_, 1, img);
-    tmpimg->WriteImage(path_buf);
-    delete [] img;
-    delete tmpimg;
-
-    ++counter;
-#endif
-
-  }
-
-#else
   void RenderGL::render_unperturbed(int i_view, GLuint vol_tex, int length)
   {
     //fprintf(stderr, "--- Render unperturbed : view %d \n", i_view);
@@ -725,17 +383,17 @@ namespace as_modeling
     if (asml_->camera_orientations_[i_view] == 'x' || asml_->camera_orientations_[i_view] == 'X')
     {
       // along x
-      shader = shader_x_perturbed_.get();
+      shader = shader_x_pertuerbed_.get();
     }
     else if (asml_->camera_orientations_[i_view] == 'y' || asml_->camera_orientations_[i_view] == 'Y')
     {
       // along y
-      shader = shader_y_perturbed_.get();
+      shader = shader_y_pertuerbed_.get();
     }
     else //if (asml_->camera_orientations_[i_view] == 'z' || asml_->camera_orientations_[i_view] == 'Z')
     {
       // along z
-      shader = shader_z_perturbed_.get();
+      shader = shader_z_pertuerbed_.get();
     }
 
     /////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -792,7 +450,7 @@ namespace as_modeling
           float tex_x_coord = (i+0.5) / static_cast<float>(length);
           float geo_x_coord = asml_->box_size_ * tex_x_coord + asml_->trans_x_ - half_size;
 
-          shader->SetUniform4i("disturbPara", interval, pu, pv, slice);
+          shader->SetUniform4i("disturbPara", interval, pu, pv, (slice==i)?1:0);
 
           glBegin(GL_QUADS);
           glTexCoord3f(tex_x_coord, 0.0f, 0.0f); glVertex3f(geo_x_coord, asml_->trans_y_ - half_size, asml_->trans_z_ - half_size);
@@ -809,7 +467,7 @@ namespace as_modeling
           float tex_x_coord = (i+0.5) / static_cast<float>(length);
           float geo_x_coord = asml_->box_size_ * tex_x_coord + asml_->trans_x_ - half_size;
 
-          shader->SetUniform4i("disturbPara", interval, pu, pv, slice);
+          shader->SetUniform4i("disturbPara", interval, pu, pv, (slice==i)?1:0);
 
           glBegin(GL_QUADS);
           glTexCoord3f(tex_x_coord, 0.0f, 0.0f); glVertex3f(geo_x_coord, asml_->trans_y_ - half_size, asml_->trans_z_ - half_size);
@@ -826,7 +484,7 @@ namespace as_modeling
           float tex_y_coord = (j+0.5) / static_cast<float>(length);
           float geo_y_coord = tex_y_coord * asml_->box_size_ + asml_->trans_y_ - half_size;
 
-          shader->SetUniform4i("disturbPara", interval, pu, pv, slice);
+          shader->SetUniform4i("disturbPara", interval, pu, pv, (slice==j)?1:0);
 
           glBegin(GL_QUADS);
           glTexCoord3f(0.0f, tex_y_coord, 0.0f); glVertex3f(asml_->trans_x_ - half_size, geo_y_coord, asml_->trans_z_ - half_size);
@@ -843,7 +501,7 @@ namespace as_modeling
           float tex_y_coord = (j+0.5) / static_cast<float>(length);
           float geo_y_coord = tex_y_coord * asml_->box_size_ + asml_->trans_y_ - half_size;
 
-          shader->SetUniform4i("disturbPara", interval, pu, pv, slice);
+          shader->SetUniform4i("disturbPara", interval, pu, pv, (slice==j)?1:0);
 
           glBegin(GL_QUADS);
           glTexCoord3f(0.0f, tex_y_coord, 0.0f); glVertex3f(asml_->trans_x_ - half_size, geo_y_coord, asml_->trans_z_ - half_size);
@@ -860,7 +518,7 @@ namespace as_modeling
           float tex_z_coord = (k+0.5) / static_cast<float>(length);
           float geo_z_coord = tex_z_coord * asml_->box_size_ + asml_->trans_z_ - half_size;
 
-          shader->SetUniform4i("disturbPara", interval, pu, pv, slice);
+          shader->SetUniform4i("disturbPara", interval, pu, pv, (slice==k)?1:0);
 
           glBegin(GL_QUADS);
           glTexCoord3f(0.0f, 0.0f, tex_z_coord); glVertex3f(asml_->trans_x_ - half_size, asml_->trans_y_ - half_size, geo_z_coord);
@@ -877,7 +535,7 @@ namespace as_modeling
           float tex_z_coord = (k+0.5) / static_cast<float>(length);
           float geo_z_coord = tex_z_coord * asml_->box_size_ + asml_->trans_z_ - half_size;
 
-          shader->SetUniform4i("disturbPara", interval, pu, pv, slice);
+          shader->SetUniform4i("disturbPara", interval, pu, pv, (slice==k)?1:0);
 
           glBegin(GL_QUADS);
           glTexCoord3f(0.0f, 0.0f, tex_z_coord); glVertex3f(asml_->trans_x_ - half_size, asml_->trans_y_ - half_size, geo_z_coord);
@@ -919,49 +577,6 @@ namespace as_modeling
     ++counter;
 #endif
 
-  }
-
-#endif
-  void RenderGL::set_shader_unperturbed(GLSLShader * shader, GLuint vol_tex, int length)
-  {
-    // unperturbed
-    shader->Begin();
-
-    shader->SetUniform3f("lightIntensity", asml_->light_intensity_, 
-      asml_->light_intensity_, asml_->light_intensity_);
-    shader->SetUniform4f("lightPosWorld", asml_->light_x_, 
-      asml_->light_y_, asml_->light_z_, 1.0f);
-    shader->SetUniform1f("absorptionCoefficient", asml_->extinction_);
-    shader->SetUniform1f("scatteringCoefficient", asml_->scattering_);
-    float step_size = asml_->box_size_ / static_cast<float>(length);
-    shader->SetUniform1f("stepSize", step_size);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_3D, vol_tex);
-    shader->SetUniform1i("volumeTex", 0);
-
-    shader->End();
-  }
-
-  void RenderGL::set_shader_perturbed(GLSLShader * shader, GLuint vol_tex, int length)
-  {
-    // perturbed
-    shader->Begin();
-
-    shader->SetUniform1f("fwidth", 1.0f*length);
-    shader->SetUniform1f("disturb", asml_->disturb_);
-    shader->SetUniform3f("lightIntensity", asml_->light_intensity_, 
-      asml_->light_intensity_, asml_->light_intensity_);
-    shader->SetUniform4f("lightPosWorld", asml_->light_x_, 
-      asml_->light_y_, asml_->light_z_, 1.0f);
-    shader->SetUniform1f("absorptionCoefficient", asml_->extinction_);
-    shader->SetUniform1f("scatteringCoefficient", asml_->scattering_);
-    float step_size = asml_->box_size_ / static_cast<float>(length);
-    shader->SetUniform1f("stepSize", step_size);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_3D, vol_tex);
-    shader->SetUniform1i("volumeTex", 0);
-
-    shader->End();
   }
 
   RenderGL::RenderGL(ASModeling *p)

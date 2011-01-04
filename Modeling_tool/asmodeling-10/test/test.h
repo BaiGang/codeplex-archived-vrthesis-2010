@@ -125,6 +125,7 @@ public:
 
 	DECLARE_MESSAGE_MAP()
 	
+	afx_msg void OnButtonExe();
 };
 
 extern CtestApp theApp;

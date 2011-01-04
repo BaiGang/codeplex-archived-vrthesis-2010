@@ -4,113 +4,76 @@
 #include <cuda_runtime.h>
 #include <utils.cuh>
 
-__global__ void Output_rrprgt(
-                              int i_view,
-                              int img_width,
-                              int img_height,
-                              float * rr,
-                              float * pr,
-                              float * gt
+
+__global__ void test_kernel(
+                            int width,
+                            int height,
+                            int iview,
+                            float * data1,
+                            float * data2
+                            )
+{
+  int i = blockIdx.x * blockDim.x + threadIdx.x;
+  int j = blockIdx.y * blockDim.y + threadIdx.y;
+
+  if (i < width && j < height)
+  {
+    float4 rr4 = tex2D(render_result, float(i), float(j));
+    data1[j * width + i] = rr4.x;
+    uchar4 gt4 = tex3D(ground_truth, float(i), float(height-1-j), float(iview));
+    data2[j * width + i] = uint8_to_float(gt4.x);
+  } // within the img
+}
+
+__global__ void test_g_kernel(
+                              int width,
+                              int height,
+                              int iview,
+                              float * data
                               )
 {
-  int v = blockDim.y * blockIdx.y + threadIdx.y;
-  int u = blockDim.x * blockIdx.x + threadIdx.x;
+  int i = blockIdx.x * blockDim.x + threadIdx.x;
+  int j = blockIdx.y * blockDim.y + threadIdx.y;
 
-  rr[v*img_width + u] = tex2D(render_result, __int2float_rn(u), __int2float_rn(v)).x;
-
-  pr[v*img_width + u] = tex2D(perturbed_result, __int2float_rn(u), __int2float_rn(v)).x;
-
-  gt[v*img_width + u] = tex3D(
-    ground_truth, __int2float_rn(u),
-    __int2float_rn(img_height-1-v), __int2float_rn(i_view)).x;
-}
-
-__global__ void Output_RenderResult(
-                                    int i_view,
-                                    int img_width,
-                                    int img_height,
-                                    float * rr
-                                    )
-{
-  int v = blockDim.y * blockIdx.y + threadIdx.y;
-  int u = blockDim.x * blockIdx.x + threadIdx.x;
-
-  if (u < img_width && v < img_height)
+  if (i < width && j < height)
   {
-    rr[v * img_width + u] = tex2D(render_result, __int2float_rn(u), __int2float_rn(v)).x;
-  }
+    float4 pr4 = tex2D(perturbed_result, float(i), float(j));
+    data[j*width + i] = pr4.x;
+  } // within the img
 }
 
-__global__ void Output_PerturbedResult(
-                                       int i_view,
-                                       int img_width,
-                                       int img_height,
-                                       float * pr
-                                       )
-{
-  int v = blockDim.y * blockIdx.y + threadIdx.y;
-  int u = blockDim.x * blockIdx.x + threadIdx.x;
 
-  if (u < img_width && v < img_height)
+
+// test projecting centers
+__global__ void test_projected_centers(
+                                       int width,
+                                       int height,
+                                       int iview,
+                                       int nview,
+                                       uint16 * pcenters,
+                                       int * tag_vol,
+                                       float * data
+                                       )           
+{
+  // the index of the volume cell
+  int index_vol   = index3(threadIdx.x, blockIdx.y, blockIdx.x, blockDim.x);
+
+  // the index of the correspoing item in the array
+  int index_array = tag_vol[index_vol];
+
+  if (index_array != 0)
   {
-    pr[v*img_width + u] = tex2D(perturbed_result, __int2float_rn(u), __int2float_rn(v)).x;
-  }
-}
 
-__global__ void Output_GroundTruth(
-                                   int i_view,
-                                   int img_width,
-                                   int img_height,
-                                   float * gt
-                                   )
-{
-  int v = blockDim.y * blockIdx.y + threadIdx.y;
-  int u = blockDim.x * blockIdx.x + threadIdx.x;
+    ////
+    int ptru = nview * 2 * (index_array-1) + 2 * iview;
 
-  if (u < img_width && v < img_height)
-  {
-    float4 gt4 = tex3D(
-      ground_truth, float(u),
-      float(img_height-1-v), float(i_view));
+    uint16 u = pcenters[ ptru ];
+    uint16 v = pcenters[ ptru + 1];
 
-    gt[v*img_width + u] =  gt4.x ;
-  }
-}
+    if (u < width && v < height)
+      data [v*width+u] = 1.0;
 
-
-__global__ void ThreadWarmUp(int a)
-{
-  int i = threadIdx.x + blockIdx.x * blockDim.x;
-  int j = threadIdx.y + blockIdx.y * blockDim.y;
-
-  float f = __int2float_rn(i) * __int2float_rn(j) / __int2float_rn(a);
-}
-
-
-// threadIdx.x : x
-// blockIdx. x : y
-// blockIdx. y : z
-__global__ void Output_ProjectedCenters(
-                                        int i_view,
-                                        int img_width,
-                                        int img_height,
-                                        float * pc
-                                        )
-{
-  ushort2 uv = tex3D(
-    pcenters,
-    __int2float_rn(threadIdx.x),
-    __int2float_rn(blockIdx.x),
-    __int2float_rn(i_view)
-    );
-
-  int uu = uv.x;
-  int vv = uv.y;
-
-  if ( uu < img_width && vv < img_height )
-  {
-    pc[vv * img_width + uu] = 1.0f;
-  }
+  } // if (index_array != 0)
 
 }
 

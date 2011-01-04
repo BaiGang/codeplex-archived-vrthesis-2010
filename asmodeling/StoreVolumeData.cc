@@ -16,6 +16,12 @@ namespace as_modeling
     PFMImage * res_img = new PFMImage(max_vol_size_, max_vol_size_*max_vol_size_, 0, frame_volume_result_.get());
     res_img->WriteImage(path_buf);
 
+    //// also, we should show the render result of the reconstructed volume
+    //for (int i_view = 0; i_view < num_cameras_; ++i_view)
+    //{
+    //  sprintf(path_buf, "../Data/Results/Frame%08d_View%02d.pfm", i_frame, i_view);
+    //  
+    //}
 
     return true;
   }

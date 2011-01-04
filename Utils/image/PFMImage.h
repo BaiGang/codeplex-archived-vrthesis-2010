@@ -1,16 +1,3 @@
-/********************************************************************
-	created:	2007/06/18
-	created:	18:6:2007   21:27
-	filename: 	J:\HuYong\SVBRDF\CommonTools\image\PFMImage.h
-	file path:	J:\HuYong\SVBRDF\CommonTools\image
-	file base:	PFMImage
-	file ext:	h
-	author:		HuYong
-	
-	purpose:	Portable Float Map нд╪Ч
-*********************************************************************/
-
-
 #pragma once
 #include "image.h"
 
